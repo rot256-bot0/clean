@@ -1,0 +1,9 @@
+.lake/
+backend/target/
+artifacts/
+__pycache__/
+*.pyc
+backend/src/bin/emitter_*.rs
+backend/src/bin/from_lean_*.rs
+backend/src/bin/batch_writer_test.rs
+backend/src/bin/wrong_slots.rs
