@@ -14,6 +14,7 @@ from build_native import build
 from emit_rust import EmitError, emit_module
 from run_caliper import run_all as run_caliper
 from run_crypto import run_all as run_crypto
+from run_methods import run_all as run_methods
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "artifacts"
@@ -245,6 +246,9 @@ def main():
     caliper = run_caliper()
     if caliper.get("status") != "PASS":
         raise AssertionError("Caliper verification did not pass")
+    methods = run_methods()
+    if methods.get("status") != "PASS":
+        raise AssertionError("Typed methods verification did not pass")
     hashes = {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in sorted((ROOT / "Witgen").rglob("*.lean"))
@@ -266,6 +270,8 @@ def main():
                          "programs": ["custom_split", "custom_low"]},
         "crypto": {"status": crypto["status"], "native_cases": crypto["native_cases"],
                    "verification_receipt": "artifacts/crypto/verification.json"},
+        "methods": {"status": methods["status"], "native_cases": methods["native_cases"],
+                    "verification_receipt": "artifacts/methods/verification.json"},
         "caliper": {
             "status": caliper["status"],
             "verification_receipt": "artifacts/caliper/verification.json",

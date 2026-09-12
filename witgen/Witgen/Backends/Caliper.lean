@@ -76,6 +76,7 @@ def locSchemaRepr : (k : Schema) → StructRepr Loc (schemaDesc k)
 def compileStruct : StructOp schemaDesc args shapes t → HList Loc args → Loc t
   | .make k, xs => (locSchemaRepr k).pack xs
   | .get k field, .cons x .nil => field.ref.get ((locSchemaRepr k).unpack x)
+  | .set k field, .cons x (.cons value .nil) => (locSchemaRepr k).set field x value
 
 def compileList : ListOp args shapes t → HList Loc args → Loc t
   | .empty _, .nil => []
@@ -248,6 +249,7 @@ theorem compileStruct_correct (op : StructOp schemaDesc args [] t) (xs : HList L
   cases op with
   | make k => exact h
   | get k field => cases xs with | cons x xs => cases xs; exact h
+  | set k field => cases xs with | cons x xs => cases xs with | cons value xs => cases xs; exact h
 
 theorem compileList_correct (op : ListOp args [] t) (xs : HList Loc args)
     (s : _root_.Caliper.State64) :

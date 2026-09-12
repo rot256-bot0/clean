@@ -7,6 +7,7 @@ mod error;
 pub use error::{Error, Result};
 mod crypto;
 pub use crypto::*;
+pub mod typed;
 
 #[derive(MontConfig)]
 #[modulus = "17"]

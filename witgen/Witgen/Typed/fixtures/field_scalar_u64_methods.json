@@ -1,0 +1,1781 @@
+{
+  "body": {
+    "arg_types": [
+      {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    ],
+    "args": [
+      0
+    ],
+    "next": {
+      "arg_types": [
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        },
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        }
+      ],
+      "args": [
+        0,
+        2
+      ],
+      "next": {
+        "arg_types": [],
+        "args": [],
+        "next": {
+          "arg_types": [
+            {
+              "field": 2,
+              "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+            },
+            {
+              "field": 2,
+              "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+            }
+          ],
+          "args": [
+            1,
+            0
+          ],
+          "next": {
+            "ref": 0,
+            "tag": "ret"
+          },
+          "op": "method.call",
+          "regions": [],
+          "result": {
+            "field": 2,
+            "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+          },
+          "static": {
+            "index": 2,
+            "name": "field.2.add.u64"
+          },
+          "tag": "let"
+        },
+        "op": "u64.fieldLiteral",
+        "regions": [],
+        "result": {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        },
+        "static": {
+          "field": 2,
+          "limbs": [
+            "5",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        "tag": "let"
+      },
+      "op": "method.call",
+      "regions": [],
+      "result": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      },
+      "static": {
+        "index": 1,
+        "name": "field.2.mul.u64"
+      },
+      "tag": "let"
+    },
+    "op": "method.call",
+    "regions": [],
+    "result": {
+      "field": 2,
+      "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+    },
+    "static": {
+      "index": 0,
+      "name": "field.2.square.u64"
+    },
+    "tag": "let"
+  },
+  "inputs": [
+    {
+      "name": "a",
+      "type": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "args": [
+        "word4",
+        "word4",
+        "word4"
+      ],
+      "body": {
+        "arg_types": [],
+        "args": [],
+        "next": {
+          "arg_types": [
+            "word4"
+          ],
+          "args": [
+            1
+          ],
+          "next": {
+            "arg_types": [
+              "word4"
+            ],
+            "args": [
+              2
+            ],
+            "next": {
+              "arg_types": [
+                "word4"
+              ],
+              "args": [
+                3
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  4
+                ],
+                "next": {
+                  "arg_types": [
+                    "word4"
+                  ],
+                  "args": [
+                    6
+                  ],
+                  "next": {
+                    "arg_types": [
+                      "word4"
+                    ],
+                    "args": [
+                      7
+                    ],
+                    "next": {
+                      "arg_types": [
+                        "word4"
+                      ],
+                      "args": [
+                        8
+                      ],
+                      "next": {
+                        "arg_types": [
+                          "word4"
+                        ],
+                        "args": [
+                          9
+                        ],
+                        "next": {
+                          "arg_types": [
+                            "word4"
+                          ],
+                          "args": [
+                            11
+                          ],
+                          "next": {
+                            "arg_types": [
+                              "word4"
+                            ],
+                            "args": [
+                              12
+                            ],
+                            "next": {
+                              "arg_types": [
+                                "word4"
+                              ],
+                              "args": [
+                                13
+                              ],
+                              "next": {
+                                "arg_types": [
+                                  "word4"
+                                ],
+                                "args": [
+                                  14
+                                ],
+                                "next": {
+                                  "arg_types": [
+                                    "u64",
+                                    "u64",
+                                    "bool"
+                                  ],
+                                  "args": [
+                                    7,
+                                    3,
+                                    12
+                                  ],
+                                  "next": {
+                                    "arg_types": [
+                                      "u64",
+                                      "u64",
+                                      "bool"
+                                    ],
+                                    "args": [
+                                      8,
+                                      4,
+                                      13
+                                    ],
+                                    "next": {
+                                      "arg_types": [
+                                        "u64",
+                                        "u64",
+                                        "bool"
+                                      ],
+                                      "args": [
+                                        8,
+                                        4,
+                                        0
+                                      ],
+                                      "next": {
+                                        "arg_types": [
+                                          "u64",
+                                          "u64",
+                                          "bool"
+                                        ],
+                                        "args": [
+                                          9,
+                                          5,
+                                          1
+                                        ],
+                                        "next": {
+                                          "arg_types": [
+                                            "u64",
+                                            "u64",
+                                            "bool"
+                                          ],
+                                          "args": [
+                                            9,
+                                            5,
+                                            0
+                                          ],
+                                          "next": {
+                                            "arg_types": [
+                                              "u64",
+                                              "u64",
+                                              "bool"
+                                            ],
+                                            "args": [
+                                              10,
+                                              6,
+                                              1
+                                            ],
+                                            "next": {
+                                              "arg_types": [
+                                                "u64",
+                                                "u64",
+                                                "bool"
+                                              ],
+                                              "args": [
+                                                10,
+                                                6,
+                                                0
+                                              ],
+                                              "next": {
+                                                "arg_types": [
+                                                  "u64",
+                                                  "u64",
+                                                  "bool"
+                                                ],
+                                                "args": [
+                                                  11,
+                                                  7,
+                                                  1
+                                                ],
+                                                "next": {
+                                                  "arg_types": [
+                                                    "u64",
+                                                    "u64",
+                                                    "bool"
+                                                  ],
+                                                  "args": [
+                                                    7,
+                                                    19,
+                                                    20
+                                                  ],
+                                                  "next": {
+                                                    "arg_types": [
+                                                      "u64",
+                                                      "u64",
+                                                      "bool"
+                                                    ],
+                                                    "args": [
+                                                      8,
+                                                      20,
+                                                      21
+                                                    ],
+                                                    "next": {
+                                                      "arg_types": [
+                                                        "u64",
+                                                        "u64",
+                                                        "bool"
+                                                      ],
+                                                      "args": [
+                                                        7,
+                                                        20,
+                                                        0
+                                                      ],
+                                                      "next": {
+                                                        "arg_types": [
+                                                          "u64",
+                                                          "u64",
+                                                          "bool"
+                                                        ],
+                                                        "args": [
+                                                          8,
+                                                          21,
+                                                          1
+                                                        ],
+                                                        "next": {
+                                                          "arg_types": [
+                                                            "u64",
+                                                            "u64",
+                                                            "bool"
+                                                          ],
+                                                          "args": [
+                                                            7,
+                                                            21,
+                                                            0
+                                                          ],
+                                                          "next": {
+                                                            "arg_types": [
+                                                              "u64",
+                                                              "u64",
+                                                              "bool"
+                                                            ],
+                                                            "args": [
+                                                              8,
+                                                              22,
+                                                              1
+                                                            ],
+                                                            "next": {
+                                                              "arg_types": [
+                                                                "u64",
+                                                                "u64",
+                                                                "bool"
+                                                              ],
+                                                              "args": [
+                                                                7,
+                                                                22,
+                                                                0
+                                                              ],
+                                                              "next": {
+                                                                "arg_types": [
+                                                                  "u64",
+                                                                  "u64",
+                                                                  "bool"
+                                                                ],
+                                                                "args": [
+                                                                  8,
+                                                                  23,
+                                                                  1
+                                                                ],
+                                                                "next": {
+                                                                  "arg_types": [
+                                                                    "u64",
+                                                                    "u64",
+                                                                    "u64",
+                                                                    "u64"
+                                                                  ],
+                                                                  "args": [
+                                                                    15,
+                                                                    13,
+                                                                    11,
+                                                                    9
+                                                                  ],
+                                                                  "next": {
+                                                                    "arg_types": [
+                                                                      "u64",
+                                                                      "u64",
+                                                                      "u64",
+                                                                      "u64"
+                                                                    ],
+                                                                    "args": [
+                                                                      8,
+                                                                      6,
+                                                                      4,
+                                                                      2
+                                                                    ],
+                                                                    "next": {
+                                                                      "arg_types": [
+                                                                        "bool"
+                                                                      ],
+                                                                      "args": [
+                                                                        2
+                                                                      ],
+                                                                      "next": {
+                                                                        "arg_types": [
+                                                                          "bool",
+                                                                          "bool"
+                                                                        ],
+                                                                        "args": [
+                                                                          11,
+                                                                          0
+                                                                        ],
+                                                                        "next": {
+                                                                          "arg_types": [
+                                                                            "bool",
+                                                                            "word4",
+                                                                            "word4"
+                                                                          ],
+                                                                          "args": [
+                                                                            0,
+                                                                            2,
+                                                                            3
+                                                                          ],
+                                                                          "next": {
+                                                                            "ref": 0,
+                                                                            "tag": "ret"
+                                                                          },
+                                                                          "op": "u64.select",
+                                                                          "regions": [],
+                                                                          "result": "word4",
+                                                                          "static": {},
+                                                                          "tag": "let"
+                                                                        },
+                                                                        "op": "u64.or",
+                                                                        "regions": [],
+                                                                        "result": "bool",
+                                                                        "static": {},
+                                                                        "tag": "let"
+                                                                      },
+                                                                      "op": "u64.not",
+                                                                      "regions": [],
+                                                                      "result": "bool",
+                                                                      "static": {},
+                                                                      "tag": "let"
+                                                                    },
+                                                                    "op": "u64.pack",
+                                                                    "regions": [],
+                                                                    "result": "word4",
+                                                                    "static": {},
+                                                                    "tag": "let"
+                                                                  },
+                                                                  "op": "u64.pack",
+                                                                  "regions": [],
+                                                                  "result": "word4",
+                                                                  "static": {},
+                                                                  "tag": "let"
+                                                                },
+                                                                "op": "u64.sbbFlag",
+                                                                "regions": [],
+                                                                "result": "bool",
+                                                                "static": {},
+                                                                "tag": "let"
+                                                              },
+                                                              "op": "u64.sbbWord",
+                                                              "regions": [],
+                                                              "result": "u64",
+                                                              "static": {},
+                                                              "tag": "let"
+                                                            },
+                                                            "op": "u64.sbbFlag",
+                                                            "regions": [],
+                                                            "result": "bool",
+                                                            "static": {},
+                                                            "tag": "let"
+                                                          },
+                                                          "op": "u64.sbbWord",
+                                                          "regions": [],
+                                                          "result": "u64",
+                                                          "static": {},
+                                                          "tag": "let"
+                                                        },
+                                                        "op": "u64.sbbFlag",
+                                                        "regions": [],
+                                                        "result": "bool",
+                                                        "static": {},
+                                                        "tag": "let"
+                                                      },
+                                                      "op": "u64.sbbWord",
+                                                      "regions": [],
+                                                      "result": "u64",
+                                                      "static": {},
+                                                      "tag": "let"
+                                                    },
+                                                    "op": "u64.sbbFlag",
+                                                    "regions": [],
+                                                    "result": "bool",
+                                                    "static": {},
+                                                    "tag": "let"
+                                                  },
+                                                  "op": "u64.sbbWord",
+                                                  "regions": [],
+                                                  "result": "u64",
+                                                  "static": {},
+                                                  "tag": "let"
+                                                },
+                                                "op": "u64.adcFlag",
+                                                "regions": [],
+                                                "result": "bool",
+                                                "static": {},
+                                                "tag": "let"
+                                              },
+                                              "op": "u64.adcWord",
+                                              "regions": [],
+                                              "result": "u64",
+                                              "static": {},
+                                              "tag": "let"
+                                            },
+                                            "op": "u64.adcFlag",
+                                            "regions": [],
+                                            "result": "bool",
+                                            "static": {},
+                                            "tag": "let"
+                                          },
+                                          "op": "u64.adcWord",
+                                          "regions": [],
+                                          "result": "u64",
+                                          "static": {},
+                                          "tag": "let"
+                                        },
+                                        "op": "u64.adcFlag",
+                                        "regions": [],
+                                        "result": "bool",
+                                        "static": {},
+                                        "tag": "let"
+                                      },
+                                      "op": "u64.adcWord",
+                                      "regions": [],
+                                      "result": "u64",
+                                      "static": {},
+                                      "tag": "let"
+                                    },
+                                    "op": "u64.adcFlag",
+                                    "regions": [],
+                                    "result": "bool",
+                                    "static": {},
+                                    "tag": "let"
+                                  },
+                                  "op": "u64.adcWord",
+                                  "regions": [],
+                                  "result": "u64",
+                                  "static": {},
+                                  "tag": "let"
+                                },
+                                "op": "u64.get",
+                                "regions": [],
+                                "result": "u64",
+                                "static": {
+                                  "limb": 3
+                                },
+                                "tag": "let"
+                              },
+                              "op": "u64.get",
+                              "regions": [],
+                              "result": "u64",
+                              "static": {
+                                "limb": 2
+                              },
+                              "tag": "let"
+                            },
+                            "op": "u64.get",
+                            "regions": [],
+                            "result": "u64",
+                            "static": {
+                              "limb": 1
+                            },
+                            "tag": "let"
+                          },
+                          "op": "u64.get",
+                          "regions": [],
+                          "result": "u64",
+                          "static": {
+                            "limb": 0
+                          },
+                          "tag": "let"
+                        },
+                        "op": "u64.get",
+                        "regions": [],
+                        "result": "u64",
+                        "static": {
+                          "limb": 3
+                        },
+                        "tag": "let"
+                      },
+                      "op": "u64.get",
+                      "regions": [],
+                      "result": "u64",
+                      "static": {
+                        "limb": 2
+                      },
+                      "tag": "let"
+                    },
+                    "op": "u64.get",
+                    "regions": [],
+                    "result": "u64",
+                    "static": {
+                      "limb": 1
+                    },
+                    "tag": "let"
+                  },
+                  "op": "u64.get",
+                  "regions": [],
+                  "result": "u64",
+                  "static": {
+                    "limb": 0
+                  },
+                  "tag": "let"
+                },
+                "op": "u64.get",
+                "regions": [],
+                "result": "u64",
+                "static": {
+                  "limb": 3
+                },
+                "tag": "let"
+              },
+              "op": "u64.get",
+              "regions": [],
+              "result": "u64",
+              "static": {
+                "limb": 2
+              },
+              "tag": "let"
+            },
+            "op": "u64.get",
+            "regions": [],
+            "result": "u64",
+            "static": {
+              "limb": 1
+            },
+            "tag": "let"
+          },
+          "op": "u64.get",
+          "regions": [],
+          "result": "u64",
+          "static": {
+            "limb": 0
+          },
+          "tag": "let"
+        },
+        "op": "u64.flag",
+        "regions": [],
+        "result": "bool",
+        "static": {
+          "value": false
+        },
+        "tag": "let"
+      },
+      "name": "u64.field.add",
+      "result": "word4"
+    },
+    {
+      "args": [
+        "word4",
+        "word4",
+        "word4"
+      ],
+      "body": {
+        "arg_types": [],
+        "args": [],
+        "next": {
+          "arg_types": [
+            "word4",
+            "word4",
+            "word4",
+            "word4"
+          ],
+          "args": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "next": {
+            "ref": 0,
+            "tag": "ret"
+          },
+          "op": "u64.repeat",
+          "regions": [
+            {
+              "body": {
+                "arg_types": [
+                  "word4",
+                  "word4",
+                  "word4"
+                ],
+                "args": [
+                  2,
+                  1,
+                  1
+                ],
+                "next": {
+                  "arg_types": [
+                    "word4",
+                    "word4",
+                    "word4"
+                  ],
+                  "args": [
+                    3,
+                    0,
+                    5
+                  ],
+                  "next": {
+                    "arg_types": [
+                      "word4",
+                      "nat"
+                    ],
+                    "args": [
+                      5,
+                      2
+                    ],
+                    "next": {
+                      "arg_types": [
+                        "bool",
+                        "word4",
+                        "word4"
+                      ],
+                      "args": [
+                        0,
+                        1,
+                        2
+                      ],
+                      "next": {
+                        "ref": 0,
+                        "tag": "ret"
+                      },
+                      "op": "u64.select",
+                      "regions": [],
+                      "result": "word4",
+                      "static": {},
+                      "tag": "let"
+                    },
+                    "op": "u64.bitAt",
+                    "regions": [],
+                    "result": "bool",
+                    "static": {},
+                    "tag": "let"
+                  },
+                  "op": "method.call",
+                  "regions": [],
+                  "result": "word4",
+                  "static": {
+                    "index": 0,
+                    "name": "u64.field.add"
+                  },
+                  "tag": "let"
+                },
+                "op": "method.call",
+                "regions": [],
+                "result": "word4",
+                "static": {
+                  "index": 0,
+                  "name": "u64.field.add"
+                },
+                "tag": "let"
+              },
+              "inputs": [
+                "nat",
+                "word4",
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "output": "word4"
+            }
+          ],
+          "result": "word4",
+          "static": {
+            "count": 256
+          },
+          "tag": "let"
+        },
+        "op": "u64.literal",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "limbs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        "tag": "let"
+      },
+      "name": "u64.field.mul",
+      "result": "word4"
+    },
+    {
+      "args": [
+        "word4",
+        "word4"
+      ],
+      "body": {
+        "arg_types": [
+          "word4",
+          "word4",
+          "word4"
+        ],
+        "args": [
+          0,
+          1,
+          1
+        ],
+        "next": {
+          "ref": 0,
+          "tag": "ret"
+        },
+        "op": "method.call",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "index": 0,
+          "name": "u64.field.mul"
+        },
+        "tag": "let"
+      },
+      "name": "u64.field.square",
+      "result": "word4"
+    },
+    {
+      "args": [
+        {
+          "field": 0,
+          "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        },
+        {
+          "field": 0,
+          "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 0,
+            "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 0,
+              "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 0,
+                  "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+                },
+                "static": {
+                  "field": 0
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 2,
+                "name": "u64.field.add"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "4891460686036598785",
+                "2896914383306846353",
+                "13281191951274694749",
+                "3486998266802970665"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 0
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 0
+        },
+        "tag": "let"
+      },
+      "name": "field.0.add.u64",
+      "result": {
+        "field": 0,
+        "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 0,
+          "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        },
+        {
+          "field": 0,
+          "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 0,
+            "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 0,
+              "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 0,
+                  "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+                },
+                "static": {
+                  "field": 0
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 2,
+                "name": "u64.field.mul"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "4891460686036598785",
+                "2896914383306846353",
+                "13281191951274694749",
+                "3486998266802970665"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 0
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 0
+        },
+        "tag": "let"
+      },
+      "name": "field.0.mul.u64",
+      "result": {
+        "field": 0,
+        "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 0,
+          "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 0,
+            "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [],
+          "args": [],
+          "next": {
+            "arg_types": [
+              "word4",
+              "word4"
+            ],
+            "args": [
+              0,
+              1
+            ],
+            "next": {
+              "arg_types": [
+                "word4"
+              ],
+              "args": [
+                0
+              ],
+              "next": {
+                "ref": 0,
+                "tag": "ret"
+              },
+              "op": "u64.fromWord",
+              "regions": [],
+              "result": {
+                "field": 0,
+                "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+              },
+              "static": {
+                "field": 0
+              },
+              "tag": "let"
+            },
+            "op": "method.call",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "index": 2,
+              "name": "u64.field.square"
+            },
+            "tag": "let"
+          },
+          "op": "u64.literal",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "limbs": [
+              "4891460686036598785",
+              "2896914383306846353",
+              "13281191951274694749",
+              "3486998266802970665"
+            ]
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 0
+        },
+        "tag": "let"
+      },
+      "name": "field.0.square.u64",
+      "result": {
+        "field": 0,
+        "modulus": "21888242871839275222246405745257275088548364400416034343698204186575808495617"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 1,
+          "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+        },
+        {
+          "field": 1,
+          "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 1,
+            "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 1,
+              "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 1,
+                  "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+                },
+                "static": {
+                  "field": 1
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 5,
+                "name": "u64.field.add"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "18446744069414583343",
+                "18446744073709551615",
+                "18446744073709551615",
+                "18446744073709551615"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 1
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 1
+        },
+        "tag": "let"
+      },
+      "name": "field.1.add.u64",
+      "result": {
+        "field": 1,
+        "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 1,
+          "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+        },
+        {
+          "field": 1,
+          "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 1,
+            "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 1,
+              "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 1,
+                  "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+                },
+                "static": {
+                  "field": 1
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 5,
+                "name": "u64.field.mul"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "18446744069414583343",
+                "18446744073709551615",
+                "18446744073709551615",
+                "18446744073709551615"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 1
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 1
+        },
+        "tag": "let"
+      },
+      "name": "field.1.mul.u64",
+      "result": {
+        "field": 1,
+        "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 1,
+          "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 1,
+            "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [],
+          "args": [],
+          "next": {
+            "arg_types": [
+              "word4",
+              "word4"
+            ],
+            "args": [
+              0,
+              1
+            ],
+            "next": {
+              "arg_types": [
+                "word4"
+              ],
+              "args": [
+                0
+              ],
+              "next": {
+                "ref": 0,
+                "tag": "ret"
+              },
+              "op": "u64.fromWord",
+              "regions": [],
+              "result": {
+                "field": 1,
+                "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+              },
+              "static": {
+                "field": 1
+              },
+              "tag": "let"
+            },
+            "op": "method.call",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "index": 5,
+              "name": "u64.field.square"
+            },
+            "tag": "let"
+          },
+          "op": "u64.literal",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "limbs": [
+              "18446744069414583343",
+              "18446744073709551615",
+              "18446744073709551615",
+              "18446744073709551615"
+            ]
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 1
+        },
+        "tag": "let"
+      },
+      "name": "field.1.square.u64",
+      "result": {
+        "field": 1,
+        "modulus": "115792089237316195423570985008687907853269984665640564039457584007908834671663"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        },
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 2,
+            "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 2,
+              "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 2,
+                  "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+                },
+                "static": {
+                  "field": 2
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 8,
+                "name": "u64.field.add"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "13822214165235122497",
+                "13451932020343611451",
+                "18446744073709551614",
+                "18446744073709551615"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 2
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 2
+        },
+        "tag": "let"
+      },
+      "name": "field.2.add.u64",
+      "result": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        },
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 2,
+            "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [
+            {
+              "field": 2,
+              "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+            }
+          ],
+          "args": [
+            2
+          ],
+          "next": {
+            "arg_types": [],
+            "args": [],
+            "next": {
+              "arg_types": [
+                "word4",
+                "word4",
+                "word4"
+              ],
+              "args": [
+                0,
+                2,
+                1
+              ],
+              "next": {
+                "arg_types": [
+                  "word4"
+                ],
+                "args": [
+                  0
+                ],
+                "next": {
+                  "ref": 0,
+                  "tag": "ret"
+                },
+                "op": "u64.fromWord",
+                "regions": [],
+                "result": {
+                  "field": 2,
+                  "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+                },
+                "static": {
+                  "field": 2
+                },
+                "tag": "let"
+              },
+              "op": "method.call",
+              "regions": [],
+              "result": "word4",
+              "static": {
+                "index": 8,
+                "name": "u64.field.mul"
+              },
+              "tag": "let"
+            },
+            "op": "u64.literal",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "limbs": [
+                "13822214165235122497",
+                "13451932020343611451",
+                "18446744073709551614",
+                "18446744073709551615"
+              ]
+            },
+            "tag": "let"
+          },
+          "op": "u64.toWord",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "field": 2
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 2
+        },
+        "tag": "let"
+      },
+      "name": "field.2.mul.u64",
+      "result": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    },
+    {
+      "args": [
+        {
+          "field": 2,
+          "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+        }
+      ],
+      "body": {
+        "arg_types": [
+          {
+            "field": 2,
+            "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+          }
+        ],
+        "args": [
+          0
+        ],
+        "next": {
+          "arg_types": [],
+          "args": [],
+          "next": {
+            "arg_types": [
+              "word4",
+              "word4"
+            ],
+            "args": [
+              0,
+              1
+            ],
+            "next": {
+              "arg_types": [
+                "word4"
+              ],
+              "args": [
+                0
+              ],
+              "next": {
+                "ref": 0,
+                "tag": "ret"
+              },
+              "op": "u64.fromWord",
+              "regions": [],
+              "result": {
+                "field": 2,
+                "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+              },
+              "static": {
+                "field": 2
+              },
+              "tag": "let"
+            },
+            "op": "method.call",
+            "regions": [],
+            "result": "word4",
+            "static": {
+              "index": 8,
+              "name": "u64.field.square"
+            },
+            "tag": "let"
+          },
+          "op": "u64.literal",
+          "regions": [],
+          "result": "word4",
+          "static": {
+            "limbs": [
+              "13822214165235122497",
+              "13451932020343611451",
+              "18446744073709551614",
+              "18446744073709551615"
+            ]
+          },
+          "tag": "let"
+        },
+        "op": "u64.toWord",
+        "regions": [],
+        "result": "word4",
+        "static": {
+          "field": 2
+        },
+        "tag": "let"
+      },
+      "name": "field.2.square.u64",
+      "result": {
+        "field": 2,
+        "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+      }
+    }
+  ],
+  "name": "field_2_u64_methods",
+  "output": {
+    "field": 2,
+    "modulus": "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+  },
+  "version": 2
+}

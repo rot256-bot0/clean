@@ -232,6 +232,7 @@ def structInfo {S Schema : Type} {desc : Schema → StructDesc S}
     StructOp desc args shapes t → OpInfo
   | .make _ => ⟨"record.make", none, none⟩
   | .get _ field => ⟨"record.get", none, some field.ref.index⟩
+  | .set _ field => ⟨"record.set", none, some field.ref.index⟩
 
 def ListOp.info : ListOp args shapes t → OpInfo
   | .empty _ => ⟨"list.empty", none, none⟩

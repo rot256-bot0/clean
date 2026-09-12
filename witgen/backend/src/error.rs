@@ -19,6 +19,8 @@ pub enum Error {
     CircuitAssumptions { circuit: &'static str },
     WitnessLength { expected: usize, actual: usize },
     UnknownProgram(String),
+    UnknownField(u8),
+    InvalidPointEncoding,
     Json(serde_json::Error),
     Io(io::Error),
 }
@@ -40,6 +42,8 @@ impl Error {
             Self::CircuitAssumptions { .. } => "circuit_assumptions",
             Self::WitnessLength { .. } => "witness_length",
             Self::UnknownProgram(_) => "unknown_program",
+            Self::UnknownField(_) => "unknown_field",
+            Self::InvalidPointEncoding => "invalid_point_encoding",
             Self::Json(_) => "invalid_json",
             Self::Io(_) => "io",
         }
@@ -74,6 +78,8 @@ impl fmt::Display for Error {
                 "witness result length mismatch: expected {expected}, got {actual}"
             ),
             Self::UnknownProgram(program) => write!(f, "unknown exported program: {program}"),
+            Self::UnknownField(id) => write!(f, "unknown field identity: {id}"),
+            Self::InvalidPointEncoding => f.write_str("invalid secp256k1 point encoding"),
             Self::Json(source) => write!(f, "invalid JSON: {source}"),
             Self::Io(source) => write!(f, "input/output error: {source}"),
         }

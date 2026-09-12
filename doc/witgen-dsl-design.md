@@ -2,76 +2,194 @@
 
 [Source branch](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl) · [Run instructions](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/README.md)
 
-All code blocks below are extracted from checked source or actual generated output. This package is developed inside the Clean fork; it does not yet replace the parent Clean WitnessIR.
+The examples below are compiled source and actual emitted code. Features have typed operations and fixed semantics; certified transformations choose their implementations. Shared method bodies remain separate from their callers. The generic core has no mandatory field, structure, curve, or method-call feature.
 
 <details>
 <summary>Contents</summary>
 
-- [Write the WitGen](#1-write-the-witgen)
-- [General Structures](#2-general-structures)
-- [Custom Types and Features](#3-custom-types-and-features)
-- [Proof-Bearing Lowering](#4-proof-bearing-lowering)
-- [Native Code and Typed Errors](#5-native-code-and-typed-errors)
-- [The Full Circuit Witness](#6-the-full-circuit-witness)
+- [Fields Are Selected by Types](#1-fields-are-selected-by-types)
+- [A secp256k1 Feature](#2-a-secp256k1-feature)
+- [Functional Structures](#3-functional-structures)
+- [Shared Methods](#4-shared-methods)
+- [Field → Nat](#5-field--nat-gmp-backend)
+- [Field → U64](#6-field--u64-shared-word-methods)
 - [Caliper Integration and Runtime Proofs](#7-caliper-integration-and-runtime-proofs)
-- [Checks and Boundaries](#8-checks-and-boundaries)
+
 
 </details>
 
-## 1. Write the WitGen
+## 1. Fields Are Selected by Types
 
-The main example uses the **BN254 scalar field**, not a small test field. The author asks for field arithmetic and generic structure operations, using named bindings and named fields:
-
-
-[Witgen/Crypto/Program.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Crypto/Program.lean#L19-L26)
-
-```lean
-def quadratic {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] :
-    Program F [.scalar, .scalar] .quad :=
-  witgen [x, y] do
-    let square ← fieldMul x x
-    let output ← fieldAdd square y
-    let witness ← makeNamedStruct schemaDesc .quad
-      fields![square := square, output := output]
-    return witness
-```
+`field.Mul`, `field.Add`, and `field.Square` infer the field identity from their operands. The field ID appears in both the sort and the requested feature:
 
 
-`Has` requests a feature in the program signature; it does not select a backend implementation. `fieldMul` and `fieldAdd` are smart constructors for the arithmetic feature. `makeNamedStruct` is the same reusable operation for every caller-defined schema.
-
-`witgen [x, y] do` elaborates to finite, intrinsically typed `Program` syntax. Ordinary authoring does not expose de Bruijn indices or explicit feature injections. Names and aliases are weakened across bindings; nested regions declare their inputs/captures explicitly. The implemented surface supports `let x ← step`, reference aliases `let x := reference`, and `return reference`. Other statements and ambient reference captures are rejected, not given guessed scoping semantics. This is an implemented authoring subset, not a claim to support every Lean `do` construct.
-
-The ambient-parameter interface is deliberately closed: static scalar values, type-valued families, and restricted direct uses of abstract-target `Has` capabilities are supported. Unknown records, containers, value callbacks, proof carriers and unsolved holes are rejected rather than presumed reference-free. Define schemas and smart builders globally and pass region data as explicit named inputs. Global low-level builders remain trusted; this elaborator check is not a kernel provenance theorem or a sandbox for arbitrary Lean code. [Exact policy and diagnostics](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/StructAuthoringAPI.md#closed-ambient-parameter-interface).
-
-The exact field modulus is:
-
-
-[backend/src/crypto.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/crypto.rs#L8-L9)
-
-```rust
-pub const BN254_MODULUS: &str =
-    "21888242871839275222246405745257275088548364400416034343698204186575808495617";
-```
-
-
-This is BN254 **Fr**, distinct from its base field Fq. The native representation has four 64-bit limbs. Canonical inputs and output cells use decimal strings at the JSON boundary; no conversion through `u64` or floating point occurs. The parameter's size is not a claim of 254-bit cryptographic security.
-
-## 2. General Structures
-
-A schema names the result sort and its ordered fields. The sort universe and schema family belong to the caller:
-
-
-[Witgen/Structs.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Structs.lean#L7-L11)
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L6-L10)
 
 ```lean
-structure StructDesc (S : Type) where
-  name : String
-  result : S
-  fields : List (String × S)
-  names_nodup : (fields.map Prod.fst).Nodup := by decide
+inductive FieldOp (f : FieldId) : Signature Ty where
+  | const (n : Nat) : FieldOp f [] [] (.field f)
+  | add : FieldOp f [.field f, .field f] [] (.field f)
+  | mul : FieldOp f [.field f, .field f] [] (.field f)
+  | square : FieldOp f [.field f] [] (.field f)
 ```
 
-[Witgen/Structs.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Structs.lean#L40-L44)
+
+
+### Semantics
+
+`FieldOp` declares the operation signatures. Its specification is the model below, independent of the backend implementation:
+
+
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L12-L17)
+
+```lean
+def fieldModel (f : FieldId) : Model (FieldOp f) FieldVal where
+  eval := fun op args _ => match op, args with
+    | .const n, .nil => Residue.ofNat (modulus_pos f) n
+    | .add, .cons a (.cons b .nil) => Residue.add a b
+    | .mul, .cons a (.cons b .nil) => Residue.mul a b
+    | .square, .cons a .nil => Residue.square a
+```
+
+
+
+A field value is `Fin (modulus f)`. The residue definitions specify canonical modular arithmetic directly:
+
+
+[Witgen/Typed/Types.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Types.lean#L34-L38)
+
+```lean
+def ofNat {p : Nat} (hp : 0 < p) (n : Nat) : Fin p := ⟨n % p, Nat.mod_lt n hp⟩
+def add {p : Nat} (a b : Fin p) : Fin p := ofNat (Nat.zero_lt_of_lt a.isLt) (a.val + b.val)
+def mul {p : Nat} (a b : Fin p) : Fin p := ofNat (Nat.zero_lt_of_lt a.isLt) (a.val * b.val)
+/-- Dedicated square semantics, not an alias at the operation boundary. -/
+def square {p : Nat} (a : Fin p) : Fin p := ofNat (Nat.zero_lt_of_lt a.isLt) (a.val ^ 2)
+```
+
+
+
+Each certified implementation/instantiation pass must preserve this model under its representation relation.
+
+### Authoring Helpers
+
+These helpers construct typed calls; they do not define the operations' semantics:
+
+
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L79-L89)
+
+```lean
+def Const (f : FieldId) [Has (FieldOp f) F] (n : Nat) :
+    Step F Γ (.field f) := call (FieldOp.const (f := f) n) .nil .nil
+
+def Add [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
+  call (FieldOp.add (f := f)) h![a, b] .nil
+
+def Mul [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
+  call (FieldOp.mul (f := f)) h![a, b] .nil
+
+def Square [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.field f) :=
+  call (FieldOp.square (f := f)) h![a] .nil
+```
+
+
+
+This is compile-time selection of a **mathematical functionality**, not automatic selection of Arkworks, GMP, or U64 implementation. Constants without operands name their field explicitly. A scalar-field value is not accepted where a base-field value is required, even when both physical representations contain four words.
+
+The library registers BN254 Fr plus the distinct secp256k1 base and scalar fields. Their identities survive the IR, method signatures, and JSON metadata. This is a library-owned field family, not a field enumeration built into the generic core; adding another family still requires its semantics, codecs and implementations.
+
+Here is the actual mixed-field example. The scalar arithmetic feeds point scaling, while base arithmetic consumes a coordinate of the computed point:
+
+
+[Witgen/Typed/Public.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Public.lean#L21-L37)
+
+```lean
+def mixed : Program Secp.Feature
+    [.field secp256k1.Scalar, .field secp256k1.Scalar, .field secp256k1.Base]
+    (.field secp256k1.Base) :=
+  witgen [s, t, b] do
+    let ss ← field.Square s
+    let st ← field.Mul ss t
+    let alpha ← field.Add st s
+    let g ← curve.Generator
+    let p ← curve.Scale alpha g
+    let minusG ← curve.Inv g
+    let q ← curve.Add p minusG
+    let x ← curve.X q
+    let gx ← curve.X g
+    let bb ← field.Square b
+    let bx ← field.Mul bb x
+    let output ← field.Add bx gx
+    return output
+```
+
+
+
+The declared input types determine which `FieldOp f` instance each operation requires. `curve.Scale` only accepts the secp scalar sort. Tests reject base-as-scalar and cross-field arithmetic rather than guessing a coercion. `curve.X` is an explicitly total coordinate view with `X(identity)=0`; use optional affine conversion when the presence of affine coordinates matters.
+
+`witgen [...] do` elaborates into the unchanged finite typed AST. Named bindings, checked named fields and reference aliases are supported. Its ambient-parameter interface is deliberately restricted: unknown callbacks, records, proof carriers and unresolved holes are rejected; global low-level builders remain trusted. This is not a sandbox or a kernel provenance theorem. [Exact authoring policy](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/StructAuthoringAPI.md#closed-ambient-parameter-interface).
+
+## 2. A secp256k1 Feature
+
+The curve operations are one optional functionality, separate from field arithmetic:
+
+
+[Witgen/Typed/SecpFeature.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/SecpFeature.lean#L6-L14)
+
+```lean
+inductive SecpOp : Signature Ty where
+  | add : SecpOp [.point, .point] [] .point
+  | scale : SecpOp [.field secpScalar, .point] [] .point
+  | inv : SecpOp [.point] [] .point
+  | generator : SecpOp [] [] .point
+  | identity : SecpOp [] [] .point
+  | x : SecpOp [.point] [] (.field secpBase)
+  | toAffine : SecpOp [.point] [] (.option (.pair (.field secpBase) (.field secpBase)))
+  | fromAffine : SecpOp [.pair (.field secpBase) (.field secpBase)] [] (.option .point)
+```
+
+
+
+`curve.Inv P` is the **group inverse** `−P`, not multiplicative field inversion. The source model uses Mathlib's actual Weierstrass curve with equation $y^2=x^3+7$, not a discrete-log or synthetic point representation. Both secp moduli have closed kernel-checked Lucas primality certificates. Scalar multiplication acts by the scalar's canonical natural representative; the implementation reuses Mathlib's binary scalar multiplication.
+
+### Affine Coordinates
+
+Affine coordinates are a pair of **base-field** elements. Optionality makes the exceptional cases explicit:
+
+- `curve.ToAffine : Point → Option (Base × Base)` returns `None` at infinity.
+- `curve.FromAffine : Base × Base → Option Point` returns `None` off the curve, including `(0,0)`.
+- Invalid affine coordinates are never silently converted into the identity point.
+
+The actual roundtrip is a finite program using an optional bind and a closed region:
+
+
+[Witgen/Typed/AffineExamples.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/AffineExamples.lean#L13-L19)
+
+```lean
+def roundtripProgram : Program AffineFeature [.point] (.option .point) :=
+  witgen [p] do
+    let xy ← curve.ToAffine p
+    let q ← value.Bind xy (witgen [coords] do
+      let out ← curve.FromAffine coords
+      return out)
+    return q
+```
+
+
+
+`affine_roundtrip` and `fromAffine_isSome_iff` connect this API to the real curve equation. Concrete tests cover the generator, twice the generator, its inverse, high-width scalar multiplication and infinity.
+
+### Native Implementation or Lowering
+
+The native backend implements this feature with **Arkworks secp256k1**. That keeps the source point operations abstract and permits the backend's optimized implementation.
+
+A backend without curve support would instead need a certified **curve → field** implementation; those field operations could then use the **Field → U64** path below. The current revision implements the Arkworks curve backend and the field lowerings, **not** a curve-to-field or curve-to-U64 lowering. It does not claim a proof of the generator order/cofactor or a modulo-order module action law.
+
+## 3. Functional Structures
+
+`struct.Named`, `struct.Get`, and `struct.Set` operate on caller-owned schemas. There is no separate operation constructor for each record type. `StructOp.set` takes the old record and one typed replacement field and returns a new record:
+
+
+[Witgen/Structs.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Structs.lean#L94-L101)
 
 ```lean
 inductive StructOp {S : Type} {Schema : Type}
@@ -79,342 +197,246 @@ inductive StructOp {S : Type} {Schema : Type}
   | make (schema : Schema) : StructOp desc (desc schema).sorts [] (desc schema).result
   | get (schema : Schema) {name : String} {t : S}
       (field : FieldRef (desc schema).fields name t) : StructOp desc [(desc schema).result] [] t
+  | set (schema : Schema) {name : String} {t : S}
+      (field : FieldRef (desc schema).fields name t) :
+      StructOp desc [(desc schema).result, t] [] (desc schema).result
 ```
 
 
-There are only two structural operations: make a structure, and get a typed field. Adding `QuadWitness`, a nested envelope, a limb record, or a circuit-specific structure does not add another constructor to this operation family or to the core DSL.
 
-Here are the actual caller-owned schemas for the cryptographic example:
-
-
-[Witgen/Crypto/Features.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Crypto/Features.lean#L35-L43)
-
-```lean
-@[reducible] def schemaDesc : Schema → StructDesc Ty
-  | .quad => {
-      name := "QuadWitness"
-      result := .quad
-      fields := [("square", .scalar), ("output", .scalar)] }
-  | .envelope => {
-      name := "QuadEnvelope"
-      result := .envelope
-      fields := [("trace", .quad)] }
-```
+Updating a structure is **functional**, not a mutable store. Other fields and the original record remain available unchanged:
 
 
-`fields![square := square, output := output]` checks both the names and their declared order. Duplicate field names are forbidden. `getField schemaDesc .envelope "trace" envelope` checks that the field exists and has the requested sort. Field order is explicit; this version does not automatically reorder named arguments.
-
-The semantic representation is not an unchecked bag of constructor/projection callbacks. It includes both inverse laws:
-
-
-[Witgen/Structs.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Structs.lean#L47-L51)
+[Witgen/StructSetTests.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/StructSetTests.lean#L7-L18)
 
 ```lean
-structure StructRepr {S : Type} (V : S → Type) (d : StructDesc S) where
-  pack : HList V d.sorts → V d.result
-  unpack : V d.result → HList V d.sorts
-  unpack_pack : ∀ xs, unpack (pack xs) = xs
-  pack_unpack : ∀ x, pack (unpack x) = x
-```
+def updatePair : Program (StructOp desc) [.pair, .number] .pair :=
+  witgen [old, value] do
+    let fresh ← struct.Set desc .pair "right" old value
+    return fresh
 
-
-`structModel_respects` proves the generic representation law for every schema and field. Lists are a separate `ListOp` feature with `empty` and `push`; branching/map/fold are a separate optional control feature. No arithmetic, structure, list, or control vocabulary is mandatory in `Witgen.Core`.
-
-## 3. Custom Types and Features
-
-A circuit can expose its own type and operations first, then lower them to structures. This is more than giving a standard tuple another name. The executable example introduces a native `SplitWitness` and a source `SplitOp`; the target representation of the same abstract sort is an ordered heterogeneous field list:
-
-
-[Witgen/Custom.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean#L23-L30)
-
-```lean
-@[reducible] def Native : Ty → Type
-  | .nat => Nat
-  | .split => SplitWitness
-
-/-- No native SplitWitness survives in the target semantic representation. -/
-@[reducible] def Structural : Ty → Type
-  | .nat => Nat
-  | .split => HList (fun _ : Ty => Nat) (desc .split).sorts
-```
-
-[Witgen/Custom.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean#L76-L85)
-
-```lean
-def splitProgram (base : Nat) : Program SplitOp [.nat] .split :=
-  witgen [x] do
-    let witness ← split base x
-    return witness
-
-def lowProgram (base : Nat) : Program SplitOp [.nat] .nat :=
-  witgen [x] do
-    let witness ← split base x
-    let result ← low witness
+def oldAndNew : Program (StructOp desc) [.pair, .number] .pair :=
+  witgen [old, value] do
+    let fresh ← struct.Set desc .pair "right" old value
+    let before ← struct.Get desc .pair "right" old
+    let after ← struct.Get desc .pair "right" fresh
+    let result ← struct.Named desc .pair fields![left := before, right := after]
     return result
 ```
 
 
-The implementation expands the custom feature into Nat arithmetic and generic structure operations. Access to a custom field becomes a checked structural projection:
+
+The generic laws prove get-after-set, preservation of other fields, restoring an existing field, last-write-wins, and preservation of the representation relation. `StructRepr` still requires both pack/unpack inverse laws. Duplicate field names and wrong replacement sorts are rejected. Named construction follows the schema's declared field order.
+
+A backend can implement this with a copy/update or a layout transformation. The Caliper backend changes the returned register layout without writing the old record's registers. Lists and optional/pair values remain separate optional library features.
+
+Custom circuit types can still be exposed through custom features and lowered to structures. The checked `SplitWitness` example changes the native record carrier to a field `HList`; arithmetic stays in the lowered AST, not in a hidden boundary adapter. [Custom lowering source](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean).
+
+## 4. Shared Methods
+
+A method has a typed signature and a finite `Program` body. A call contains a typed reference, **not** the body or a host function:
 
 
-[Witgen/Custom.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean#L88-L103)
+[Witgen/Methods.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Methods.lean#L8-L12)
 
 ```lean
-def lowerSplit : Template SplitOp Target
-  | _, _, _, .split base, _ =>
-    witgen [x] do
-      let base ← constant base
-      let lo ← remainder x base
-      let hi ← quotient x base
-      let witness ← makeNamedStruct desc .split fields![low := lo, high := hi]
-      return witness
-  | _, _, _, .low, _ =>
-    witgen [w] do
-      let result ← getField desc .split "low" w
-      return result
-  | _, _, _, .high, _ =>
-    witgen [w] do
-      let result ← getField desc .split "high" w
-      return result
+structure MethodSig (S : Type) where
+  name : String
+  args : List S
+  result : S
+  deriving DecidableEq, Repr
 ```
 
-[Witgen/Custom.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean#L105-L107)
+[Witgen/Methods.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Methods.lean#L46-L56)
 
 ```lean
-def Related : (t : Ty) → Native t → Structural t → Prop
-  | .nat, x, y => x = y
-  | .split, w, fields => h![w.low, w.high] = fields
-```
+inductive CallOp {S : Type} (ms : List (MethodSig S)) : Signature S where
+  | call (ref : Ref ms m) : CallOp ms m.args [] m.result
 
+abbrev WithCalls (F : Signature S) (ms : List (MethodSig S)) : Signature S :=
+  SigSum F (CallOp ms)
 
-`lowerSplit_law` proves each replacement against the source specification. The generic core theorem then handles every program using that feature:
-
-
-[Witgen/Custom.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean#L144-L150)
-
-```lean
-def certifiedLowering : CertifiedLowering nativeModel targetModel Related :=
-  .ofTemplate _ _ lowerSplit Related lowerSplit_law
-
-theorem lowerSplit_correct (p : Program SplitOp Γ t) (xs : HList Native Γ)
-    (ys : HList Structural Γ) (hr : HList.Rel Related xs ys) :
-    Related t (p.eval nativeModel xs) ((p.lower lowerSplit).eval targetModel ys) :=
-  Program.eval_lower_related _ _ _ _ lowerSplit_law p xs ys hr
+inductive Library {S : Type} (F : Signature S) : List (MethodSig S) → Type where
+  | nil : Library F []
+  | cons (prior : Library F ms) (sig : MethodSig S)
+      (fresh : sig.name ∉ ms.map MethodSig.name)
+      (body : Program (WithCalls F ms) sig.args sig.result) : Library F (sig :: ms)
 ```
 
 
-The relation preserves both limbs, not merely the low output. Separate theorems establish reconstruction and the low-limb bound. The native demonstration fixes a positive base and includes an input larger than `u64`; the pure Nat model's totalized zero division is not a promise that native division accepts zero.
 
-**Type conversion here changes semantic representation, not abstract sort indices.** A source sort can mean a native circuit structure in one model and a field-list representation in another. Reindexing into a different sort universe is a separate pass not implemented here. A custom feature still needs a lowering proof and a data-only serializer for the selected backend; it is not automatically supported merely because it has a type.
+A definition may refer only to earlier definitions. Names are unique; missing, forward, duplicate, wrong-name/index, and mismatched-signature calls are rejected. The library interpreter evaluates the stored AST bodies. Generic refinement and call-substitution theorems let a caller use each method's correctness result without expanding its proof at every call site.
 
-## 4. Proof-Bearing Lowering
+This version deliberately supports **acyclic methods**, not recursion or an arbitrary dynamic linker. Native emission writes each definition once and retains calls. It also supports a shared library with multiple callers, so importing another caller does not duplicate the arithmetic bodies.
 
-The cryptographic example itself begins as a circuit-level `QuadFeature`. Its implementation lowers to field arithmetic and `StructOp`; field operations can then lower to arbitrary-precision Nat arithmetic with explicit reduction:
+`field.Square` has its own operation/specification and a certified fallback to `field.Mul x x`. A native field backend can use its square implementation; the U64 method library implements Square by calling its existing Mul method.
+
+## 5. Field → Nat: GMP Backend
+
+Use the same source program for the direct field backend, the Nat-method backend and the U64-method backend:
 
 
-[Witgen/Crypto/Program.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Crypto/Program.lean#L50-L54)
+[Witgen/Typed/Examples.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Examples.lean#L7-L13)
 
 ```lean
-def quadraticField : Program FieldSig [.scalar, .scalar] .quad :=
-  quadraticFeature.lower quadToField
-
-def quadraticNat (p : Nat) : Program NatSig [.scalar, .scalar] .quad :=
-  quadraticField.lower (fieldToNat p)
+def fieldProgram (f : FieldId) : Program (FieldOp f) [.field f, .field f] (.field f) :=
+  witgen [a,b] do
+    let aa ← field.Square a
+    let product ← field.Mul aa b
+    let five ← field.Const f 5
+    let out ← field.Add product five
+    return out
 ```
 
 
-The proof-bearing interface keeps models and representation relations explicit:
+
+The Nat method bodies unpack the scalar representation, perform arbitrary-precision arithmetic and **explicit** modular reduction, then repack it. Pack/unpack are raw layout operations and do not secretly normalize a wrong result.
+
+Actual emitted secp-scalar multiplication and squaring methods:
 
 
-[Witgen/Core.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Core.lean#L214-L218)
-
-```lean
-structure CertifiedLowering (M : Model F V) (N : Model G W)
-    (R : ∀ s, V s → W s → Prop) where
-  run : {Γ : List S} → {t : S} → Program F Γ t → Program G Γ t
-  correct : ∀ {Γ t} (p : Program F Γ t) xs ys, HList.Rel R xs ys →
-    R t (p.eval M xs) ((run p).eval N ys)
-```
-
-
-A `Template` maps a source operation to a **target subprogram**, not just another operation tag. Its law quantifies over related arguments and regions. `Program.eval_lower_related` lifts that law through all continuations and nested regions; certified passes compose without erasing intermediate representation conditions.
-
-For BN254, `fieldToNat_correct` covers arbitrary finite programs over the supplied arithmetic/structure signature at any positive modulus. `quadToField_correct` certifies the preceding custom-feature expansion. Neither theorem asserts that BN254 arithmetic fits in one machine word.
-
-## 5. Native Code and Typed Errors
-
-Both following files are generated from the actual certified ASTs. Each returns a native structure; `populate` writes every required witness cell without overwriting inputs.
-
-### Direct BN254 Backend
-
-
-[backend/src/generated_crypto/quad_bn254.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_crypto/quad_bn254.rs#L1-L29)
+[backend/src/generated_methods/module_5.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_methods/module_5.rs#L20-L41)
 
 ```rust
-// Generated from typed witness IR. Do not hand-edit.
-
-#[derive(Clone, Debug)]
-pub struct QuadWitness {
-    pub square: witgen_native::Bn254Scalar,
-    pub output: witgen_native::Bn254Scalar,
+// method 1: "field.2.mul.nat"
+fn method_1(
+    a0: typed::NatField<2>,
+    a1: typed::NatField<2>,
+) -> witgen_native::Result<typed::NatField<2>> {
+    let v5: rug::Integer = (a0.clone()).0;
+    let v6: rug::Integer = (a1.clone()).0;
+    let v7: rug::Integer = v5.clone() * v6.clone();
+    let v8: rug::Integer = v7.clone()
+        % rug::Integer::from_str_radix(
+            "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+            10,
+        )?;
+    let v9: typed::NatField<2> = typed::NatField::<2>(v8.clone());
+    Ok(v9.clone())
 }
 
-pub fn generate(
-    x: witgen_native::Bn254Scalar,
-    y: witgen_native::Bn254Scalar,
-) -> witgen_native::Result<QuadWitness> {
-    let _wg0: witgen_native::Bn254Scalar = witgen_native::bn254_mul(x, x);
-    let _wg1: witgen_native::Bn254Scalar = witgen_native::bn254_add(_wg0, y);
-    let _wg2: QuadWitness = QuadWitness {
-        square: _wg0,
-        output: _wg1,
+// method 2: "field.2.square.nat"
+fn method_2(a0: typed::NatField<2>) -> witgen_native::Result<typed::NatField<2>> {
+    let v10: typed::NatField<2> = method_1(a0.clone(), a0.clone())?;
+    Ok(v10.clone())
+}
+```
+
+
+
+The generated caller retains three method calls rather than inserting their bodies:
+
+
+[backend/src/generated_methods/module_5.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_methods/module_5.rs#L44-L59)
+
+```rust
+pub fn run(
+    a0: typed::NatField<2>,
+    a1: typed::NatField<2>,
+) -> witgen_native::Result<typed::NatField<2>> {
+    let v11: typed::NatField<2> = method_2(a0.clone())?;
+    let v12: typed::NatField<2> = method_1(v11.clone(), a1.clone())?;
+    let v13: typed::NatField<2> = typed::NatField::<2>(
+        rug::Integer::from_str_radix("5", 10)?
+            % rug::Integer::from_str_radix(
+                "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+                10,
+            )?,
+    );
+    let v14: typed::NatField<2> = method_0(v12.clone(), v13.clone())?;
+    Ok(v14.clone())
+}
+```
+
+
+
+Field identity remains part of `NatField<2>`; the choice of GMP is a backend decision. The exact source-to-Nat relation includes the entire raw value, not equality only after another modular reduction.
+
+## 6. Field → U64: Shared Word Methods
+
+This is now an actual **four-limb U64 implementation**, including secp256k1 moduli near $2^{256}$. It is not a renamed field intrinsic or a Nat/GMP calculation hidden in a call.
+
+The library contains:
+
+- **Three generic arithmetic bodies:** Add, Mul and Square, with an explicit four-word modulus argument.
+- **Nine thin field wrappers:** the three operations for each registered field identity.
+- **One copy of that library** shared by the nine single-operation callers and three composed callers in the emitted unit.
+
+The actual secp-scalar caller is small:
+
+
+[backend/src/generated_methods/shared_u64.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_methods/shared_u64.rs#L558-L567)
+
+```rust
+pub fn program_11(
+    a0: typed::WordField<2>,
+    a1: typed::WordField<2>,
+) -> witgen_native::Result<typed::WordField<2>> {
+    let v102: typed::WordField<2> = method_11(a0.clone())?;
+    let v103: typed::WordField<2> = method_10(v102.clone(), a1.clone())?;
+    let v104: typed::WordField<2> = typed::WordField::<2>([5u64, 0u64, 0u64, 0u64]);
+    let v105: typed::WordField<2> = method_9(v103.clone(), v104.clone())?;
+    Ok(v105.clone())
+}
+```
+
+
+
+`method_11`, `method_10`, and `method_9` are the scalar-field Square/Mul/Add wrappers. The multiplication implementation itself is stored once as a bounded loop. Its two Add call sites remain calls:
+
+
+[backend/src/generated_methods/shared_u64.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_methods/shared_u64.rs#L50-L81)
+
+```rust
+// method 1: "u64.field.mul"
+fn method_1(
+    a0: typed::Word4,
+    a1: typed::Word4,
+    a2: typed::Word4,
+) -> witgen_native::Result<typed::Word4> {
+    let v34: typed::Word4 = [0u64, 0u64, 0u64, 0u64];
+    let v41: typed::Word4 = {
+        let mut acc36: typed::Word4 = v34.clone();
+        for index35 in (0..256usize).rev() {
+            acc36 = {
+                let v37: typed::Word4 = method_0(a0.clone(), acc36.clone(), acc36.clone())?;
+                let v38: typed::Word4 = method_0(a0.clone(), v37.clone(), a2.clone())?;
+                let v39: bool = typed::bit_at(a1.clone(), index35.clone());
+                let v40: typed::Word4 = if v39.clone() {
+                    v38.clone()
+                } else {
+                    v37.clone()
+                };
+                v40.clone()
+            };
+        }
+        acc36
     };
-    Ok((_wg2).clone())
+    Ok(v41.clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::Bn254Scalar; 4]) -> witgen_native::Result<()> {
-    let result = generate(cells[0], cells[1])?;
-    let _cell0 = result.square;
-    let _cell1 = result.output;
-    cells[2] = _cell0;
-    cells[3] = _cell1;
-    Ok(())
+// method 2: "u64.field.square"
+fn method_2(a0: typed::Word4, a1: typed::Word4) -> witgen_native::Result<typed::Word4> {
+    let v42: typed::Word4 = method_1(a0.clone(), a1.clone(), a1.clone())?;
+    Ok(v42.clone())
 }
 ```
 
 
-### After Field → Nat: GMP Backend
 
+The reference multiplier uses a descending 256-bit Horner/double-add loop. Add uses word carry/borrow operations and handles the carry beyond the fourth limb; it does **not** assume the sum fits in 256 bits. Its conditional modulus subtraction is proved correct for every positive modulus below $2^{256}$ and canonical inputs. Dropping the high carry is an executed negative control.
 
-[backend/src/generated_crypto/quad_nat.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated_crypto/quad_nat.rs#L1-L37)
+`Word4.Add_correct`, `Mul_correct` and `Square_correct` prove raw decoding equals the required modular result and remains canonical. Separate theorems prove that the stored method ASTs evaluate to these word algorithms. `U64.certified` then supplies the actual Field→U64 refinement for callers; `caller_correct` is not a collection of hand-selected numerical equalities.
 
-```rust
-// Generated from typed witness IR. Do not hand-edit.
+The native U64 method bodies use only word primitives, layouts, calls and the bounded loop. Nat values are used as proof/reference values and public loop indices; input parsing and decimal output serialization are outside the word-arithmetic body. The native emitter rejects unbounded external Nat interfaces in U64 mode. Raw `fromWord` wrappers do not repair outputs with a hidden modulo.
 
-#[derive(Clone, Debug)]
-pub struct QuadWitness {
-    pub square: rug::Integer,
-    pub output: rug::Integer,
-}
-
-pub fn generate(x: rug::Integer, y: rug::Integer) -> witgen_native::Result<QuadWitness> {
-    let _wg0: rug::Integer = witgen_native::nat_mul(&x, &x);
-    let _wg1: rug::Integer = witgen_native::nat_from_str(
-        "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-    )?;
-    let _wg2: rug::Integer = witgen_native::nat_mod(&_wg0, &_wg1)?;
-    let _wg3: rug::Integer = witgen_native::nat_add(&_wg2, &y);
-    let _wg4: rug::Integer = witgen_native::nat_from_str(
-        "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-    )?;
-    let _wg5: rug::Integer = witgen_native::nat_mod(&_wg3, &_wg4)?;
-    let _wg6: QuadWitness = QuadWitness {
-        square: (_wg2).clone(),
-        output: (_wg5).clone(),
-    };
-    Ok((_wg6).clone())
-}
-
-pub fn populate(cells: &mut [witgen_native::Bn254Scalar; 4]) -> witgen_native::Result<()> {
-    let result = generate(
-        rug::Integer::from(witgen_native::bn254_to_nat(cells[0])),
-        rug::Integer::from(witgen_native::bn254_to_nat(cells[1])),
-    )?;
-    let _cell0 = witgen_native::bn254_from_nat(&result.square)?;
-    let _cell1 = witgen_native::bn254_from_nat(&result.output)?;
-    cells[2] = _cell0;
-    cells[3] = _cell1;
-    Ok(())
-}
-```
-
-
-The same emitter handles the nested `QuadEnvelope` schema and the lowered custom `SplitWitness` without adding special record-operation cases. Structure names and ordered field types travel in the schema metadata.
-
-### Errors Are Values, Not Strings
-
-The shared native API has a concrete error enum and a fixed result alias:
-
-
-[backend/src/error.rs](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/error.rs#L4-L24)
-
-```rust
-pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum Error {
-    NonCanonicalField { field: &'static str },
-    NegativeNatural,
-    DivisionByZero,
-    WordOverflow,
-    ParseInteger(rug::integer::ParseIntegerError),
-    MissingField(&'static str),
-    InvalidInputType { expected: &'static str },
-    InputArity { expected: usize, actual: usize },
-    InputLength { expected: usize, actual: usize },
-    NonBooleanCell { slot: usize },
-    CircuitAssumptions { circuit: &'static str },
-    WitnessLength { expected: usize, actual: usize },
-    UnknownProgram(String),
-    Json(serde_json::Error),
-    Io(io::Error),
-}
-```
-
-
-Callers can match `Error::DivisionByZero`, inspect expected/actual lengths, or distinguish canonical-field failures from malformed input. `Error` implements `Display` and `std::error::Error`; integer-parse, JSON and I/O errors retain their original `source()`. Providers, generated functions, writers and dispatch all propagate this type. Only the CLI formats a diagnostic string, alongside a stable `error_code`.
-
-The tests execute high-width multiplication/reduction and reject noncanonical field values, negative Nat values, malformed integers, wrong arities and bad lengths. Output validation is completed before any witness stores. The raw Nat backend remains arbitrary precision; the BN254 backend admits only canonical scalar representatives.
-
-## 6. The Full Circuit Witness
-
-A correct public output alone is insufficient. The BN254 quadratic witness exposes both the internal square and the public output. The complete buffer is `[x, y, square, output]`, and its independent relation requires:
-
-```text
-inputs are bound unchanged
-0 ≤ square, output < p
-square = x*x mod p
-output = square+y mod p
-```
-
-`QuadCircuit.sound` is generator-independent. `quadFieldWitgen` and `quadNatWitgen` store the actual programs with fixed input/output adapters. `quad_nat_raw_buffer` proves that the **raw** Nat result already equals the field witness buffer—no hidden modular repair in an output decoder. `envelope_nat_buffer_correct` carries the same complete witness through a nested custom structure.
-
-The arithmetic proof models canonical residues as `Fin p` and uses `0 < p`. It does not prove primality or declare a Lean algebraic `Field` instance; the exact known-prime BN254 scalar parameter identifies the intended native field. The add/multiply/reduction proofs do not need primality.
-
-The main native validation executes four actual ASTs on twelve input pairs, for 48 complete witnesses. Ten pairs have an input outside `u64`; unreduced squares reach 508 bits. Both backends are compared to Lean and to a separate integer arithmetic oracle. These are boundary/representative tests, not an exhaustive enumeration of a cryptographic field.
+This is an inspectable **reference implementation**, not optimized Montgomery arithmetic and not a constant-time certificate. The loop evaluates both modular-add alternatives before selection. No native-speed claim follows from these correctness proofs.
 
 ## 7. Caliper Integration and Runtime Proofs
 
-Caliper is an **analysis backend**, not the native execution engine. Its current target handles words, static structure/list layouts and supported control. It does not yet implement full-width BN254 field arithmetic; such a path would need a certified multi-limb implementation. The example below is instead parameterized **word modular multiplication**, kept separate from the cryptographic field examples.
+Caliper consumes only the U64-level program. Higher-level operations are lowered by implementation/instantiation passes before reaching this backend; Caliper itself has no field or curve implementations.
 
-This is the actual emitted producer followed by its complete input-and-witness writer:
-
-
-[examples/caliper/modMul.caliper](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/examples/caliper/modMul.caliper#L1-L13)
-
-```text
-mul  r3, r0, r1
-udiv r4, r3, r2
-umod r5, r3, r2
-skip
-skip
-mem.alloci b0, 6
-mem.push  b0, r0
-mem.push  b0, r1
-mem.push  b0, r2
-mem.push  b0, r3
-mem.push  b0, r4
-mem.push  b0, r5
-skip
-```
-
-
-It starts with operands/modulus in registers and fills `[a,b,n,product,quotient,remainder]`. Allocation reserves an empty buffer; each `mem.push` initializes one cell. Zero-cost `skip` nodes are retained rather than silently optimized away.
-
-### A Checked Runtime Bound and an Exact Cost
-
-Import `Witgen.Backends.CaliperExamples`, open `Caliper` and `Witgen.Backends.CaliperExamples`, and use these checked declarations:
+The parameterized word modular-multiplication example has checked total-correctness and exact-cost declarations:
 
 
 [Witgen/Backends/CaliperRuntimeGuide.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Backends/CaliperRuntimeGuide.lean#L29-L44)
@@ -439,9 +461,10 @@ theorem modMul_exact_cost (tape : RandomTape 64) (s s' : State 64)
 ```
 
 
-`Triple C tape P code Q T D M` proves terminating execution from every state satisfying `P`, with postcondition `Q` and upper bounds on time, net capacity growth and peak growth. `Exec` carries exact costs. The second theorem uses determinism to establish exact values for every completed run.
 
-For a memory-neutral producer and a fresh output buffer of $n$ words, the writer-composition theorem charges
+Its `.cycles` charge is 99 with net/peak buffer-capacity growth 6/6. This is **not a Rust runtime or measured hardware timing**. `Exec` carries exact values; `Triple` supplies terminating executions with upper bounds.
+
+For a memory-neutral producer and a fresh $n$-word output buffer, reserve and initialization are both charged:
 
 $$
 \begin{aligned}
@@ -450,26 +473,4 @@ T_{\mathrm{full}} &= T_{\mathrm{producer}} + C.\mathrm{memAlloc}\\
 \end{aligned}
 $$
 
-This word example costs 15 under `.unit` and 99 under `.cycles`, with net/peak buffer growth 6/6. These are abstract model charges, **not a Rust runtime or measured hardware cycles**. Inputs start in registers: parsing, host conversion, Lean code generation and compilation are outside the clock. Buffer capacity excludes registers; static register endpoints are not liveness peaks.
-
-To analyze another WitGen: fix its input/representation assumptions and source program; prove the feature fallbacks; compile the actual word AST with checked fresh registers and static shapes; prove its execution/value correspondence and cost formula; compose with `withWitness_exec`; finally connect every copied cell to the circuit relation. For size-dependent bounds, prove the parameterized family—not merely a timed or checked instance.
-
-**There is no generic whole-compiler preservation theorem yet.** Current whole-program certificates cover the documented word examples and fixed two-row gated program. Branch outputs with incompatible static shapes are rejected. Runtime-length containers and a general multi-limb field lowering are not implemented. The word execution model covers wrapping and totalized zero division; Nat/circuit correctness needs the stated bounds and positive-modulus hypotheses.
-
-[Compiler API](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperBackendAPI.md) · [Cost and Circuit Theorems](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperCostAPI.md)
-
-## 8. Checks and Boundaries
-
-```sh
-cd witgen
-python3 tools/run_crypto.py       # main BN254 field/GMP examples
-python3 tools/run_demo.py         # full suite, custom types and Caliper included
-python3 -m unittest discover -s tests -v
-cargo test --locked --manifest-path backend/Cargo.toml --test crypto --test errors --test providers
-```
-
-The older small-field suite remains for exhaustive bounded regressions and word-lowering tests; it is not the main field example. Its native suite still compares 7,472 cases across 18 variants. The separate custom-type path adds two generated programs and ten exact source/target/native comparisons. Named-argument, duplicate-name, scoping, alias, shadowing, capture and invalid-shape controls accompany the generic structural authoring layer.
-
-**Kernel-checked:** typed finite syntax, operation-to-subprogram/model-related lowering, generic structure representation laws, the circuit/full-buffer results and the specifically scoped Caliper execution/resource theorems. Exact nonempty axiom audits keep the core/crypto policies at `propext` and `Quot.sound`; Caliper additionally permits standard `Classical.choice`. No custom axioms, `sorry`, native-decision proofs or blanket heartbeat increases are used.
-
-**Tested boundary:** elaboration behavior, JSON codecs, Rust printing, rustfmt/rustc, Arkworks/GMP and native execution. The code emitter does not reconstruct code from evaluated outputs. Cryptographic-size arithmetic is implemented and tested; a verified foreign runtime, a general multi-limb Caliper backend, automatic lowering search, arbitrary procedure linking, and replacement of parent Clean's WitnessIR remain separate work.
+Input parsing, representation conversion and code generation are outside that example's clock; buffer capacity excludes registers.

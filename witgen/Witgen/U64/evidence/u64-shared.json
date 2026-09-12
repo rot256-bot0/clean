@@ -1,0 +1,1190 @@
+{"version": 2,
+ "programs":
+ [{"output":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.add",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.0.add.u64", "index": 8},
+    "result":
+    {"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]}},
+  {"output":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.mul",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.0.mul.u64", "index": 7},
+    "result":
+    {"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]}},
+  {"output":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.square",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0},
+     "name": "a"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.0.square.u64", "index": 6},
+    "result":
+    {"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.add",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.1.add.u64", "index": 5},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.mul",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.1.mul.u64", "index": 4},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.square",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1},
+     "name": "a"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.1.square.u64", "index": 3},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.add",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.2.add.u64", "index": 2},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.mul",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     "name": "a"},
+    {"type":
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     "name": "b"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.2.mul.u64", "index": 1},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]}},
+  {"output":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.square",
+   "inputs":
+   [{"type":
+     {"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2},
+     "name": "a"}],
+   "body":
+   {"tag": "let",
+    "static": {"name": "field.2.square.u64", "index": 0},
+    "result":
+    {"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2},
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]}}],
+ "methods":
+ [{"result": "word4",
+   "name": "u64.field.add",
+   "body":
+   {"tag": "let",
+    "static": {"value": false},
+    "result": "bool",
+    "regions": [],
+    "op": "u64.flag",
+    "next":
+    {"tag": "let",
+     "static": {"limb": 0},
+     "result": "u64",
+     "regions": [],
+     "op": "u64.get",
+     "next":
+     {"tag": "let",
+      "static": {"limb": 1},
+      "result": "u64",
+      "regions": [],
+      "op": "u64.get",
+      "next":
+      {"tag": "let",
+       "static": {"limb": 2},
+       "result": "u64",
+       "regions": [],
+       "op": "u64.get",
+       "next":
+       {"tag": "let",
+        "static": {"limb": 3},
+        "result": "u64",
+        "regions": [],
+        "op": "u64.get",
+        "next":
+        {"tag": "let",
+         "static": {"limb": 0},
+         "result": "u64",
+         "regions": [],
+         "op": "u64.get",
+         "next":
+         {"tag": "let",
+          "static": {"limb": 1},
+          "result": "u64",
+          "regions": [],
+          "op": "u64.get",
+          "next":
+          {"tag": "let",
+           "static": {"limb": 2},
+           "result": "u64",
+           "regions": [],
+           "op": "u64.get",
+           "next":
+           {"tag": "let",
+            "static": {"limb": 3},
+            "result": "u64",
+            "regions": [],
+            "op": "u64.get",
+            "next":
+            {"tag": "let",
+             "static": {"limb": 0},
+             "result": "u64",
+             "regions": [],
+             "op": "u64.get",
+             "next":
+             {"tag": "let",
+              "static": {"limb": 1},
+              "result": "u64",
+              "regions": [],
+              "op": "u64.get",
+              "next":
+              {"tag": "let",
+               "static": {"limb": 2},
+               "result": "u64",
+               "regions": [],
+               "op": "u64.get",
+               "next":
+               {"tag": "let",
+                "static": {"limb": 3},
+                "result": "u64",
+                "regions": [],
+                "op": "u64.get",
+                "next":
+                {"tag": "let",
+                 "static": {},
+                 "result": "u64",
+                 "regions": [],
+                 "op": "u64.adcWord",
+                 "next":
+                 {"tag": "let",
+                  "static": {},
+                  "result": "bool",
+                  "regions": [],
+                  "op": "u64.adcFlag",
+                  "next":
+                  {"tag": "let",
+                   "static": {},
+                   "result": "u64",
+                   "regions": [],
+                   "op": "u64.adcWord",
+                   "next":
+                   {"tag": "let",
+                    "static": {},
+                    "result": "bool",
+                    "regions": [],
+                    "op": "u64.adcFlag",
+                    "next":
+                    {"tag": "let",
+                     "static": {},
+                     "result": "u64",
+                     "regions": [],
+                     "op": "u64.adcWord",
+                     "next":
+                     {"tag": "let",
+                      "static": {},
+                      "result": "bool",
+                      "regions": [],
+                      "op": "u64.adcFlag",
+                      "next":
+                      {"tag": "let",
+                       "static": {},
+                       "result": "u64",
+                       "regions": [],
+                       "op": "u64.adcWord",
+                       "next":
+                       {"tag": "let",
+                        "static": {},
+                        "result": "bool",
+                        "regions": [],
+                        "op": "u64.adcFlag",
+                        "next":
+                        {"tag": "let",
+                         "static": {},
+                         "result": "u64",
+                         "regions": [],
+                         "op": "u64.sbbWord",
+                         "next":
+                         {"tag": "let",
+                          "static": {},
+                          "result": "bool",
+                          "regions": [],
+                          "op": "u64.sbbFlag",
+                          "next":
+                          {"tag": "let",
+                           "static": {},
+                           "result": "u64",
+                           "regions": [],
+                           "op": "u64.sbbWord",
+                           "next":
+                           {"tag": "let",
+                            "static": {},
+                            "result": "bool",
+                            "regions": [],
+                            "op": "u64.sbbFlag",
+                            "next":
+                            {"tag": "let",
+                             "static": {},
+                             "result": "u64",
+                             "regions": [],
+                             "op": "u64.sbbWord",
+                             "next":
+                             {"tag": "let",
+                              "static": {},
+                              "result": "bool",
+                              "regions": [],
+                              "op": "u64.sbbFlag",
+                              "next":
+                              {"tag": "let",
+                               "static": {},
+                               "result": "u64",
+                               "regions": [],
+                               "op": "u64.sbbWord",
+                               "next":
+                               {"tag": "let",
+                                "static": {},
+                                "result": "bool",
+                                "regions": [],
+                                "op": "u64.sbbFlag",
+                                "next":
+                                {"tag": "let",
+                                 "static": {},
+                                 "result": "word4",
+                                 "regions": [],
+                                 "op": "u64.pack",
+                                 "next":
+                                 {"tag": "let",
+                                  "static": {},
+                                  "result": "word4",
+                                  "regions": [],
+                                  "op": "u64.pack",
+                                  "next":
+                                  {"tag": "let",
+                                   "static": {},
+                                   "result": "bool",
+                                   "regions": [],
+                                   "op": "u64.not",
+                                   "next":
+                                   {"tag": "let",
+                                    "static": {},
+                                    "result": "bool",
+                                    "regions": [],
+                                    "op": "u64.or",
+                                    "next":
+                                    {"tag": "let",
+                                     "static": {},
+                                     "result": "word4",
+                                     "regions": [],
+                                     "op": "u64.select",
+                                     "next": {"tag": "ret", "ref": 0},
+                                     "args": [0, 2, 3],
+                                     "arg_types": ["bool", "word4", "word4"]},
+                                    "args": [11, 0],
+                                    "arg_types": ["bool", "bool"]},
+                                   "args": [2],
+                                   "arg_types": ["bool"]},
+                                  "args": [8, 6, 4, 2],
+                                  "arg_types": ["u64", "u64", "u64", "u64"]},
+                                 "args": [15, 13, 11, 9],
+                                 "arg_types": ["u64", "u64", "u64", "u64"]},
+                                "args": [8, 23, 1],
+                                "arg_types": ["u64", "u64", "bool"]},
+                               "args": [7, 22, 0],
+                               "arg_types": ["u64", "u64", "bool"]},
+                              "args": [8, 22, 1],
+                              "arg_types": ["u64", "u64", "bool"]},
+                             "args": [7, 21, 0],
+                             "arg_types": ["u64", "u64", "bool"]},
+                            "args": [8, 21, 1],
+                            "arg_types": ["u64", "u64", "bool"]},
+                           "args": [7, 20, 0],
+                           "arg_types": ["u64", "u64", "bool"]},
+                          "args": [8, 20, 21],
+                          "arg_types": ["u64", "u64", "bool"]},
+                         "args": [7, 19, 20],
+                         "arg_types": ["u64", "u64", "bool"]},
+                        "args": [11, 7, 1],
+                        "arg_types": ["u64", "u64", "bool"]},
+                       "args": [10, 6, 0],
+                       "arg_types": ["u64", "u64", "bool"]},
+                      "args": [10, 6, 1],
+                      "arg_types": ["u64", "u64", "bool"]},
+                     "args": [9, 5, 0],
+                     "arg_types": ["u64", "u64", "bool"]},
+                    "args": [9, 5, 1],
+                    "arg_types": ["u64", "u64", "bool"]},
+                   "args": [8, 4, 0],
+                   "arg_types": ["u64", "u64", "bool"]},
+                  "args": [8, 4, 13],
+                  "arg_types": ["u64", "u64", "bool"]},
+                 "args": [7, 3, 12],
+                 "arg_types": ["u64", "u64", "bool"]},
+                "args": [14],
+                "arg_types": ["word4"]},
+               "args": [13],
+               "arg_types": ["word4"]},
+              "args": [12],
+              "arg_types": ["word4"]},
+             "args": [11],
+             "arg_types": ["word4"]},
+            "args": [9],
+            "arg_types": ["word4"]},
+           "args": [8],
+           "arg_types": ["word4"]},
+          "args": [7],
+          "arg_types": ["word4"]},
+         "args": [6],
+         "arg_types": ["word4"]},
+        "args": [4],
+        "arg_types": ["word4"]},
+       "args": [3],
+       "arg_types": ["word4"]},
+      "args": [2],
+      "arg_types": ["word4"]},
+     "args": [1],
+     "arg_types": ["word4"]},
+    "args": [],
+    "arg_types": []},
+   "args": ["word4", "word4", "word4"]},
+  {"result": "word4",
+   "name": "u64.field.mul",
+   "body":
+   {"tag": "let",
+    "static": {"limbs": ["0", "0", "0", "0"]},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.literal",
+    "next":
+    {"tag": "let",
+     "static": {"count": 256},
+     "result": "word4",
+     "regions":
+     [{"output": "word4",
+       "inputs": ["nat", "word4", "word4", "word4", "word4"],
+       "body":
+       {"tag": "let",
+        "static": {"name": "u64.field.add", "index": 0},
+        "result": "word4",
+        "regions": [],
+        "op": "method.call",
+        "next":
+        {"tag": "let",
+         "static": {"name": "u64.field.add", "index": 0},
+         "result": "word4",
+         "regions": [],
+         "op": "method.call",
+         "next":
+         {"tag": "let",
+          "static": {},
+          "result": "bool",
+          "regions": [],
+          "op": "u64.bitAt",
+          "next":
+          {"tag": "let",
+           "static": {},
+           "result": "word4",
+           "regions": [],
+           "op": "u64.select",
+           "next": {"tag": "ret", "ref": 0},
+           "args": [0, 1, 2],
+           "arg_types": ["bool", "word4", "word4"]},
+          "args": [5, 2],
+          "arg_types": ["word4", "nat"]},
+         "args": [3, 0, 5],
+         "arg_types": ["word4", "word4", "word4"]},
+        "args": [2, 1, 1],
+        "arg_types": ["word4", "word4", "word4"]}}],
+     "op": "u64.repeat",
+     "next": {"tag": "ret", "ref": 0},
+     "args": [1, 2, 3, 0],
+     "arg_types": ["word4", "word4", "word4", "word4"]},
+    "args": [],
+    "arg_types": []},
+   "args": ["word4", "word4", "word4"]},
+  {"result": "word4",
+   "name": "u64.field.square",
+   "body":
+   {"tag": "let",
+    "static": {"name": "u64.field.mul", "index": 0},
+    "result": "word4",
+    "regions": [],
+    "op": "method.call",
+    "next": {"tag": "ret", "ref": 0},
+    "args": [0, 1, 1],
+    "arg_types": ["word4", "word4", "word4"]},
+   "args": ["word4", "word4"]},
+  {"result":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.add.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 0},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 0},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["4891460686036598785",
+        "2896914383306846353",
+        "13281191951274694749",
+        "3486998266802970665"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.add", "index": 2},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 0},
+        "result":
+        {"modulus":
+         "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+         "field": 0},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+       "field": 0}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]},
+   "args":
+   [{"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0},
+    {"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0}]},
+  {"result":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.mul.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 0},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 0},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["4891460686036598785",
+        "2896914383306846353",
+        "13281191951274694749",
+        "3486998266802970665"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.mul", "index": 2},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 0},
+        "result":
+        {"modulus":
+         "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+         "field": 0},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+       "field": 0}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]},
+   "args":
+   [{"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0},
+    {"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0}]},
+  {"result":
+   {"modulus":
+    "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    "field": 0},
+   "name": "field.0.square.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 0},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static":
+     {"limbs":
+      ["4891460686036598785",
+       "2896914383306846353",
+       "13281191951274694749",
+       "3486998266802970665"]},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.literal",
+     "next":
+     {"tag": "let",
+      "static": {"name": "u64.field.square", "index": 2},
+      "result": "word4",
+      "regions": [],
+      "op": "method.call",
+      "next":
+      {"tag": "let",
+       "static": {"field": 0},
+       "result":
+       {"modulus":
+        "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+        "field": 0},
+       "regions": [],
+       "op": "u64.fromWord",
+       "next": {"tag": "ret", "ref": 0},
+       "args": [0],
+       "arg_types": ["word4"]},
+      "args": [0, 1],
+      "arg_types": ["word4", "word4"]},
+     "args": [],
+     "arg_types": []},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "field": 0}]},
+   "args":
+   [{"modulus":
+     "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+     "field": 0}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.add.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 1},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 1},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["18446744069414583343",
+        "18446744073709551615",
+        "18446744073709551615",
+        "18446744073709551615"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.add", "index": 5},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 1},
+        "result":
+        {"modulus":
+         "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+         "field": 1},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+       "field": 1}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1},
+    {"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.mul.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 1},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 1},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["18446744069414583343",
+        "18446744073709551615",
+        "18446744073709551615",
+        "18446744073709551615"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.mul", "index": 5},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 1},
+        "result":
+        {"modulus":
+         "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+         "field": 1},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+       "field": 1}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1},
+    {"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+    "field": 1},
+   "name": "field.1.square.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 1},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static":
+     {"limbs":
+      ["18446744069414583343",
+       "18446744073709551615",
+       "18446744073709551615",
+       "18446744073709551615"]},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.literal",
+     "next":
+     {"tag": "let",
+      "static": {"name": "u64.field.square", "index": 5},
+      "result": "word4",
+      "regions": [],
+      "op": "method.call",
+      "next":
+      {"tag": "let",
+       "static": {"field": 1},
+       "result":
+       {"modulus":
+        "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+        "field": 1},
+       "regions": [],
+       "op": "u64.fromWord",
+       "next": {"tag": "ret", "ref": 0},
+       "args": [0],
+       "arg_types": ["word4"]},
+      "args": [0, 1],
+      "arg_types": ["word4", "word4"]},
+     "args": [],
+     "arg_types": []},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+      "field": 1}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907853269984665640564039457584007908834671663",
+     "field": 1}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.add.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 2},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 2},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["13822214165235122497",
+        "13451932020343611451",
+        "18446744073709551614",
+        "18446744073709551615"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.add", "index": 8},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 2},
+        "result":
+        {"modulus":
+         "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+         "field": 2},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+       "field": 2}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2},
+    {"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.mul.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 2},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static": {"field": 2},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.toWord",
+     "next":
+     {"tag": "let",
+      "static":
+      {"limbs":
+       ["13822214165235122497",
+        "13451932020343611451",
+        "18446744073709551614",
+        "18446744073709551615"]},
+      "result": "word4",
+      "regions": [],
+      "op": "u64.literal",
+      "next":
+      {"tag": "let",
+       "static": {"name": "u64.field.mul", "index": 8},
+       "result": "word4",
+       "regions": [],
+       "op": "method.call",
+       "next":
+       {"tag": "let",
+        "static": {"field": 2},
+        "result":
+        {"modulus":
+         "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+         "field": 2},
+        "regions": [],
+        "op": "u64.fromWord",
+        "next": {"tag": "ret", "ref": 0},
+        "args": [0],
+        "arg_types": ["word4"]},
+       "args": [0, 2, 1],
+       "arg_types": ["word4", "word4", "word4"]},
+      "args": [],
+      "arg_types": []},
+     "args": [2],
+     "arg_types":
+     [{"modulus":
+       "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+       "field": 2}]},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2},
+    {"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2}]},
+  {"result":
+   {"modulus":
+    "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+    "field": 2},
+   "name": "field.2.square.u64",
+   "body":
+   {"tag": "let",
+    "static": {"field": 2},
+    "result": "word4",
+    "regions": [],
+    "op": "u64.toWord",
+    "next":
+    {"tag": "let",
+     "static":
+     {"limbs":
+      ["13822214165235122497",
+       "13451932020343611451",
+       "18446744073709551614",
+       "18446744073709551615"]},
+     "result": "word4",
+     "regions": [],
+     "op": "u64.literal",
+     "next":
+     {"tag": "let",
+      "static": {"name": "u64.field.square", "index": 8},
+      "result": "word4",
+      "regions": [],
+      "op": "method.call",
+      "next":
+      {"tag": "let",
+       "static": {"field": 2},
+       "result":
+       {"modulus":
+        "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+        "field": 2},
+       "regions": [],
+       "op": "u64.fromWord",
+       "next": {"tag": "ret", "ref": 0},
+       "args": [0],
+       "arg_types": ["word4"]},
+      "args": [0, 1],
+      "arg_types": ["word4", "word4"]},
+     "args": [],
+     "arg_types": []},
+    "args": [0],
+    "arg_types":
+    [{"modulus":
+      "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+      "field": 2}]},
+   "args":
+   [{"modulus":
+     "115792089237316195423570985008687907852837564279074904382605163141518161494337",
+     "field": 2}]}],
+ "kind": "u64-shared-library"}

@@ -16,6 +16,7 @@ def fieldInfo : FieldSig args shapes t → OpInfo
   | .inl .mul => ⟨"field.mul", none, none⟩
   | .inr (.make _) => ⟨"record.make", none, none⟩
   | .inr (.get _ field) => ⟨"record.get", none, some field.ref.index⟩
+  | .inr (.set _ field) => ⟨"record.set", none, some field.ref.index⟩
 
 def natInfo : NatSig args shapes t → OpInfo
   | .inl (.const n) => ⟨"nat.const", some n, none⟩
@@ -24,6 +25,7 @@ def natInfo : NatSig args shapes t → OpInfo
   | .inl .mod => ⟨"nat.mod", none, none⟩
   | .inr (.make _) => ⟨"record.make", none, none⟩
   | .inr (.get _ field) => ⟨"record.get", none, some field.ref.index⟩
+  | .inr (.set _ field) => ⟨"record.set", none, some field.ref.index⟩
 
 def namedType (name : String) (ty : Json) : Json :=
   Json.mkObj [("name", .str name), ("type", ty)]

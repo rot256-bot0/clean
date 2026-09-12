@@ -25,6 +25,9 @@ inductive StructOp {S : Type} {Schema : Type}
   | get (schema : Schema) {name : String} {t : S}
       (field : FieldRef (desc schema).fields name t) :
       StructOp desc [(desc schema).result] [] t
+  | set (schema : Schema) {name : String} {t : S}
+      (field : FieldRef (desc schema).fields name t) :
+      StructOp desc [(desc schema).result, t] [] (desc schema).result
 
 structure StructRepr (V : S → Type) (d : StructDesc S) where
   pack : HList V d.sorts → V d.result
@@ -36,17 +39,17 @@ structure StructRepr (V : S → Type) (d : StructDesc S) where
 
 Caller supplies *any* `S`, schema key type, descriptor family and proved native-record/field-list isomorphisms. No Demo sorts, record-specific operation tags, or changes to Core are needed. Ordered fields are checked by the dependent argument list; names are checked by `NamedField` resolution. Duplicate names are forbidden by `names_nodup`. For anonymous constructor notation supply the fourth argument `by decide`; record notation fills this default automatically. Mark descriptor families `@[reducible] def` (and semantic value families too) so literal field-name instance search can reduce them.
 
-`Witgen.Authoring` also provides named construction:
+The public `Witgen.struct.Named/Get/Set` API provides named construction, projection and functional update. `struct.Set desc schema "field" old value` returns a new record and does not modify `old` or its other fields. Generic get-after-set, preservation of other fields, set-after-get and last-write-wins laws are kernel-checked. Lower-level compatibility helpers remain available. `Witgen.Authoring` provides named construction:
 `makeNamedStruct desc schema (args : NamedArgs (Var Γ) (desc schema).fields) : Step F Γ (desc schema).result`.
 Write `fields![square := square, output := output]`; both names **and order** are checked against the schema, not discarded. `getField desc schema "output" result` performs checked literal-name projection.
 
-For real examples use smart arithmetic wrappers (`fieldMul x x`, `fieldAdd x c`, `fieldConst n`) returning `Step F Γ .scalar`. Demo now exports those names; Crypto should define its own versions with its field feature. Their implementation is `call FieldOp.mul h![x, y] .nil`. Main example style:
+For typed field examples use `field.Mul`, `field.Add`, `field.Square` and `field.Const`; their field ID is inferred from operand sorts (explicit for an ambiguous constant). The older unindexed Crypto/Demo wrappers remain bounded regression APIs. Main example style:
 
 ```lean
 witgen [x, c] do
-  let square ← fieldMul x x
-  let output ← fieldAdd square c
-  let result ← makeNamedStruct myDesc .myRecord
+  let square ← field.Mul x x
+  let output ← field.Add square c
+  let result ← struct.Named myDesc .myRecord
     fields![square := square, output := output]
   return result
 ```

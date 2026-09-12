@@ -13,7 +13,7 @@ Opcodes initially supported by the Rust emitter:
 `field.const`, `field.add`, `field.mul`, `field.eq`;
 `nat.const`, `nat.add`, `nat.mul`, `nat.div`, `nat.mod`, `nat.eq`;
 `word.const`, `word.add`, `word.mul`, `word.div`, `word.mod`, `word.eq`;
-`record.make`, `record.get` (static field index);
+`record.make`, `record.get`, `record.set` (static typed field index; Set is functional);
 `list.empty`, `list.push`;
 `control.branch`, `control.map`, `control.fold`.
 
@@ -21,6 +21,6 @@ A branch's args are `[condition] ++ captures`; both regions receive captures. A 
 
 The native emitter fails closed on unsupported op/type/static data, bad names, reference bounds, argument/region types, or output mismatches. JSON decoding and Rust text emission are tested parts of the TCB unless a separate correspondence proof is supplied. Source-generated manifests/IR hashes identify the executed artifact. Cargo uses Arkworks for BN254 (four-limb Fp256) and the small regression field, GMP-backed `rug::Integer` for Nat, and wrapping u64 arithmetic for Word. Partial division/remainder reject zero. Nat→Word certification needs input/intermediate bounds, not merely successful serialization.
 
-Generic `StructOp` schemas serialize to `record.make/get` without record-specific operation tags. Caller-owned sort universes can use `Export.moduleJsonWith`; the custom split example actually lowers a native circuit record to a structural field-list representation before export. Nested records preserve their descriptors' names and order.
+Generic `StructOp` schemas serialize to `record.make/get/set` without record-specific operation tags. Caller-owned sort universes can use `Export.moduleJsonWith`; the custom split example actually lowers a native circuit record to a structural field-list representation before export. Nested records preserve their descriptors' names and order.
 
 Generated functions/writers/dispatch and fallible native providers return `witgen_native::Result<T>`, fixed to the enum `witgen_native::Error`. It implements `Display` and `std::error::Error`; original parsing/JSON/I/O errors remain accessible through `source()`. No catch-all string-error conversion is used. The JSONL CLI formats only the final diagnostic as `error`, alongside a stable `error_code`; Rust clients can match enum variants and structured payloads directly.

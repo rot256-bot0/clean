@@ -221,7 +221,7 @@ class RustEmitter:
         allowed_static = (
             {"value"}
             if op in {"field.const", "nat.const", "word.const"}
-            else ({"index"} if op == "record.get" else set())
+            else ({"index"} if op in {"record.get", "record.set"} else set())
         )
         if not isinstance(static, dict) or set(static) - allowed_static:
             raise EmitError("unexpected static operation parameters")
@@ -345,9 +345,9 @@ class RustEmitter:
                 for f, (expr, ty) in zip(fields, refs)
             )
             value = f"{result['record']} {{ {assignments} }}"
-        elif op == "record.get":
+        elif op in {"record.get", "record.set"}:
             if (
-                len(refs) != 1
+                len(refs) != (1 if op == "record.get" else 2)
                 or not isinstance(refs[0][1], dict)
                 or "record" not in refs[0][1]
             ):
@@ -361,9 +361,19 @@ class RustEmitter:
             ):
                 raise EmitError("record projection index out of range")
             field = fields[index]
-            if result != field["type"]:
-                raise EmitError("record projection result mismatch")
-            value = self.copy(f"{refs[0][0]}.{field['name']}", result)
+            if op == "record.get":
+                if result != field["type"]:
+                    raise EmitError("record projection result mismatch")
+                value = self.copy(f"{refs[0][0]}.{field['name']}", result)
+            else:
+                if result != refs[0][1] or refs[1][1] != field["type"]:
+                    raise EmitError("record update value/result type mismatch")
+                updated = self.fresh()
+                value = "{\n" + self.indent(
+                    f"let mut {updated} = {self.copy(refs[0][0], result)};\n"
+                    f"{updated}.{field['name']} = {self.copy(refs[1][0], field['type'])};\n"
+                    f"{updated}"
+                ) + "\n}"
         else:
             raise EmitError(f"unsupported feature operation: {op!r}")
         name = self.fresh()

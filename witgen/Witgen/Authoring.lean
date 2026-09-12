@@ -61,6 +61,32 @@ def getField {S Schema : Type} {F : Signature S} {Γ : List S}
     Step F Γ t := call (.get schema (name := name) NamedField.ref : StructOp desc _ _ _)
       (.cons value .nil) .nil
 
+namespace struct
+
+/-- Named functional construction through the generic structure feature. -/
+def Named {S Schema : Type} {F : Signature S} {Γ : List S}
+    (desc : Schema → StructDesc S) [Has (StructOp desc) F]
+    (schema : Schema) (args : NamedArgs (Var Γ) (desc schema).fields) :
+    Step F Γ (desc schema).result := makeNamedStruct desc schema args
+
+def Get {S Schema : Type} {F : Signature S} {Γ : List S}
+    (desc : Schema → StructDesc S) [Has (StructOp desc) F]
+    (schema : Schema) (name : String) {t : S}
+    [NamedField (desc schema).fields name t] (record : Var Γ (desc schema).result) :
+    Step F Γ t := getField desc schema name record
+
+/-- Return a new record value. No reference or source binding is modified. -/
+def Set {S Schema : Type} {F : Signature S} {Γ : List S}
+    (desc : Schema → StructDesc S) [Has (StructOp desc) F]
+    (schema : Schema) (name : String) {t : S}
+    [NamedField (desc schema).fields name t]
+    (record : Var Γ (desc schema).result) (value : Var Γ t) :
+    Step F Γ (desc schema).result :=
+  call (.set schema (name := name) NamedField.ref : StructOp desc _ _ _)
+    (.cons record (.cons value .nil)) .nil
+
+end struct
+
 syntax "h![" term,* "]" : term
 macro_rules
   | `(h![]) => `(HList.nil)
