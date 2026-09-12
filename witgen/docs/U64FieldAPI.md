@@ -43,11 +43,12 @@ bodies use an explicit word4 modulus and are shared across all field identities.
 
 ## Certified Lowering and Export
 
-`lower : Handler AnyFieldOp (WithCalls U64Op allSigs)` maps arithmetic to retained
-method calls, constants to encoded literals. `certified` and `caller_correct` give
-the discharged whole-program field-to-word refinement. `Rep` says raw decoding of
+`lower : PartialHandler AnyFieldOp (WithCalls U64Op allSigs)` maps Add/Mul/Square
+to retained method calls and constants to encoded literals. Neg/Inv are declined.
+`compile p accepted` requires a success proof; there is no fallback program.
+`certified` and `caller_correct` prove preservation for accepted programs. `Rep` says raw decoding of
 a target field value equals the source canonical representative and recursively
-covers pair/option values. This field-only model uses PUnit for the unused point
+covers pair/option/list values. This field-only model uses PUnit for unused curve-indexed point
 sort; it is not a lowering of elliptic-curve operations.
 
 `bundleJson` emits one `methods` array (12 definitions) and nine single-operation
@@ -70,8 +71,10 @@ python3 tools/run_methods.py
 python3 -B Witgen/U64/check.py
 ```
 
-The Std-only cold checker builds 18 source modules without the existing package
-olean cache. It requires the independent 25-declaration axiom inventory, removes
+The cold checker rebuilds the entire local import closure without the existing
+package olean cache, retaining only pinned dependency caches. Its field specification
+now imports Mathlib for total inversion and prime certificates. It records the
+dependency manifests, requires the independent 25-declaration axiom inventory, removes
 stale verification receipts, checks the one-loop/shared-method shape and compares
 raw output limbs with Python integers. Source tests cover 601 pairs/14 moduli,
 1,803 algorithm and 1,803 body comparisons, and 279 field-caller executions

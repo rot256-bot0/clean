@@ -95,10 +95,42 @@ def field_id(value, path):
 
 
 def field_metadata(value, path):
+    if not isinstance(value, dict) or not {"field", "modulus"} <= set(value):
+        fail("schema", path, "expected field ID and modulus")
     f = field_id(value["field"], path + ".field")
     if value["modulus"] != FIELD_MODULI[f]:
         fail("field_modulus", path, "field ID requires its exact decimal modulus")
     return ("field", f)
+
+
+def curve_metadata(value, path):
+    keys(value, "id base scalar weierstrass", path)
+    ident = name(value["id"], path + ".id")
+    keys(value["base"], "field modulus", path + ".base")
+    keys(value["scalar"], "field modulus", path + ".scalar")
+    base = field_metadata(value["base"], path + ".base")
+    scalar = field_metadata(value["scalar"], path + ".scalar")
+    if (ident, base, scalar) != ("secp256k1", ("field", 1), ("field", 2)):
+        fail("curve", path, "unsupported curve descriptor or mismatched base/scalar fields")
+    coefficients = array(value["weierstrass"], path + ".weierstrass")
+    if coefficients != ["0", "0", "0", "0", "7"]:
+        fail("curve", path, "unsupported curve equation: exact canonical secp256k1 coefficients required")
+    return ("point", ident, base, scalar, tuple(coefficients))
+
+
+def curve_constant(value, path):
+    if isinstance(value, dict) and set(value) == {"infinity"}:
+        if value["infinity"] is not True:
+            fail("curve_literal", path, "infinity literal requires true")
+        return "typed::point_identity()"
+    keys(value, "x y", path)
+    modulus = int(FIELD_MODULI[1])
+    x = int(decimal(value["x"], path + ".x", modulus))
+    y = int(decimal(value["y"], path + ".y", modulus))
+    if (y*y - x*x*x - 7) % modulus != 0:
+        fail("curve_literal", path, "affine constant is not on the descriptor's curve")
+    return (f'typed::point_const(typed::secp_base_from_str("{x}")?, '
+            f'typed::secp_base_from_str("{y}")?)')
 
 
 def rust_integer(value):
@@ -120,13 +152,13 @@ def signature(args, result, expected, output, path):
 
 
 def contains_nat(ty):
-    return ty == "nat" or (isinstance(ty, tuple) and ty[0] in ("pair", "option")
+    return ty == "nat" or (isinstance(ty, tuple) and ty[0] in ("pair", "option", "list")
                            and any(contains_nat(t) for t in ty[1:]))
 
 
 def native_field_helper(f, op):
     if f == 0:
-        return ("typed::bn254_square" if op == "square" else f"witgen_native::bn254_{op}")
+        return f"typed::bn254_{op}" if op in ("square", "neg", "inv") else f"witgen_native::bn254_{op}"
     return f"typed::secp_{'base' if f == 1 else 'scalar'}_{op}"
 
 
@@ -144,9 +176,9 @@ class Emitter:
         if isinstance(value, dict) and set(value) == {"field", "modulus"}:
             return field_metadata(value, path)
         if isinstance(value, dict) and set(value) == {"point"}:
-            if self.mode != "native" or value["point"] != "secp256k1":
+            if self.mode != "native":
                 fail("type_mode", path, "only native mode supports secp256k1 points")
-            return "point"
+            return curve_metadata(value["point"], path + ".point")
         if isinstance(value, dict) and set(value) == {"pair"}:
             pair = array(value["pair"], path + ".pair")
             if len(pair) != 2:
@@ -154,6 +186,8 @@ class Emitter:
             return ("pair", self.ty(pair[0], path + ".pair[0]"), self.ty(pair[1], path + ".pair[1]"))
         if isinstance(value, dict) and set(value) == {"option"}:
             return ("option", self.ty(value["option"], path + ".option"))
+        if isinstance(value, dict) and set(value) == {"list"}:
+            return ("list", self.ty(value["list"], path + ".list"))
         fail("type", path, "unsupported or malformed logical type")
 
     def types(self, values, path):
@@ -167,11 +201,15 @@ class Emitter:
                 return f"typed::NatField<{ty[1]}>"
             return ("witgen_native::Bn254Scalar", "typed::SecpBase", "typed::SecpScalar")[ty[1]]
         if isinstance(ty, tuple):
+            if ty[0] == "point":
+                return "typed::SecpPoint"
             if ty[0] == "pair":
                 return f"({self.rust_type(ty[1])}, {self.rust_type(ty[2])})"
+            if ty[0] == "list":
+                return f"Vec<{self.rust_type(ty[1])}>"
             return f"Option<{self.rust_type(ty[1])}>"
         return {"nat": "usize" if self.mode == "u64" else "rug::Integer",
-                "u64": "u64", "bool": "bool", "word4": "typed::Word4", "point": "typed::SecpPoint"}[ty]
+                "u64": "u64", "bool": "bool", "word4": "typed::Word4"}[ty]
 
     def fresh(self, prefix="v"):
         n = f"{prefix}{self.counter}"
@@ -186,6 +224,8 @@ class Emitter:
         expressions = [f"{n}.clone()" for n, _ in args]
         actual = [t for _, t in args]
         expected, output = [], result
+        if op in ("control.if", "option.match"):
+            return self.branch_operation(node, args, result, scope, path)
         if op.startswith(("value.", "option.")):
             return self.value_operation(node, args, result, scope, path)
         if self.mode == "native" and op.startswith(("field.", "secp.", "curve.")):
@@ -212,6 +252,12 @@ class Emitter:
             expected, output = ["nat"], "nat"
             expression = (f"{expressions[0]} % {rust_integer(static['modulus'])}" if modulus != "0"
                           else expressions[0]) if len(args) == 1 else ""
+        elif self.mode == "nat" and op in ("nat.field.neg", "nat.field.inv"):
+            keys(static, "field modulus", path + ".static")
+            fty = field_metadata(static, path + ".static")
+            expected, output = [fty], fty
+            helper = "nat_field_" + op.rsplit(".", 1)[1]
+            expression = f"typed::{helper}::<{fty[1]}>({expressions[0]})?" if len(args) == 1 else ""
         elif self.mode == "nat" and op in ("nat.field.const", "nat.field.pack", "nat.field.unpack"):
             if op == "nat.field.const":
                 keys(static, "field modulus value", path + ".static")
@@ -239,10 +285,11 @@ class Emitter:
         op, static = node["op"], node["static"]
         if array(node["regions"], path + ".regions"):
             fail("regions", path, "native primitive takes no regions")
-        if op in ("field.const", "field.add", "field.mul", "field.square"):
+        if op in ("field.const", "field.add", "field.mul", "field.square", "field.neg", "field.inv"):
             keys(static, "field modulus value" if op == "field.const" else "field modulus", path + ".static")
             field = field_metadata(static, path + ".static")
-            arity = {"field.const": 0, "field.add": 2, "field.mul": 2, "field.square": 1}[op]
+            arity = {"field.const": 0, "field.add": 2, "field.mul": 2,
+                     "field.square": 1, "field.neg": 1, "field.inv": 1}[op]
             signature(args, result, [field] * arity, field, path)
             f = field[1]
             if op == "field.const":
@@ -251,27 +298,30 @@ class Emitter:
                 return f"{native_field_helper(f, 'from_nat')}(&({value}))?"
             helper = native_field_helper(f, op.split(".")[1])
         else:
-            base, scalar, point = ("field", 1), ("field", 2), "point"
+            keys(static, "curve value" if op == "curve.const" else "curve", path + ".static")
+            point = curve_metadata(static["curve"], path + ".static.curve")
+            base, scalar = point[2:4]
+            if op == "curve.const":
+                signature(args, result, [], point, path)
+                return curve_constant(static["value"], path + ".static.value")
             affine = ("pair", base, base)
             shapes = {
-                "secp.add": ([point, point], point, "point_add"),
-                "secp.scale": ([scalar, point], point, "point_scale"),
-                "secp.inv": ([point], point, "point_inv"),
-                "secp.generator": ([], point, "point_generator"),
-                "secp.identity": ([], point, "point_identity"),
-                "secp.x": ([point], base, "point_x"),
+                "curve.add": ([point, point], point, "point_add"),
+                "curve.mul": ([scalar, point], point, "point_mul"),
+                "curve.eq": ([point, point], "bool", "point_eq"),
+                "curve.msm": ([("list", ("pair", scalar, point))], point, "point_msm"),
+                "curve.inv": ([point], point, "point_inv"),
+                "curve.generator": ([], point, "point_generator"),
+                "curve.identity": ([], point, "point_identity"),
                 "curve.toAffine": ([point], ("option", affine), "to_affine"),
                 "curve.fromAffine": ([affine], ("option", point), "from_affine"),
             }
             if op not in shapes:
                 fail("operation", path, f"unsupported native operation {op!r}")
-            keys(static, "curve", path + ".static")
-            if static["curve"] != "secp256k1":
-                fail("curve", path, "expected exact secp256k1 curve identity")
             expected, output, helper = shapes[op]
             signature(args, result, expected, output, path)
             helper = "typed::" + helper
-        return f"{helper}({', '.join(n + '.clone()' for n, _ in args)})"
+        return f"{helper}({', '.join(n + '.clone()' for n, _ in args)})" + ("?" if op == "curve.msm" else "")
 
     def value_operation(self, node, args, result, scope, path):
         op = node["op"]
@@ -280,6 +330,13 @@ class Emitter:
         if len(regions) != (1 if op == "option.bind" else 0):
             fail("regions", path, "wrong structural region count")
         a = [n + ".clone()" for n, _ in args]
+        if op == "value.nil" and not args and isinstance(result, tuple) and result[0] == "list":
+            return f"Vec::<{self.rust_type(result[1])}>::new()"
+        if op == "value.cons" and len(args) == 2:
+            head = args[0][1]
+            signature(args, result, [head, ("list", head)], ("list", head), path)
+            items = self.fresh("items")
+            return block([f"let mut {items} = vec![{a[0]}];", f"{items}.extend({a[1]});"], items)
         if op == "value.pair" and len(args) == 2:
             signature(args, result, [args[0][1], args[1][1]], ("pair", args[0][1], args[1][1]), path)
             return f"({a[0]}, {a[1]})"
@@ -302,6 +359,28 @@ class Emitter:
                 body = self.region(regions[0], [(x, inp[1])], result, scope, path + ".regions[0]")
                 return f"match {a[0]} {{\n" + indent(f"Some({x}) => {body},\nNone => None,") + "\n}"
         fail("signature", path, "unsupported structural operation or incorrect signature")
+
+    def branch_operation(self, node, args, result, scope, path):
+        keys(node["static"], "", path + ".static")
+        regions = array(node["regions"], path + ".regions")
+        if len(regions) != 2:
+            fail("regions", path, "branch operation requires exactly two regions")
+        if not args:
+            fail("signature", path, "branch operation requires a discriminator")
+        discr, ty = args[0]
+        captures = args[1:]
+        if node["op"] == "control.if":
+            if ty != "bool":
+                fail("signature", path, "if condition requires Bool")
+            yes = self.region(regions[0], captures, result, scope, path + ".regions[0]")
+            no = self.region(regions[1], captures, result, scope, path + ".regions[1]")
+            return f"if {discr}.clone() {yes} else {no}"
+        if not isinstance(ty, tuple) or ty[0] != "option":
+            fail("signature", path, "option match requires an Option discriminator")
+        payload = self.fresh("_some")
+        none = self.region(regions[0], captures, result, scope, path + ".regions[0]")
+        some = self.region(regions[1], [(payload, ty[1])] + captures, result, scope, path + ".regions[1]")
+        return f"match {discr}.clone() {{\n" + indent(f"None => {none},\nSome({payload}) => {some},") + "\n}"
 
     def region(self, region, env, output, scope, path):
         keys(region, "inputs output body", path)
@@ -450,6 +529,11 @@ class Emitter:
                     'let pair = value.as_array().ok_or(witgen_native::Error::InvalidInputType { expected: "pair array" })?;',
                     'if pair.len() != 2 { return Err(witgen_native::Error::InputLength { expected: 2, actual: pair.len() }); }',
                 ], f"({left}(&pair[0])?, {right}(&pair[1])?)")
+            elif isinstance(ty, tuple) and ty[0] == "list":
+                child = decoder(ty[1])
+                expr = block([
+                    'let values = value.as_array().ok_or(witgen_native::Error::InvalidInputType { expected: "list array" })?;',
+                ], f"values.iter().map({child}).collect::<witgen_native::Result<Vec<_>>>()?")
             elif isinstance(ty, tuple) and ty[0] == "option":
                 child = decoder(ty[1])
                 if isinstance(ty[1], tuple) and ty[1][0] == "option":
@@ -462,10 +546,12 @@ class Emitter:
                     expr = f"if value.is_null() {{ None }} else {some}"
                 else:
                     expr = f"if value.is_null() {{ None }} else {{ Some({child}(value)?) }}"
+            elif isinstance(ty, tuple) and ty[0] == "point":
+                expr = "typed::parse_point(value)?"
             elif ty == "bool":
                 expr = 'value.as_bool().ok_or(witgen_native::Error::InvalidInputType { expected: "Boolean" })?'
             else:
-                helper = {"nat": "parse_nat", "u64": "parse_u64", "word4": "parse_word4", "point": "parse_point"}[ty]
+                helper = {"nat": "parse_nat", "u64": "parse_u64", "word4": "parse_word4"}[ty]
                 expr = f"typed::{helper}(value)?"
             definitions.append(f"fn {symbol}(value: &serde_json::Value) -> witgen_native::Result<{self.rust_type(ty)}> {{\n"
                                + indent(f"Ok({expr})") + "\n}\n")
@@ -487,6 +573,8 @@ class Emitter:
                 expr = f"serde_json::Value::String({raw})"
             elif isinstance(ty, tuple) and ty[0] == "pair":
                 expr = f"serde_json::Value::Array(vec![{encoder(ty[1])}(value.0), {encoder(ty[2])}(value.1)])"
+            elif isinstance(ty, tuple) and ty[0] == "list":
+                expr = f"serde_json::Value::Array(value.into_iter().map({encoder(ty[1])}).collect())"
             elif isinstance(ty, tuple) and ty[0] == "option":
                 payload = f"{encoder(ty[1])}(x)"
                 # Only an Option payload can itself encode as JSON null.
@@ -498,7 +586,7 @@ class Emitter:
                 expr = "serde_json::Value::Bool(value)"
             elif ty == "word4":
                 expr = "typed::word4_json(value)"
-            elif ty == "point":
+            elif isinstance(ty, tuple) and ty[0] == "point":
                 expr = "serde_json::Value::String(typed::point_hex(value))"
             else:
                 expr = "serde_json::Value::String(value.to_string())"

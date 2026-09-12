@@ -5233,8 +5233,2333 @@ theorem prime_115792089237316195423570985008687907852837564279074904382605163141
   intro q hq hd
   exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
 
+private def trace_491_full : List PowStep := [
+  (1, 2),
+  (14, 438),
+  (10, 1)]
+
+private theorem power_491_full : (2 : ZMod 491) ^ 490 = 1 :=
+  trace_power 491 2 490 1 trace_491_full
+    (by decide) (by decide) (by decide)
+
+private def trace_491_2 : List PowStep := [
+  (15, 362),
+  (5, 490)]
+
+private theorem power_491_2 : (2 : ZMod 491) ^ 245 ≠ 1 :=
+  trace_power_ne_one 491 2 245 490 trace_491_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_491_5 : List PowStep := [
+  (6, 64),
+  (2, 381)]
+
+private theorem power_491_5 : (2 : ZMod 491) ^ 98 ≠ 1 :=
+  trace_power_ne_one 491 2 98 381 trace_491_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_491_7 : List PowStep := [
+  (4, 16),
+  (6, 138)]
+
+private theorem power_491_7 : (2 : ZMod 491) ^ 70 ≠ 1 :=
+  trace_power_ne_one 491 2 70 138 trace_491_7
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_491 : Nat.Prime 491 := by
+  let factors : List Nat := [2, 5, 7, 7]
+  have hf : factors.prod = 491 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_7, (List.forall_mem_cons.mpr ⟨prime_7, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 491) ^ ((491 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 491) ^ ((491 - 1) / 2) ≠ 1 from power_491_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 491) ^ ((491 - 1) / 5) ≠ 1 from power_491_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 491) ^ ((491 - 1) / 7) ≠ 1 from power_491_7), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 491) ^ ((491 - 1) / 7) ≠ 1 from power_491_7), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 491 (2 : ZMod 491) power_491_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_983_full : List PowStep := [
+  (3, 125),
+  (13, 17),
+  (6, 1)]
+
+private theorem power_983_full : (5 : ZMod 983) ^ 982 = 1 :=
+  trace_power 983 5 982 1 trace_983_full
+    (by decide) (by decide) (by decide)
+
+private def trace_983_2 : List PowStep := [
+  (1, 5),
+  (14, 415),
+  (11, 982)]
+
+private theorem power_983_2 : (5 : ZMod 983) ^ 491 ≠ 1 :=
+  trace_power_ne_one 983 5 491 982 trace_983_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_983_491 : List PowStep := [
+  (2, 25)]
+
+private theorem power_983_491 : (5 : ZMod 983) ^ 2 ≠ 1 :=
+  trace_power_ne_one 983 5 2 25 trace_983_491
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_983 : Nat.Prime 983 := by
+  let factors : List Nat := [2, 491]
+  have hf : factors.prod = 983 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_491, by simp⟩)⟩)
+  have hn : ∀ q ∈ factors, (5 : ZMod 983) ^ ((983 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 983) ^ ((983 - 1) / 2) ≠ 1 from power_983_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 983) ^ ((983 - 1) / 491) ≠ 1 from power_983_491), by simp⟩)⟩)
+  apply lucas_primality 983 (5 : ZMod 983) power_983_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_5501_full : List PowStep := [
+  (1, 2),
+  (5, 1271),
+  (7, 2638),
+  (12, 1)]
+
+private theorem power_5501_full : (2 : ZMod 5501) ^ 5500 = 1 :=
+  trace_power 5501 2 5500 1 trace_5501_full
+    (by decide) (by decide) (by decide)
+
+private def trace_5501_2 : List PowStep := [
+  (10, 1024),
+  (11, 5390),
+  (14, 5500)]
+
+private theorem power_5501_2 : (2 : ZMod 5501) ^ 2750 ≠ 1 :=
+  trace_power_ne_one 5501 2 2750 5500 trace_5501_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_5501_5 : List PowStep := [
+  (4, 16),
+  (4, 3985),
+  (12, 3901)]
+
+private theorem power_5501_5 : (2 : ZMod 5501) ^ 1100 ≠ 1 :=
+  trace_power_ne_one 5501 2 1100 3901 trace_5501_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_5501_11 : List PowStep := [
+  (1, 2),
+  (15, 3268),
+  (4, 4772)]
+
+private theorem power_5501_11 : (2 : ZMod 5501) ^ 500 ≠ 1 :=
+  trace_power_ne_one 5501 2 500 4772 trace_5501_11
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_5501 : Nat.Prime 5501 := by
+  let factors : List Nat := [2, 2, 5, 5, 5, 11]
+  have hf : factors.prod = 5501 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_11, by simp⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 5501) ^ ((5501 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 2) ≠ 1 from power_5501_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 2) ≠ 1 from power_5501_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 5) ≠ 1 from power_5501_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 5) ≠ 1 from power_5501_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 5) ≠ 1 from power_5501_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5501) ^ ((5501 - 1) / 11) ≠ 1 from power_5501_11), by simp⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 5501 (2 : ZMod 5501) power_5501_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_11003_full : List PowStep := [
+  (2, 4),
+  (10, 3913),
+  (15, 10020),
+  (10, 1)]
+
+private theorem power_11003_full : (2 : ZMod 11003) ^ 11002 = 1 :=
+  trace_power 11003 2 11002 1 trace_11003_full
+    (by decide) (by decide) (by decide)
+
+private def trace_11003_2 : List PowStep := [
+  (1, 2),
+  (5, 6582),
+  (7, 245),
+  (13, 11002)]
+
+private theorem power_11003_2 : (2 : ZMod 11003) ^ 5501 ≠ 1 :=
+  trace_power_ne_one 11003 2 5501 11002 trace_11003_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_11003_5501 : List PowStep := [
+  (2, 4)]
+
+private theorem power_11003_5501 : (2 : ZMod 11003) ^ 2 ≠ 1 :=
+  trace_power_ne_one 11003 2 2 4 trace_11003_5501
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_11003 : Nat.Prime 11003 := by
+  let factors : List Nat := [2, 5501]
+  have hf : factors.prod = 11003 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_5501, by simp⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 11003) ^ ((11003 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 11003) ^ ((11003 - 1) / 2) ≠ 1 from power_11003_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 11003) ^ ((11003 - 1) / 5501) ≠ 1 from power_11003_5501), by simp⟩)⟩)
+  apply lucas_primality 11003 (2 : ZMod 11003) power_11003_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_449_full : List PowStep := [
+  (1, 3),
+  (12, 349),
+  (0, 1)]
+
+private theorem power_449_full : (3 : ZMod 449) ^ 448 = 1 :=
+  trace_power 449 3 448 1 trace_449_full
+    (by decide) (by decide) (by decide)
+
+private def trace_449_2 : List PowStep := [
+  (14, 221),
+  (0, 448)]
+
+private theorem power_449_2 : (3 : ZMod 449) ^ 224 ≠ 1 :=
+  trace_power_ne_one 449 3 224 448 trace_449_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_449_7 : List PowStep := [
+  (4, 81),
+  (0, 324)]
+
+private theorem power_449_7 : (3 : ZMod 449) ^ 64 ≠ 1 :=
+  trace_power_ne_one 449 3 64 324 trace_449_7
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_449 : Nat.Prime 449 := by
+  let factors : List Nat := [2, 2, 2, 2, 2, 2, 7]
+  have hf : factors.prod = 449 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_7, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 449) ^ ((449 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 2) ≠ 1 from power_449_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 449) ^ ((449 - 1) / 7) ≠ 1 from power_449_7), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 449 (3 : ZMod 449) power_449_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_237073_full : List PowStep := [
+  (3, 3375),
+  (9, 152298),
+  (14, 191961),
+  (1, 107787),
+  (0, 1)]
+
+private theorem power_237073_full : (15 : ZMod 237073) ^ 237072 = 1 :=
+  trace_power 237073 15 237072 1 trace_237073_full
+    (by decide) (by decide) (by decide)
+
+private def trace_237073_2 : List PowStep := [
+  (1, 15),
+  (12, 23410),
+  (15, 159419),
+  (0, 186535),
+  (8, 237072)]
+
+private theorem power_237073_2 : (15 : ZMod 237073) ^ 118536 ≠ 1 :=
+  trace_power_ne_one 237073 15 118536 237072 trace_237073_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_237073_3 : List PowStep := [
+  (1, 15),
+  (3, 119398),
+  (4, 112661),
+  (11, 67392),
+  (0, 63336)]
+
+private theorem power_237073_3 : (15 : ZMod 237073) ^ 79024 ≠ 1 :=
+  trace_power_ne_one 237073 15 79024 63336 trace_237073_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_237073_11 : List PowStep := [
+  (5, 48156),
+  (4, 139266),
+  (3, 206878),
+  (0, 224235)]
+
+private theorem power_237073_11 : (15 : ZMod 237073) ^ 21552 ≠ 1 :=
+  trace_power_ne_one 237073 15 21552 224235 trace_237073_11
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_237073_449 : List PowStep := [
+  (2, 225),
+  (1, 49845),
+  (0, 197030)]
+
+private theorem power_237073_449 : (15 : ZMod 237073) ^ 528 ≠ 1 :=
+  trace_power_ne_one 237073 15 528 197030 trace_237073_449
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_237073 : Nat.Prime 237073 := by
+  let factors : List Nat := [2, 2, 2, 2, 3, 11, 449]
+  have hf : factors.prod = 237073 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_11, (List.forall_mem_cons.mpr ⟨prime_449, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (15 : ZMod 237073) ^ ((237073 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 2) ≠ 1 from power_237073_2), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 2) ≠ 1 from power_237073_2), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 2) ≠ 1 from power_237073_2), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 2) ≠ 1 from power_237073_2), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 3) ≠ 1 from power_237073_3), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 11) ≠ 1 from power_237073_11), (List.forall_mem_cons.mpr ⟨(show (15 : ZMod 237073) ^ ((237073 - 1) / 449) ≠ 1 from power_237073_449), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 237073 (15 : ZMod 237073) power_237073_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_3691_full : List PowStep := [
+  (14, 1620),
+  (6, 2147),
+  (10, 1)]
+
+private theorem power_3691_full : (2 : ZMod 3691) ^ 3690 = 1 :=
+  trace_power 3691 2 3690 1 trace_3691_full
+    (by decide) (by decide) (by decide)
+
+private def trace_3691_2 : List PowStep := [
+  (7, 128),
+  (3, 3226),
+  (5, 3690)]
+
+private theorem power_3691_2 : (2 : ZMod 3691) ^ 1845 ≠ 1 :=
+  trace_power_ne_one 3691 2 1845 3690 trace_3691_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_3691_3 : List PowStep := [
+  (4, 16),
+  (12, 2161),
+  (14, 3216)]
+
+private theorem power_3691_3 : (2 : ZMod 3691) ^ 1230 ≠ 1 :=
+  trace_power_ne_one 3691 2 1230 3216 trace_3691_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_3691_5 : List PowStep := [
+  (2, 4),
+  (14, 835),
+  (2, 643)]
+
+private theorem power_3691_5 : (2 : ZMod 3691) ^ 738 ≠ 1 :=
+  trace_power_ne_one 3691 2 738 643 trace_3691_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_3691_41 : List PowStep := [
+  (5, 32),
+  (10, 1752)]
+
+private theorem power_3691_41 : (2 : ZMod 3691) ^ 90 ≠ 1 :=
+  trace_power_ne_one 3691 2 90 1752 trace_3691_41
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_3691 : Nat.Prime 3691 := by
+  let factors : List Nat := [2, 3, 3, 5, 41]
+  have hf : factors.prod = 3691 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_41, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 3691) ^ ((3691 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 3691) ^ ((3691 - 1) / 2) ≠ 1 from power_3691_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 3691) ^ ((3691 - 1) / 3) ≠ 1 from power_3691_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 3691) ^ ((3691 - 1) / 3) ≠ 1 from power_3691_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 3691) ^ ((3691 - 1) / 5) ≠ 1 from power_3691_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 3691) ^ ((3691 - 1) / 41) ≠ 1 from power_3691_41), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 3691 (2 : ZMod 3691) power_3691_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_4999_full : List PowStep := [
+  (1, 3),
+  (3, 3965),
+  (8, 2406),
+  (6, 1)]
+
+private theorem power_4999_full : (3 : ZMod 4999) ^ 4998 = 1 :=
+  trace_power 4999 3 4998 1 trace_4999_full
+    (by decide) (by decide) (by decide)
+
+private def trace_4999_2 : List PowStep := [
+  (9, 4686),
+  (12, 180),
+  (3, 4998)]
+
+private theorem power_4999_2 : (3 : ZMod 4999) ^ 2499 ≠ 1 :=
+  trace_power_ne_one 4999 3 2499 4998 trace_4999_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_4999_3 : List PowStep := [
+  (6, 729),
+  (8, 641),
+  (2, 2661)]
+
+private theorem power_4999_3 : (3 : ZMod 4999) ^ 1666 ≠ 1 :=
+  trace_power_ne_one 4999 3 1666 2661 trace_4999_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_4999_7 : List PowStep := [
+  (2, 9),
+  (12, 638),
+  (10, 227)]
+
+private theorem power_4999_7 : (3 : ZMod 4999) ^ 714 ≠ 1 :=
+  trace_power_ne_one 4999 3 714 227 trace_4999_7
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_4999_17 : List PowStep := [
+  (1, 3),
+  (2, 2988),
+  (6, 2420)]
+
+private theorem power_4999_17 : (3 : ZMod 4999) ^ 294 ≠ 1 :=
+  trace_power_ne_one 4999 3 294 2420 trace_4999_17
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_4999 : Nat.Prime 4999 := by
+  let factors : List Nat := [2, 3, 7, 7, 17]
+  have hf : factors.prod = 4999 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_7, (List.forall_mem_cons.mpr ⟨prime_7, (List.forall_mem_cons.mpr ⟨prime_17, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 4999) ^ ((4999 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 4999) ^ ((4999 - 1) / 2) ≠ 1 from power_4999_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 4999) ^ ((4999 - 1) / 3) ≠ 1 from power_4999_3), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 4999) ^ ((4999 - 1) / 7) ≠ 1 from power_4999_7), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 4999) ^ ((4999 - 1) / 7) ≠ 1 from power_4999_7), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 4999) ^ ((4999 - 1) / 17) ≠ 1 from power_4999_17), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 4999 (3 : ZMod 4999) power_4999_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_405928799_full : List PowStep := [
+  (1, 22),
+  (8, 51831449),
+  (3, 84246942),
+  (1, 195132274),
+  (15, 367571520),
+  (11, 358932488),
+  (5, 347753120),
+  (14, 1)]
+
+private theorem power_405928799_full : (22 : ZMod 405928799) ^ 405928798 = 1 :=
+  trace_power 405928799 22 405928798 1 trace_405928799_full
+    (by decide) (by decide) (by decide)
+
+private def trace_405928799_2 : List PowStep := [
+  (12, 306932537),
+  (1, 5523534),
+  (8, 118807673),
+  (15, 306437870),
+  (13, 166293004),
+  (10, 307435558),
+  (15, 405928798)]
+
+private theorem power_405928799_2 : (22 : ZMod 405928799) ^ 202964399 ≠ 1 :=
+  trace_power_ne_one 405928799 22 202964399 405928798 trace_405928799_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_405928799_11 : List PowStep := [
+  (2, 484),
+  (3, 135557996),
+  (3, 67966445),
+  (1, 244532896),
+  (6, 253721944),
+  (13, 268247625),
+  (10, 215859951)]
+
+private theorem power_405928799_11 : (22 : ZMod 405928799) ^ 36902618 ≠ 1 :=
+  trace_power_ne_one 405928799 22 36902618 215859951 trace_405928799_11
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_405928799_3691 : List PowStep := [
+  (1, 22),
+  (10, 324764577),
+  (13, 268588283),
+  (9, 350022274),
+  (10, 147917081)]
+
+private theorem power_405928799_3691 : (22 : ZMod 405928799) ^ 109978 ≠ 1 :=
+  trace_power_ne_one 405928799 22 109978 147917081 trace_405928799_3691
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_405928799_4999 : List PowStep := [
+  (1, 22),
+  (3, 295921102),
+  (13, 403887925),
+  (3, 18407859),
+  (2, 61847818)]
+
+private theorem power_405928799_4999 : (22 : ZMod 405928799) ^ 81202 ≠ 1 :=
+  trace_power_ne_one 405928799 22 81202 61847818 trace_405928799_4999
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_405928799 : Nat.Prime 405928799 := by
+  let factors : List Nat := [2, 11, 3691, 4999]
+  have hf : factors.prod = 405928799 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_11, (List.forall_mem_cons.mpr ⟨prime_3691, (List.forall_mem_cons.mpr ⟨prime_4999, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (22 : ZMod 405928799) ^ ((405928799 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (22 : ZMod 405928799) ^ ((405928799 - 1) / 2) ≠ 1 from power_405928799_2), (List.forall_mem_cons.mpr ⟨(show (22 : ZMod 405928799) ^ ((405928799 - 1) / 11) ≠ 1 from power_405928799_11), (List.forall_mem_cons.mpr ⟨(show (22 : ZMod 405928799) ^ ((405928799 - 1) / 3691) ≠ 1 from power_405928799_3691), (List.forall_mem_cons.mpr ⟨(show (22 : ZMod 405928799) ^ ((405928799 - 1) / 4999) ≠ 1 from power_405928799_4999), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 405928799 (22 : ZMod 405928799) power_405928799_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_107_full : List PowStep := [
+  (6, 64),
+  (10, 1)]
+
+private theorem power_107_full : (2 : ZMod 107) ^ 106 = 1 :=
+  trace_power 107 2 106 1 trace_107_full
+    (by decide) (by decide) (by decide)
+
+private def trace_107_2 : List PowStep := [
+  (3, 8),
+  (5, 106)]
+
+private theorem power_107_2 : (2 : ZMod 107) ^ 53 ≠ 1 :=
+  trace_power_ne_one 107 2 53 106 trace_107_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_107_53 : List PowStep := [
+  (2, 4)]
+
+private theorem power_107_53 : (2 : ZMod 107) ^ 2 ≠ 1 :=
+  trace_power_ne_one 107 2 2 4 trace_107_53
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_107 : Nat.Prime 107 := by
+  let factors : List Nat := [2, 53]
+  have hf : factors.prod = 107 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_53, by simp⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 107) ^ ((107 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 107) ^ ((107 - 1) / 2) ≠ 1 from power_107_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 107) ^ ((107 - 1) / 53) ≠ 1 from power_107_53), by simp⟩)⟩)
+  apply lucas_primality 107 (2 : ZMod 107) power_107_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_661_full : List PowStep := [
+  (2, 4),
+  (9, 40),
+  (4, 1)]
+
+private theorem power_661_full : (2 : ZMod 661) ^ 660 = 1 :=
+  trace_power 661 2 660 1 trace_661_full
+    (by decide) (by decide) (by decide)
+
+private def trace_661_2 : List PowStep := [
+  (1, 2),
+  (4, 230),
+  (10, 660)]
+
+private theorem power_661_2 : (2 : ZMod 661) ^ 330 ≠ 1 :=
+  trace_power_ne_one 661 2 330 660 trace_661_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_661_3 : List PowStep := [
+  (13, 260),
+  (12, 296)]
+
+private theorem power_661_3 : (2 : ZMod 661) ^ 220 ≠ 1 :=
+  trace_power_ne_one 661 2 220 296 trace_661_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_661_5 : List PowStep := [
+  (8, 256),
+  (4, 247)]
+
+private theorem power_661_5 : (2 : ZMod 661) ^ 132 ≠ 1 :=
+  trace_power_ne_one 661 2 132 247 trace_661_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_661_11 : List PowStep := [
+  (3, 8),
+  (12, 634)]
+
+private theorem power_661_11 : (2 : ZMod 661) ^ 60 ≠ 1 :=
+  trace_power_ne_one 661 2 60 634 trace_661_11
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_661 : Nat.Prime 661 := by
+  let factors : List Nat := [2, 2, 3, 5, 11]
+  have hf : factors.prod = 661 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_11, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 661) ^ ((661 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 661) ^ ((661 - 1) / 2) ≠ 1 from power_661_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 661) ^ ((661 - 1) / 2) ≠ 1 from power_661_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 661) ^ ((661 - 1) / 3) ≠ 1 from power_661_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 661) ^ ((661 - 1) / 5) ≠ 1 from power_661_5), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 661) ^ ((661 - 1) / 11) ≠ 1 from power_661_11), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 661 (2 : ZMod 661) power_661_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_93001_full : List PowStep := [
+  (1, 14),
+  (6, 91157),
+  (11, 33876),
+  (4, 46468),
+  (8, 1)]
+
+private theorem power_93001_full : (14 : ZMod 93001) ^ 93000 = 1 :=
+  trace_power 93001 14 93000 1 trace_93001_full
+    (by decide) (by decide) (by decide)
+
+private def trace_93001_2 : List PowStep := [
+  (11, 27421),
+  (5, 26718),
+  (10, 29081),
+  (4, 93000)]
+
+private theorem power_93001_2 : (14 : ZMod 93001) ^ 46500 ≠ 1 :=
+  trace_power_ne_one 93001 14 46500 93000 trace_93001_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_93001_3 : List PowStep := [
+  (7, 43371),
+  (9, 85175),
+  (1, 80939),
+  (8, 22786)]
+
+private theorem power_93001_3 : (14 : ZMod 93001) ^ 31000 ≠ 1 :=
+  trace_power_ne_one 93001 14 31000 22786 trace_93001_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_93001_5 : List PowStep := [
+  (4, 38416),
+  (8, 8867),
+  (10, 48417),
+  (8, 79997)]
+
+private theorem power_93001_5 : (14 : ZMod 93001) ^ 18600 ≠ 1 :=
+  trace_power_ne_one 93001 14 18600 79997 trace_93001_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_93001_31 : List PowStep := [
+  (11, 27421),
+  (11, 52709),
+  (8, 61219)]
+
+private theorem power_93001_31 : (14 : ZMod 93001) ^ 3000 ≠ 1 :=
+  trace_power_ne_one 93001 14 3000 61219 trace_93001_31
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_93001 : Nat.Prime 93001 := by
+  let factors : List Nat := [2, 2, 2, 3, 5, 5, 5, 31]
+  have hf : factors.prod = 93001 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_31, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (14 : ZMod 93001) ^ ((93001 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 2) ≠ 1 from power_93001_2), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 2) ≠ 1 from power_93001_2), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 2) ≠ 1 from power_93001_2), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 3) ≠ 1 from power_93001_3), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 5) ≠ 1 from power_93001_5), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 5) ≠ 1 from power_93001_5), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 5) ≠ 1 from power_93001_5), (List.forall_mem_cons.mpr ⟨(show (14 : ZMod 93001) ^ ((93001 - 1) / 31) ≠ 1 from power_93001_31), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 93001 (14 : ZMod 93001) power_93001_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_12048837557_full : List PowStep := [
+  (2, 4),
+  (12, 883211196),
+  (14, 7981552270),
+  (2, 8474336178),
+  (10, 9426048753),
+  (10, 284884293),
+  (11, 4016385526),
+  (11, 11446980907),
+  (4, 1)]
+
+private theorem power_12048837557_full : (2 : ZMod 12048837557) ^ 12048837556 = 1 :=
+  trace_power 12048837557 2 12048837556 1 trace_12048837557_full
+    (by decide) (by decide) (by decide)
+
+private def trace_12048837557_2 : List PowStep := [
+  (1, 2),
+  (6, 4194304),
+  (7, 11894905327),
+  (1, 4490516767),
+  (5, 2401545910),
+  (5, 9644260193),
+  (5, 5458521508),
+  (13, 560724773),
+  (10, 12048837556)]
+
+private theorem power_12048837557_2 : (2 : ZMod 12048837557) ^ 6024418778 ≠ 1 :=
+  trace_power_ne_one 12048837557 2 6024418778 12048837556 trace_12048837557_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_12048837557_7 : List PowStep := [
+  (6, 64),
+  (6, 1095104075),
+  (9, 4418382881),
+  (8, 7938344963),
+  (6, 11105654168),
+  (1, 8108342189),
+  (10, 11739727391),
+  (12, 41029474)]
+
+private theorem power_12048837557_7 : (2 : ZMod 12048837557) ^ 1721262508 ≠ 1 :=
+  trace_power_ne_one 12048837557 2 1721262508 41029474 trace_12048837557_7
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_12048837557_661 : List PowStep := [
+  (1, 2),
+  (1, 131072),
+  (6, 8342573050),
+  (2, 5445132129),
+  (3, 9243528609),
+  (14, 10312932194),
+  (4, 8877273464)]
+
+private theorem power_12048837557_661 : (2 : ZMod 12048837557) ^ 18228196 ≠ 1 :=
+  trace_power_ne_one 12048837557 2 18228196 8877273464 trace_12048837557_661
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_12048837557_93001 : List PowStep := [
+  (1, 2),
+  (15, 2147483648),
+  (10, 7480721140),
+  (1, 2062192906),
+  (4, 4746995210)]
+
+private theorem power_12048837557_93001 : (2 : ZMod 12048837557) ^ 129556 ≠ 1 :=
+  trace_power_ne_one 12048837557 2 129556 4746995210 trace_12048837557_93001
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_12048837557 : Nat.Prime 12048837557 := by
+  let factors : List Nat := [2, 2, 7, 7, 661, 93001]
+  have hf : factors.prod = 12048837557 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_7, (List.forall_mem_cons.mpr ⟨prime_7, (List.forall_mem_cons.mpr ⟨prime_661, (List.forall_mem_cons.mpr ⟨prime_93001, by simp⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 12048837557) ^ ((12048837557 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 2) ≠ 1 from power_12048837557_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 2) ≠ 1 from power_12048837557_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 7) ≠ 1 from power_12048837557_7), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 7) ≠ 1 from power_12048837557_7), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 661) ≠ 1 from power_12048837557_661), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 12048837557) ^ ((12048837557 - 1) / 93001) ≠ 1 from power_12048837557_93001), by simp⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 12048837557 (2 : ZMod 12048837557) power_12048837557_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_5156902474397_full : List PowStep := [
+  (4, 16),
+  (11, 3612365223546),
+  (0, 1476751069562),
+  (10, 3044316283765),
+  (15, 1163788361085),
+  (5, 2550693829131),
+  (7, 24272984856),
+  (1, 3400251867718),
+  (2, 599630194631),
+  (9, 1040775521777),
+  (12, 1)]
+
+private theorem power_5156902474397_full : (2 : ZMod 5156902474397) ^ 5156902474396 = 1 :=
+  trace_power 5156902474397 2 5156902474396 1 trace_5156902474397_full
+    (by decide) (by decide) (by decide)
+
+private def trace_5156902474397_2 : List PowStep := [
+  (2, 4),
+  (5, 137438953472),
+  (8, 2243617552499),
+  (5, 3891323020129),
+  (7, 1806583742645),
+  (10, 39450837500),
+  (11, 1155868772095),
+  (8, 242280007350),
+  (9, 179134234739),
+  (4, 4377102515264),
+  (14, 5156902474396)]
+
+private theorem power_5156902474397_2 : (2 : ZMod 5156902474397) ^ 2578451237198 ≠ 1 :=
+  trace_power_ne_one 5156902474397 2 2578451237198 5156902474396 trace_5156902474397_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_5156902474397_107 : List PowStep := [
+  (11, 2048),
+  (3, 3957423448215),
+  (8, 2203038787765),
+  (10, 2757631940018),
+  (10, 3981764034225),
+  (10, 417457207361),
+  (14, 1184050977974),
+  (13, 3481135916060),
+  (4, 4827909776387)]
+
+private theorem power_5156902474397_107 : (2 : ZMod 5156902474397) ^ 48195350228 ≠ 1 :=
+  trace_power_ne_one 5156902474397 2 48195350228 4827909776387 trace_5156902474397_107
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_5156902474397_12048837557 : List PowStep := [
+  (1, 2),
+  (10, 67108864),
+  (12, 4746712836098)]
+
+private theorem power_5156902474397_12048837557 : (2 : ZMod 5156902474397) ^ 428 ≠ 1 :=
+  trace_power_ne_one 5156902474397 2 428 4746712836098 trace_5156902474397_12048837557
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_5156902474397 : Nat.Prime 5156902474397 := by
+  let factors : List Nat := [2, 2, 107, 12048837557]
+  have hf : factors.prod = 5156902474397 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_107, (List.forall_mem_cons.mpr ⟨prime_12048837557, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 5156902474397) ^ ((5156902474397 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5156902474397) ^ ((5156902474397 - 1) / 2) ≠ 1 from power_5156902474397_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5156902474397) ^ ((5156902474397 - 1) / 2) ≠ 1 from power_5156902474397_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5156902474397) ^ ((5156902474397 - 1) / 107) ≠ 1 from power_5156902474397_107), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 5156902474397) ^ ((5156902474397 - 1) / 12048837557) ≠ 1 from power_5156902474397_12048837557), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 5156902474397 (2 : ZMod 5156902474397) power_5156902474397_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_1670836401704629_full : List PowStep := [
+  (5, 32),
+  (14, 334550377564754),
+  (15, 697087771204285),
+  (9, 1096796053977318),
+  (13, 393450958863751),
+  (14, 1408413978844002),
+  (10, 351800355889703),
+  (3, 932282227416658),
+  (3, 1417046708254361),
+  (8, 1073117598149064),
+  (14, 1314053965769530),
+  (11, 879277017913070),
+  (4, 1)]
+
+private theorem power_1670836401704629_full : (2 : ZMod 1670836401704629) ^ 1670836401704628 = 1 :=
+  trace_power 1670836401704629 2 1670836401704628 1 trace_1670836401704629_full
+    (by decide) (by decide) (by decide)
+
+private def trace_1670836401704629_2 : List PowStep := [
+  (2, 4),
+  (15, 140737488355328),
+  (7, 78886445969736),
+  (12, 942329548201887),
+  (14, 531531781777348),
+  (15, 477728264953292),
+  (5, 430826919595042),
+  (1, 126810643008675),
+  (9, 973435405542231),
+  (12, 1018664538146646),
+  (7, 1342255429129415),
+  (5, 378776392996913),
+  (10, 1670836401704628)]
+
+private theorem power_1670836401704629_2 : (2 : ZMod 1670836401704629) ^ 835418200852314 ≠ 1 :=
+  trace_power_ne_one 1670836401704629 2 835418200852314 1670836401704628 trace_1670836401704629_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_1670836401704629_3 : List PowStep := [
+  (1, 2),
+  (15, 2147483648),
+  (10, 1630060553903927),
+  (8, 424461706918998),
+  (9, 1038893697534927),
+  (15, 244842569073087),
+  (8, 689720735855157),
+  (11, 73126903649427),
+  (11, 777470217300954),
+  (13, 567221491216497),
+  (10, 1649866683717563),
+  (3, 512062820541085),
+  (12, 1322408984917240)]
+
+private theorem power_1670836401704629_3 : (2 : ZMod 1670836401704629) ^ 556945467234876 ≠ 1 :=
+  trace_power_ne_one 1670836401704629 2 556945467234876 1322408984917240 trace_1670836401704629_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_1670836401704629_5156902474397 : List PowStep := [
+  (1, 2),
+  (4, 1048576),
+  (4, 11046204280772)]
+
+private theorem power_1670836401704629_5156902474397 : (2 : ZMod 1670836401704629) ^ 324 ≠ 1 :=
+  trace_power_ne_one 1670836401704629 2 324 11046204280772 trace_1670836401704629_5156902474397
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_1670836401704629 : Nat.Prime 1670836401704629 := by
+  let factors : List Nat := [2, 2, 3, 3, 3, 3, 5156902474397]
+  have hf : factors.prod = 1670836401704629 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_5156902474397, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 2) ≠ 1 from power_1670836401704629_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 2) ≠ 1 from power_1670836401704629_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 3) ≠ 1 from power_1670836401704629_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 3) ≠ 1 from power_1670836401704629_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 3) ≠ 1 from power_1670836401704629_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 3) ≠ 1 from power_1670836401704629_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1670836401704629) ^ ((1670836401704629 - 1) / 5156902474397) ≠ 1 from power_1670836401704629_5156902474397), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 1670836401704629 (2 : ZMod 1670836401704629) power_1670836401704629_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_137_full : List PowStep := [
+  (8, 122),
+  (8, 1)]
+
+private theorem power_137_full : (3 : ZMod 137) ^ 136 = 1 :=
+  trace_power 137 3 136 1 trace_137_full
+    (by decide) (by decide) (by decide)
+
+private def trace_137_2 : List PowStep := [
+  (4, 81),
+  (4, 136)]
+
+private theorem power_137_2 : (3 : ZMod 137) ^ 68 ≠ 1 :=
+  trace_power_ne_one 137 3 68 136 trace_137_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_137_17 : List PowStep := [
+  (8, 122)]
+
+private theorem power_137_17 : (3 : ZMod 137) ^ 8 ≠ 1 :=
+  trace_power_ne_one 137 3 8 122 trace_137_17
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_137 : Nat.Prime 137 := by
+  let factors : List Nat := [2, 2, 2, 17]
+  have hf : factors.prod = 137 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_17, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 137) ^ ((137 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 137) ^ ((137 - 1) / 2) ≠ 1 from power_137_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 137) ^ ((137 - 1) / 2) ≠ 1 from power_137_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 137) ^ ((137 - 1) / 2) ≠ 1 from power_137_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 137) ^ ((137 - 1) / 17) ≠ 1 from power_137_17), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 137 (3 : ZMod 137) power_137_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_823_full : List PowStep := [
+  (3, 27),
+  (3, 371),
+  (6, 1)]
+
+private theorem power_823_full : (3 : ZMod 823) ^ 822 = 1 :=
+  trace_power 823 3 822 1 trace_823_full
+    (by decide) (by decide) (by decide)
+
+private def trace_823_2 : List PowStep := [
+  (1, 3),
+  (9, 534),
+  (11, 822)]
+
+private theorem power_823_2 : (3 : ZMod 823) ^ 411 ≠ 1 :=
+  trace_power_ne_one 823 3 411 822 trace_823_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_823_3 : List PowStep := [
+  (1, 3),
+  (1, 764),
+  (2, 648)]
+
+private theorem power_823_3 : (3 : ZMod 823) ^ 274 ≠ 1 :=
+  trace_power_ne_one 823 3 274 648 trace_823_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_823_137 : List PowStep := [
+  (6, 729)]
+
+private theorem power_823_137 : (3 : ZMod 823) ^ 6 ≠ 1 :=
+  trace_power_ne_one 823 3 6 729 trace_823_137
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_823 : Nat.Prime 823 := by
+  let factors : List Nat := [2, 3, 137]
+  have hf : factors.prod = 823 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_137, by simp⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 823) ^ ((823 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 823) ^ ((823 - 1) / 2) ≠ 1 from power_823_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 823) ^ ((823 - 1) / 3) ≠ 1 from power_823_3), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 823) ^ ((823 - 1) / 137) ≠ 1 from power_823_137), by simp⟩)⟩)⟩)
+  apply lucas_primality 823 (3 : ZMod 823) power_823_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+theorem prime_47 : Nat.Prime 47 := by decide
+
+private def trace_223_full : List PowStep := [
+  (13, 96),
+  (14, 1)]
+
+private theorem power_223_full : (3 : ZMod 223) ^ 222 = 1 :=
+  trace_power 223 3 222 1 trace_223_full
+    (by decide) (by decide) (by decide)
+
+private def trace_223_2 : List PowStep := [
+  (6, 60),
+  (15, 222)]
+
+private theorem power_223_2 : (3 : ZMod 223) ^ 111 ≠ 1 :=
+  trace_power_ne_one 223 3 111 222 trace_223_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_223_3 : List PowStep := [
+  (4, 81),
+  (10, 183)]
+
+private theorem power_223_3 : (3 : ZMod 223) ^ 74 ≠ 1 :=
+  trace_power_ne_one 223 3 74 183 trace_223_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_223_37 : List PowStep := [
+  (6, 60)]
+
+private theorem power_223_37 : (3 : ZMod 223) ^ 6 ≠ 1 :=
+  trace_power_ne_one 223 3 6 60 trace_223_37
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_223 : Nat.Prime 223 := by
+  let factors : List Nat := [2, 3, 37]
+  have hf : factors.prod = 223 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_37, by simp⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 223) ^ ((223 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 223) ^ ((223 - 1) / 2) ≠ 1 from power_223_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 223) ^ ((223 - 1) / 3) ≠ 1 from power_223_3), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 223) ^ ((223 - 1) / 37) ≠ 1 from power_223_37), by simp⟩)⟩)⟩)
+  apply lucas_primality 223 (3 : ZMod 223) power_223_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_20963_full : List PowStep := [
+  (5, 32),
+  (1, 10483),
+  (14, 12902),
+  (2, 1)]
+
+private theorem power_20963_full : (2 : ZMod 20963) ^ 20962 = 1 :=
+  trace_power 20963 2 20962 1 trace_20963_full
+    (by decide) (by decide) (by decide)
+
+private def trace_20963_2 : List PowStep := [
+  (2, 4),
+  (8, 13772),
+  (15, 13762),
+  (1, 20962)]
+
+private theorem power_20963_2 : (2 : ZMod 20963) ^ 10481 ≠ 1 :=
+  trace_power_ne_one 20963 2 10481 20962 trace_20963_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_20963_47 : List PowStep := [
+  (1, 2),
+  (11, 12602),
+  (14, 4773)]
+
+private theorem power_20963_47 : (2 : ZMod 20963) ^ 446 ≠ 1 :=
+  trace_power_ne_one 20963 2 446 4773 trace_20963_47
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_20963_223 : List PowStep := [
+  (5, 32),
+  (14, 12288)]
+
+private theorem power_20963_223 : (2 : ZMod 20963) ^ 94 ≠ 1 :=
+  trace_power_ne_one 20963 2 94 12288 trace_20963_223
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_20963 : Nat.Prime 20963 := by
+  let factors : List Nat := [2, 47, 223]
+  have hf : factors.prod = 20963 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_47, (List.forall_mem_cons.mpr ⟨prime_223, by simp⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 20963) ^ ((20963 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 20963) ^ ((20963 - 1) / 2) ≠ 1 from power_20963_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 20963) ^ ((20963 - 1) / 47) ≠ 1 from power_20963_47), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 20963) ^ ((20963 - 1) / 223) ≠ 1 from power_20963_223), by simp⟩)⟩)⟩)
+  apply lucas_primality 20963 (2 : ZMod 20963) power_20963_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_41927_full : List PowStep := [
+  (10, 38561),
+  (3, 39602),
+  (12, 21564),
+  (6, 1)]
+
+private theorem power_41927_full : (5 : ZMod 41927) ^ 41926 = 1 :=
+  trace_power 41927 5 41926 1 trace_41927_full
+    (by decide) (by decide) (by decide)
+
+private def trace_41927_2 : List PowStep := [
+  (5, 3125),
+  (1, 41573),
+  (14, 13546),
+  (3, 41926)]
+
+private theorem power_41927_2 : (5 : ZMod 41927) ^ 20963 ≠ 1 :=
+  trace_power_ne_one 41927 5 20963 41926 trace_41927_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_41927_20963 : List PowStep := [
+  (2, 25)]
+
+private theorem power_41927_20963 : (5 : ZMod 41927) ^ 2 ≠ 1 :=
+  trace_power_ne_one 41927 5 2 25 trace_41927_20963
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_41927 : Nat.Prime 41927 := by
+  let factors : List Nat := [2, 20963]
+  have hf : factors.prod = 41927 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_20963, by simp⟩)⟩)
+  have hn : ∀ q ∈ factors, (5 : ZMod 41927) ^ ((41927 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 41927) ^ ((41927 - 1) / 2) ≠ 1 from power_41927_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 41927) ^ ((41927 - 1) / 20963) ≠ 1 from power_41927_20963), by simp⟩)⟩)
+  apply lucas_primality 41927 (5 : ZMod 41927) power_41927_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_1593227_full : List PowStep := [
+  (1, 2),
+  (8, 844946),
+  (4, 523907),
+  (15, 241474),
+  (8, 341497),
+  (10, 1)]
+
+private theorem power_1593227_full : (2 : ZMod 1593227) ^ 1593226 = 1 :=
+  trace_power 1593227 2 1593226 1 trace_1593227_full
+    (by decide) (by decide) (by decide)
+
+private def trace_1593227_2 : List PowStep := [
+  (12, 4096),
+  (2, 474025),
+  (7, 209485),
+  (12, 1278346),
+  (5, 1593226)]
+
+private theorem power_1593227_2 : (2 : ZMod 1593227) ^ 796613 ≠ 1 :=
+  trace_power_ne_one 1593227 2 796613 1593226 trace_1593227_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_1593227_19 : List PowStep := [
+  (1, 2),
+  (4, 1048576),
+  (7, 1558345),
+  (8, 268547),
+  (14, 836782)]
+
+private theorem power_1593227_19 : (2 : ZMod 1593227) ^ 83854 ≠ 1 :=
+  trace_power_ne_one 1593227 2 83854 836782 trace_1593227_19
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_1593227_41927 : List PowStep := [
+  (2, 4),
+  (6, 45861)]
+
+private theorem power_1593227_41927 : (2 : ZMod 1593227) ^ 38 ≠ 1 :=
+  trace_power_ne_one 1593227 2 38 45861 trace_1593227_41927
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_1593227 : Nat.Prime 1593227 := by
+  let factors : List Nat := [2, 19, 41927]
+  have hf : factors.prod = 1593227 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_19, (List.forall_mem_cons.mpr ⟨prime_41927, by simp⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 1593227) ^ ((1593227 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1593227) ^ ((1593227 - 1) / 2) ≠ 1 from power_1593227_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1593227) ^ ((1593227 - 1) / 19) ≠ 1 from power_1593227_19), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1593227) ^ ((1593227 - 1) / 41927) ≠ 1 from power_1593227_41927), by simp⟩)⟩)⟩)
+  apply lucas_primality 1593227 (2 : ZMod 1593227) power_1593227_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_379_full : List PowStep := [
+  (1, 2),
+  (7, 201),
+  (10, 1)]
+
+private theorem power_379_full : (2 : ZMod 379) ^ 378 = 1 :=
+  trace_power 379 2 378 1 trace_379_full
+    (by decide) (by decide) (by decide)
+
+private def trace_379_2 : List PowStep := [
+  (11, 153),
+  (13, 378)]
+
+private theorem power_379_2 : (2 : ZMod 379) ^ 189 ≠ 1 :=
+  trace_power_ne_one 379 2 189 378 trace_379_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_379_3 : List PowStep := [
+  (7, 128),
+  (14, 327)]
+
+private theorem power_379_3 : (2 : ZMod 379) ^ 126 ≠ 1 :=
+  trace_power_ne_one 379 2 126 327 trace_379_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_379_7 : List PowStep := [
+  (3, 8),
+  (6, 125)]
+
+private theorem power_379_7 : (2 : ZMod 379) ^ 54 ≠ 1 :=
+  trace_power_ne_one 379 2 54 125 trace_379_7
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_379 : Nat.Prime 379 := by
+  let factors : List Nat := [2, 3, 3, 3, 7]
+  have hf : factors.prod = 379 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_7, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 379) ^ ((379 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 379) ^ ((379 - 1) / 2) ≠ 1 from power_379_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 379) ^ ((379 - 1) / 3) ≠ 1 from power_379_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 379) ^ ((379 - 1) / 3) ≠ 1 from power_379_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 379) ^ ((379 - 1) / 3) ≠ 1 from power_379_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 379) ^ ((379 - 1) / 7) ≠ 1 from power_379_7), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 379 (2 : ZMod 379) power_379_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_409_full : List PowStep := [
+  (1, 21),
+  (9, 105),
+  (8, 1)]
+
+private theorem power_409_full : (21 : ZMod 409) ^ 408 = 1 :=
+  trace_power 409 21 408 1 trace_409_full
+    (by decide) (by decide) (by decide)
+
+private def trace_409_2 : List PowStep := [
+  (12, 259),
+  (12, 408)]
+
+private theorem power_409_2 : (21 : ZMod 409) ^ 204 ≠ 1 :=
+  trace_power_ne_one 409 21 204 408 trace_409_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_409_3 : List PowStep := [
+  (8, 309),
+  (8, 355)]
+
+private theorem power_409_3 : (21 : ZMod 409) ^ 136 ≠ 1 :=
+  trace_power_ne_one 409 21 136 355 trace_409_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_409_17 : List PowStep := [
+  (1, 21),
+  (8, 5)]
+
+private theorem power_409_17 : (21 : ZMod 409) ^ 24 ≠ 1 :=
+  trace_power_ne_one 409 21 24 5 trace_409_17
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_409 : Nat.Prime 409 := by
+  let factors : List Nat := [2, 2, 2, 3, 17]
+  have hf : factors.prod = 409 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_17, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (21 : ZMod 409) ^ ((409 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (21 : ZMod 409) ^ ((409 - 1) / 2) ≠ 1 from power_409_2), (List.forall_mem_cons.mpr ⟨(show (21 : ZMod 409) ^ ((409 - 1) / 2) ≠ 1 from power_409_2), (List.forall_mem_cons.mpr ⟨(show (21 : ZMod 409) ^ ((409 - 1) / 2) ≠ 1 from power_409_2), (List.forall_mem_cons.mpr ⟨(show (21 : ZMod 409) ^ ((409 - 1) / 3) ≠ 1 from power_409_3), (List.forall_mem_cons.mpr ⟨(show (21 : ZMod 409) ^ ((409 - 1) / 17) ≠ 1 from power_409_17), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 409 (21 : ZMod 409) power_409_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_1637_full : List PowStep := [
+  (6, 64),
+  (6, 231),
+  (4, 1)]
+
+private theorem power_1637_full : (2 : ZMod 1637) ^ 1636 = 1 :=
+  trace_power 1637 2 1636 1 trace_1637_full
+    (by decide) (by decide) (by decide)
+
+private def trace_1637_2 : List PowStep := [
+  (3, 8),
+  (3, 382),
+  (2, 1636)]
+
+private theorem power_1637_2 : (2 : ZMod 1637) ^ 818 ≠ 1 :=
+  trace_power_ne_one 1637 2 818 1636 trace_1637_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_1637_409 : List PowStep := [
+  (4, 16)]
+
+private theorem power_1637_409 : (2 : ZMod 1637) ^ 4 ≠ 1 :=
+  trace_power_ne_one 1637 2 4 16 trace_1637_409
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_1637 : Nat.Prime 1637 := by
+  let factors : List Nat := [2, 2, 409]
+  have hf : factors.prod = 1637 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_409, by simp⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 1637) ^ ((1637 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1637) ^ ((1637 - 1) / 2) ≠ 1 from power_1637_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1637) ^ ((1637 - 1) / 2) ≠ 1 from power_1637_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 1637) ^ ((1637 - 1) / 409) ≠ 1 from power_1637_409), by simp⟩)⟩)⟩)
+  apply lucas_primality 1637 (2 : ZMod 1637) power_1637_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_229_full : List PowStep := [
+  (14, 215),
+  (4, 1)]
+
+private theorem power_229_full : (6 : ZMod 229) ^ 228 = 1 :=
+  trace_power 229 6 228 1 trace_229_full
+    (by decide) (by decide) (by decide)
+
+private def trace_229_2 : List PowStep := [
+  (7, 98),
+  (2, 228)]
+
+private theorem power_229_2 : (6 : ZMod 229) ^ 114 ≠ 1 :=
+  trace_power_ne_one 229 6 114 228 trace_229_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_229_3 : List PowStep := [
+  (4, 151),
+  (12, 134)]
+
+private theorem power_229_3 : (6 : ZMod 229) ^ 76 ≠ 1 :=
+  trace_power_ne_one 229 6 76 134 trace_229_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_229_19 : List PowStep := [
+  (12, 165)]
+
+private theorem power_229_19 : (6 : ZMod 229) ^ 12 ≠ 1 :=
+  trace_power_ne_one 229 6 12 165 trace_229_19
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_229 : Nat.Prime 229 := by
+  let factors : List Nat := [2, 2, 3, 19]
+  have hf : factors.prod = 229 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_19, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (6 : ZMod 229) ^ ((229 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (6 : ZMod 229) ^ ((229 - 1) / 2) ≠ 1 from power_229_2), (List.forall_mem_cons.mpr ⟨(show (6 : ZMod 229) ^ ((229 - 1) / 2) ≠ 1 from power_229_2), (List.forall_mem_cons.mpr ⟨(show (6 : ZMod 229) ^ ((229 - 1) / 3) ≠ 1 from power_229_3), (List.forall_mem_cons.mpr ⟨(show (6 : ZMod 229) ^ ((229 - 1) / 19) ≠ 1 from power_229_19), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 229 (6 : ZMod 229) power_229_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+theorem prime_71 : Nat.Prime 71 := by decide
+
+private def trace_853_full : List PowStep := [
+  (3, 8),
+  (5, 757),
+  (4, 1)]
+
+private theorem power_853_full : (2 : ZMod 853) ^ 852 = 1 :=
+  trace_power 853 2 852 1 trace_853_full
+    (by decide) (by decide) (by decide)
+
+private def trace_853_2 : List PowStep := [
+  (1, 2),
+  (10, 795),
+  (10, 852)]
+
+private theorem power_853_2 : (2 : ZMod 853) ^ 426 ≠ 1 :=
+  trace_power_ne_one 853 2 426 852 trace_853_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_853_3 : List PowStep := [
+  (1, 2),
+  (1, 563),
+  (12, 632)]
+
+private theorem power_853_3 : (2 : ZMod 853) ^ 284 ≠ 1 :=
+  trace_power_ne_one 853 2 284 632 trace_853_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_853_71 : List PowStep := [
+  (12, 684)]
+
+private theorem power_853_71 : (2 : ZMod 853) ^ 12 ≠ 1 :=
+  trace_power_ne_one 853 2 12 684 trace_853_71
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_853 : Nat.Prime 853 := by
+  let factors : List Nat := [2, 2, 3, 71]
+  have hf : factors.prod = 853 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_71, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 853) ^ ((853 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 853) ^ ((853 - 1) / 2) ≠ 1 from power_853_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 853) ^ ((853 - 1) / 2) ≠ 1 from power_853_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 853) ^ ((853 - 1) / 3) ≠ 1 from power_853_3), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 853) ^ ((853 - 1) / 71) ≠ 1 from power_853_71), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 853 (2 : ZMod 853) power_853_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_639533339_full : List PowStep := [
+  (2, 4),
+  (6, 518104513),
+  (1, 122159254),
+  (14, 338340564),
+  (8, 461375189),
+  (1, 364905960),
+  (1, 203221123),
+  (10, 1)]
+
+private theorem power_639533339_full : (2 : ZMod 639533339) ^ 639533338 = 1 :=
+  trace_power 639533339 2 639533338 1 trace_639533339_full
+    (by decide) (by decide) (by decide)
+
+private def trace_639533339_2 : List PowStep := [
+  (1, 2),
+  (3, 524288),
+  (0, 290739023),
+  (15, 131104910),
+  (4, 62728889),
+  (0, 211763364),
+  (8, 446925292),
+  (13, 639533338)]
+
+private theorem power_639533339_2 : (2 : ZMod 639533339) ^ 319766669 ≠ 1 :=
+  trace_power_ne_one 639533339 2 319766669 639533338 trace_639533339_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_639533339_229 : List PowStep := [
+  (2, 4),
+  (10, 615272140),
+  (9, 421356568),
+  (13, 427885953),
+  (1, 560023661),
+  (2, 271298491)]
+
+private theorem power_639533339_229 : (2 : ZMod 639533339) ^ 2792722 ≠ 1 :=
+  trace_power_ne_one 639533339 2 2792722 271298491 trace_639533339_229
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_639533339_853 : List PowStep := [
+  (11, 2048),
+  (7, 418421286),
+  (0, 42878818),
+  (11, 486480982),
+  (2, 256057581)]
+
+private theorem power_639533339_853 : (2 : ZMod 639533339) ^ 749746 ≠ 1 :=
+  trace_power_ne_one 639533339 2 749746 256057581 trace_639533339_853
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_639533339_1637 : List PowStep := [
+  (5, 32),
+  (15, 59073833),
+  (6, 318239802),
+  (1, 534791347),
+  (2, 248876995)]
+
+private theorem power_639533339_1637 : (2 : ZMod 639533339) ^ 390674 ≠ 1 :=
+  trace_power_ne_one 639533339 2 390674 248876995 trace_639533339_1637
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_639533339 : Nat.Prime 639533339 := by
+  let factors : List Nat := [2, 229, 853, 1637]
+  have hf : factors.prod = 639533339 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_229, (List.forall_mem_cons.mpr ⟨prime_853, (List.forall_mem_cons.mpr ⟨prime_1637, by simp⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (2 : ZMod 639533339) ^ ((639533339 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 639533339) ^ ((639533339 - 1) / 2) ≠ 1 from power_639533339_2), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 639533339) ^ ((639533339 - 1) / 229) ≠ 1 from power_639533339_229), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 639533339) ^ ((639533339 - 1) / 853) ≠ 1 from power_639533339_853), (List.forall_mem_cons.mpr ⟨(show (2 : ZMod 639533339) ^ ((639533339 - 1) / 1637) ≠ 1 from power_639533339_1637), by simp⟩)⟩)⟩)⟩)
+  apply lucas_primality 639533339 (2 : ZMod 639533339) power_639533339_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_65865678001877903_full : List PowStep := [
+  (14, 6103515625),
+  (10, 49714088955607834),
+  (0, 29783264655931780),
+  (0, 58803425563645699),
+  (7, 16852790087729705),
+  (12, 37617870094920244),
+  (3, 8994618634358070),
+  (4, 20814136980128200),
+  (3, 62949205407553473),
+  (1, 59203783134179939),
+  (3, 14275770065850360),
+  (3, 8537704510709684),
+  (8, 43433959607128670),
+  (14, 1)]
+
+private theorem power_65865678001877903_full : (5 : ZMod 65865678001877903) ^ 65865678001877902 = 1 :=
+  trace_power 65865678001877903 5 65865678001877902 1 trace_65865678001877903_full
+    (by decide) (by decide) (by decide)
+
+private def trace_65865678001877903_2 : List PowStep := [
+  (7, 78125),
+  (5, 57506806652306812),
+  (0, 41376488407476446),
+  (0, 54614436790736835),
+  (3, 15582873565392459),
+  (14, 17679944513336428),
+  (1, 3042107415912872),
+  (10, 40511297818254427),
+  (1, 50262081407488025),
+  (8, 29829323268635827),
+  (9, 32687860450708136),
+  (9, 9647066329942654),
+  (12, 59008885819339970),
+  (7, 65865678001877902)]
+
+private theorem power_65865678001877903_2 : (5 : ZMod 65865678001877903) ^ 32932839000938951 ≠ 1 :=
+  trace_power_ne_one 65865678001877903 5 32932839000938951 65865678001877902 trace_65865678001877903_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_65865678001877903_83 : List PowStep := [
+  (2, 25),
+  (13, 57284035326059365),
+  (1, 14651247656979002),
+  (11, 51402394271451606),
+  (13, 60434120770248014),
+  (10, 40401303478680931),
+  (4, 64295446428145034),
+  (1, 7628523286619542),
+  (9, 6713246501241653),
+  (4, 14934893779487498),
+  (4, 62922329801414354),
+  (7, 12108439650369112),
+  (10, 46316002665751102)]
+
+private theorem power_65865678001877903_83 : (5 : ZMod 65865678001877903) ^ 793562385564794 ≠ 1 :=
+  trace_power_ne_one 65865678001877903 5 793562385564794 46316002665751102 trace_65865678001877903_83
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_65865678001877903_379 : List PowStep := [
+  (9, 1953125),
+  (14, 45095700801379161),
+  (0, 38095640734331574),
+  (15, 60515056213252836),
+  (3, 58931433685859231),
+  (0, 3149252953698041),
+  (1, 14380370799919686),
+  (8, 52388735667451923),
+  (7, 31581907872013115),
+  (2, 3266140316393850),
+  (4, 52054151725449514),
+  (10, 43783936274874531)]
+
+private theorem power_65865678001877903_379 : (5 : ZMod 65865678001877903) ^ 173788068606538 ≠ 1 :=
+  trace_power_ne_one 65865678001877903 5 173788068606538 43783936274874531 trace_65865678001877903_379
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_65865678001877903_1637 : List PowStep := [
+  (2, 25),
+  (4, 19645326681927316),
+  (9, 3913168907026756),
+  (8, 419563847275185),
+  (1, 28630063535366704),
+  (4, 56655797594495967),
+  (10, 7982091751223178),
+  (12, 62860760283800497),
+  (10, 4865998998029197),
+  (13, 44860823647670220),
+  (7, 61590809717112550),
+  (6, 56641079936670322)]
+
+private theorem power_65865678001877903_1637 : (5 : ZMod 65865678001877903) ^ 40235600489846 ≠ 1 :=
+  trace_power_ne_one 65865678001877903 5 40235600489846 56641079936670322 trace_65865678001877903_1637
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_65865678001877903_639533339 : List PowStep := [
+  (6, 15625),
+  (2, 2820623742034264),
+  (3, 48871129220256727),
+  (8, 16088617646272899),
+  (1, 44022853474615748),
+  (8, 33513450061234789),
+  (10, 18968088485270649)]
+
+private theorem power_65865678001877903_639533339 : (5 : ZMod 65865678001877903) ^ 102990218 ≠ 1 :=
+  trace_power_ne_one 65865678001877903 5 102990218 18968088485270649 trace_65865678001877903_639533339
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_65865678001877903 : Nat.Prime 65865678001877903 := by
+  let factors : List Nat := [2, 83, 379, 1637, 639533339]
+  have hf : factors.prod = 65865678001877903 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_83, (List.forall_mem_cons.mpr ⟨prime_379, (List.forall_mem_cons.mpr ⟨prime_1637, (List.forall_mem_cons.mpr ⟨prime_639533339, by simp⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / 2) ≠ 1 from power_65865678001877903_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / 83) ≠ 1 from power_65865678001877903_83), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / 379) ≠ 1 from power_65865678001877903_379), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / 1637) ≠ 1 from power_65865678001877903_1637), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 65865678001877903) ^ ((65865678001877903 - 1) / 639533339) ≠ 1 from power_65865678001877903_639533339), by simp⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 65865678001877903 (5 : ZMod 65865678001877903) power_65865678001877903_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_13818364434197438864469338081_full : List PowStep := [
+  (2, 9),
+  (12, 984770902183611232881),
+  (10, 12596446258262420570971122539),
+  (6, 6013373079058631767301362551),
+  (4, 7472161903724485436879936307),
+  (8, 6411765538874505385585772480),
+  (7, 6459754562886845318727133087),
+  (12, 9120529815683458846347129711),
+  (15, 5220846285223956177417591636),
+  (12, 1886437234314280167008555368),
+  (13, 4474036755109480571175560442),
+  (7, 524555744109995998299457345),
+  (9, 4681862884621048141851485528),
+  (5, 6906612351309949603303398410),
+  (14, 5112603998534267644417346194),
+  (8, 8152258625664711948656211578),
+  (7, 11643985796622657375275308179),
+  (2, 9072788262601288371685357972),
+  (9, 13692602411930922530978190602),
+  (5, 12262823178093307119144367918),
+  (2, 11973732052671175204970173779),
+  (7, 6379790489383530548965005786),
+  (14, 11537110112971884460776403123),
+  (0, 1)]
+
+private theorem power_13818364434197438864469338081_full : (3 : ZMod 13818364434197438864469338081) ^ 13818364434197438864469338080 = 1 :=
+  trace_power 13818364434197438864469338081 3 13818364434197438864469338080 1 trace_13818364434197438864469338081_full
+    (by decide) (by decide) (by decide)
+
+private def trace_13818364434197438864469338081_2 : List PowStep := [
+  (1, 3),
+  (6, 31381059609),
+  (5, 7237954386818590318399582276),
+  (3, 13402718373407664791149340167),
+  (2, 7010042036085959938355337337),
+  (4, 12336793362549488461362281727),
+  (3, 4008219274052075701249564590),
+  (14, 5753971800505551483859975410),
+  (7, 9176279723411702349669163029),
+  (14, 4102149633039838613723394882),
+  (6, 10649380578662279289377282605),
+  (11, 3375993396337708788928614156),
+  (12, 2425315064956343788793427944),
+  (10, 2137690257159955593811335883),
+  (15, 12936899612021497549181383642),
+  (4, 4658137062062790276173812948),
+  (3, 7388014863623266958594661863),
+  (9, 2901696624746320249837937994),
+  (4, 8676292422495503506343939533),
+  (10, 11147805440635279421633713702),
+  (9, 735428956798410263315022593),
+  (3, 11132134223172545570287568128),
+  (15, 1260859393363995662911933059),
+  (0, 13818364434197438864469338080)]
+
+private theorem power_13818364434197438864469338081_2 : (3 : ZMod 13818364434197438864469338081) ^ 6909182217098719432234669040 ≠ 1 :=
+  trace_power_ne_one 13818364434197438864469338081 3 6909182217098719432234669040 13818364434197438864469338080 trace_13818364434197438864469338081_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_13818364434197438864469338081_5 : List PowStep := [
+  (8, 6561),
+  (14, 4729600144503398049815677346),
+  (14, 7085420474905480256025188320),
+  (0, 12078650943931578878364068039),
+  (14, 4264280084793279219018460469),
+  (7, 5623322501953383616000256866),
+  (15, 9845050367966504210852552877),
+  (6, 1826678360427168661471407555),
+  (5, 10261683629733791425187191901),
+  (12, 9426931464382575805465049285),
+  (4, 2598988497536901932514961819),
+  (11, 12720295886214502532202769565),
+  (7, 260175586676158321229518690),
+  (9, 12861850517747868121020638167),
+  (4, 7986225932371941881493406325),
+  (14, 13638261056818929699542092413),
+  (3, 9410939446127253418521980745),
+  (11, 12496393151814719225894452793),
+  (7, 827277734698424783530483313),
+  (6, 4552407746075074349532718048),
+  (14, 2955222540862682613491674607),
+  (6, 694153836874816883066776306),
+  (0, 1236319344469036993987267104)]
+
+private theorem power_13818364434197438864469338081_5 : (3 : ZMod 13818364434197438864469338081) ^ 2763672886839487772893867616 ≠ 1 :=
+  trace_power_ne_one 13818364434197438864469338081 3 2763672886839487772893867616 1236319344469036993987267104 trace_13818364434197438864469338081_5
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_13818364434197438864469338081_823 : List PowStep := [
+  (13, 1594323),
+  (14, 3291014836528682276920607362),
+  (3, 6308472844442302776435586832),
+  (7, 10070958392044978548315094411),
+  (8, 9946594894341867461765371163),
+  (8, 1398510122435128853796524203),
+  (7, 5688912060539484367032331136),
+  (14, 7025164686954433188671008389),
+  (13, 8695998603008442701814596966),
+  (9, 177558570764698118261074483),
+  (9, 12454673513181502265767683890),
+  (3, 1703653303783938486715718960),
+  (8, 4888000617380104018408080166),
+  (14, 10182571199760742458445167908),
+  (5, 12032457260559535307619343342),
+  (1, 13202442814668619774071314455),
+  (3, 8978180551129977492856699409),
+  (12, 9241836001525996325221424045),
+  (7, 2505391460118300821310770026),
+  (2, 6512259595114165664121777531),
+  (0, 570363171180057177517864248)]
+
+private theorem power_13818364434197438864469338081_823 : (3 : ZMod 13818364434197438864469338081) ^ 16790236250543668122076960 ≠ 1 :=
+  trace_power_ne_one 13818364434197438864469338081 3 16790236250543668122076960 570363171180057177517864248 trace_13818364434197438864469338081_823
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_13818364434197438864469338081_1593227 : List PowStep := [
+  (1, 3),
+  (13, 68630377364883),
+  (6, 7609269325351490579405976877),
+  (2, 11374983810337917037422803229),
+  (12, 7099274194976322802038548096),
+  (11, 75148684281086399757805112),
+  (9, 3623517793516502901398798115),
+  (8, 8697426238720052358232810214),
+  (15, 2607815355233742944708123496),
+  (5, 3313056338523307812547804164),
+  (14, 8314049320593930747978251404),
+  (5, 11703947348268953898127958737),
+  (11, 1625223069757162315976869610),
+  (15, 3431342641712895837841559513),
+  (8, 4258768977098615392773916346),
+  (7, 7346269920723315002668060560),
+  (3, 12636366034629803162878776201),
+  (10, 6630130951610966011268207104),
+  (0, 9233249052774251384923794665)]
+
+private theorem power_13818364434197438864469338081_1593227 : (3 : ZMod 13818364434197438864469338081) ^ 8673192479287282267040 ≠ 1 :=
+  trace_power_ne_one 13818364434197438864469338081 3 8673192479287282267040 9233249052774251384923794665 trace_13818364434197438864469338081_1593227
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_13818364434197438864469338081_65865678001877903 : List PowStep := [
+  (3, 27),
+  (0, 79766443076872509863361),
+  (13, 7608310082675760512433437000),
+  (8, 6147467998679698979734732933),
+  (13, 11250983929527819103187191017),
+  (2, 9542189745429171007173691265),
+  (14, 12355991209096219870804905578),
+  (10, 8617763932575249144691017398),
+  (2, 4547809021354800476213075737),
+  (0, 11685553033882782147454259209)]
+
+private theorem power_13818364434197438864469338081_65865678001877903 : (3 : ZMod 13818364434197438864469338081) ^ 209796131360 ≠ 1 :=
+  trace_power_ne_one 13818364434197438864469338081 3 209796131360 11685553033882782147454259209 trace_13818364434197438864469338081_65865678001877903
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_13818364434197438864469338081 : Nat.Prime 13818364434197438864469338081 := by
+  let factors : List Nat := [2, 2, 2, 2, 2, 5, 823, 1593227, 65865678001877903]
+  have hf : factors.prod = 13818364434197438864469338081 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_5, (List.forall_mem_cons.mpr ⟨prime_823, (List.forall_mem_cons.mpr ⟨prime_1593227, (List.forall_mem_cons.mpr ⟨prime_65865678001877903, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 2) ≠ 1 from power_13818364434197438864469338081_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 2) ≠ 1 from power_13818364434197438864469338081_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 2) ≠ 1 from power_13818364434197438864469338081_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 2) ≠ 1 from power_13818364434197438864469338081_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 2) ≠ 1 from power_13818364434197438864469338081_2), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 5) ≠ 1 from power_13818364434197438864469338081_5), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 823) ≠ 1 from power_13818364434197438864469338081_823), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 1593227) ≠ 1 from power_13818364434197438864469338081_1593227), (List.forall_mem_cons.mpr ⟨(show (3 : ZMod 13818364434197438864469338081) ^ ((13818364434197438864469338081 - 1) / 65865678001877903) ≠ 1 from power_13818364434197438864469338081_65865678001877903), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 13818364434197438864469338081 (3 : ZMod 13818364434197438864469338081) power_13818364434197438864469338081_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_full : List PowStep := [
+  (3, 125),
+  (0, 3552713678800500929355621337890625),
+  (6, 7655004590256582837831759880035028699545382017496924375072382483157270584848),
+  (4, 1529073607188199410183149168738248905581602555356055434634892474431355010581),
+  (4, 12301284706844877689472251122113057448755843976851070785641120989993949132946),
+  (14, 11958847517414781215061269953450853392437724657183239622145513938599101632571),
+  (7, 6333763033519229937480232744617183760288677384776897396116088586793729973950),
+  (2, 19577141621140546406115453347575922078242058940758348805705073547085318911838),
+  (14, 9458403882487798320989734553303156254010260864667099454899640419026475187093),
+  (1, 9107577473661076821685658970173582713612041646245702661643463558467498237606),
+  (3, 3790144017414292299573907683648932946391382732421517268482886579952542944303),
+  (1, 1985828755570259780477591220750285835580189302113596682743569617406275254678),
+  (10, 11002182945649987039072246088824604219068541423759077798964713693363795858217),
+  (0, 19147733806758881599273771429250252088559048563967911587232422304799831638984),
+  (2, 7013649282038711802352640860150828226913060073931972169896723395637144313821),
+  (9, 7968305385463580032146292235048651368006300469800061112993626492638717231385),
+  (11, 11407807887146229938213656067958629474834747117764936279872869141834883236830),
+  (8, 13777896854708458835980331319073244619640746478316508530560495324217448643299),
+  (5, 9036257926491226812667754390463331337676149736936057219326007369931799649259),
+  (0, 2242496093322283183249880691717933844681648693069345059688582053818125947203),
+  (4, 13143251247562471277748239831026278817064498508278610220033467251065173988347),
+  (5, 19892089610898374722219151191961117824954156591960686773809378775366971110692),
+  (11, 21486132559747171456370716794948241790034655913773575583202432422811391482439),
+  (6, 20448453140214291789484296576729586162118613490594305482575206063405731450512),
+  (8, 13246191798445226434479132963975347816511682872356457779059312176322658712523),
+  (1, 12464739615718625832554523727207086231490959500634918140410800374504290636121),
+  (8, 4945528219670027244589637336847812033691749831762794040936622984559622225431),
+  (1, 17270008162749082263149874733279093680131595078605179081369836067898027019703),
+  (5, 11969324974846786871647695185550916944604590851467788346707104191238287664973),
+  (8, 5905003372224387228846613577227068724287036392824856617263206523973915967561),
+  (5, 12704883686463174763359334784411373322834660937612138441603138333735631782629),
+  (13, 5517217188276009377578658542007421826968391990017402123511112470792573750024),
+  (2, 21557933452595207642763345360774527844456422463976228734958767508658416555701),
+  (8, 3594609604481854206906020989070521313082116472571880773980016780044079804617),
+  (3, 9978142382581836083394488739391171229827799819935292177051107503295013014865),
+  (3, 9608263533402201177314772758552292668627017986940321295441189851709618059978),
+  (14, 14892649614528839654169028971139063009499781759254866059744450462017781022802),
+  (8, 19048060928032714591417534755946607634654240098947699617078024922613392412787),
+  (4, 5057202144798839499450014372260571171482027748388788617262944271947016417803),
+  (8, 9579206542913659258240905957342899449291399317339313502305956160548126360531),
+  (7, 16306061378945417499547689990469560476726625588866812400965843903745002171320),
+  (9, 1943201329826588388270439141265312603161414707756492044047941290472948293150),
+  (11, 20161422863521357340736523006175480061239753447882726980318339004137231584219),
+  (9, 3456158722108757805166158752147389326097267257793635151814555662475695313921),
+  (7, 18205901062977018423198743347807140989506408936725232654902166322973911547001),
+  (0, 11969251670545564906427322491981671093730621703182074123151076258052128948308),
+  (9, 9061542223363942494619405717243633225630770467232373133371354230755635562274),
+  (1, 14938748169776878130809849169493198826524946368436660516023968911503332636423),
+  (4, 10490369222805117846589041214555248567797986013574314709671017272084826234648),
+  (3, 13859074915942825223780066375404238746394152374296986706583155839500349989276),
+  (14, 21252797058633888110669512457827758046735110009970338276828411647506534046872),
+  (1, 18075617560161400017265719064587082343539520290825042907816305187579429967267),
+  (15, 17455065840341016599016362060421014240668472366741397563567140602202677457893),
+  (5, 15136459971889329318676257437087086493381345671803843509103584356611064634950),
+  (9, 10610473177882773990001559912042244532022120605293286388691001914180527198299),
+  (3, 5051757990388364294045374072784308903399859774183898982473141990546888223579),
+  (15, 19103219067921713944291392827692070036145651957329286315305642004821462161904),
+  (0, 5709868443893258075976348696661355716898495876243883251619397131511003808859),
+  (0, 17220337697351015657950521176323262483320249231368149235373741788599650842711),
+  (0, 421743594562400382753388642386256516545992082196004333756405989743524594615),
+  (0, 4158865282786404163413953114870269622875596290766033564087307867933865333818),
+  (0, 3478517300119284901893091970156912948790432420133812234316178878452092729974),
+  (0, 14940766826517323942636479241147756311199852622225275649687664389641784935947),
+  (0, 1)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_full : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 21888242871839275222246405745257275088548364400416034343698204186575808495616 = 1 :=
+  trace_power 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 21888242871839275222246405745257275088548364400416034343698204186575808495616 1 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_full
+    (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_2 : List PowStep := [
+  (1, 5),
+  (8, 59604644775390625),
+  (3, 9086614246629678409901891358980307970763007317620017294639366207294686486377),
+  (2, 7122149797049657406560069179679128750064069009214282033263205883947167685589),
+  (2, 3116273844467330801829001622792568843079926253117073339408483697909462424626),
+  (7, 9584622151981067344174680760542456094210385546162912082661108929439870980748),
+  (3, 517373029847386283780060741626053464129344970908342161092808690292186612163),
+  (9, 14569735884458382856254784209912830376236225605784403836765118408925324734017),
+  (7, 10515933692801596054137274619403467303992730962120133861438972633219469456172),
+  (0, 15364255734425713002718835933644000406291089247791499507392333308306132147049),
+  (9, 9915302353866463282044221001597139702102547599566625451143944039358989129856),
+  (8, 10013671365415589539201407492754203210643547010114855874351378195379236706658),
+  (13, 10783696055532049719109712848731009853889929231726391350409941317125095091687),
+  (0, 2402354128223672328358869780121422578622443142442801963686561454147809696357),
+  (1, 3886134410982702694554336166722418704666193174880187586743526178045498209802),
+  (4, 11272276662310496532619612006108119513586372798821762845622598892375354286427),
+  (13, 2603510155155449425351324680136310789914599518979895666700542175361390231641),
+  (12, 21874273728822463733401318157604561819725490105559641109087200596869146930838),
+  (2, 16502609259198323201554641579931238458835997809478122212338335242405916677844),
+  (8, 8343872891997277668601868321862574652818926223018918269209044664331295966149),
+  (2, 4134476305357831057785045960074432485207368274479980272884084381762189469934),
+  (2, 18902839417881785115916266533065687752930047717524368274171973011827260007115),
+  (13, 2084194416648000928528537406468776091667240941797815725032282949259973261067),
+  (11, 14813525971648781834912506123465838311053330219062308586587401120808795393795),
+  (4, 9376517347857831937009618928236940371959486735826044671830336997827458174850),
+  (0, 1294007377075685471616421760603917760062792716786573274240018593023678294688),
+  (12, 14366811465435179739912877045164387184657053008517704811432583758608568101504),
+  (0, 754566290014599858376334434046059585607389134598520802583940160157671647970),
+  (10, 6425611171681505176001267956657120053224756614331989312868608837284957809021),
+  (12, 17772940573227735660822313500887420407164849853616000784655108386543888319091),
+  (2, 18768133358106523373411654634717646896106986213984818118701124029201321608197),
+  (14, 19129979934757928616124920877211488417292764770213222532297807244005181690048),
+  (9, 12494802654227597455145297345515982409439655412167168111096214354004181857020),
+  (4, 16747659364652639747531990691648657637388461381937856284151428599921887086782),
+  (1, 10722679947205603560644882634460531018055450310674846622429009641286694866438),
+  (9, 751405754761996497287697911178205239224845749818669177867786597867590859340),
+  (15, 8720381750765444020246716808803326384476524582097196911534699655030093900312),
+  (4, 20710938132140626513949373190327770326956328697392362811499687227769032515796),
+  (2, 8688527548647302701724961424360795545182064770166054250650577990793349036634),
+  (4, 13163660610909834569616811784312169321574940972830683575230863032866261626959),
+  (3, 4240087459284698771200184234856471714831664842049934765271594327660777472651),
+  (12, 11307908243200590983912226516199098538677525625234053459875352388865085208733),
+  (13, 13305767183019947994369697708435408097155047623286467549698266195193572556896),
+  (12, 4031598524059352681220240458485118380885926112118639552555483931584623568936),
+  (11, 5193161134101987841005332192047631706719996804743058780668119996728484547841),
+  (8, 12884993852127825220611561092387825975427124727324898546348906356907352426900),
+  (4, 16278962444712543222161982882950573234696921839554216072953517402982671314135),
+  (8, 17898123499280837878048763555213381316685887531033950867536307914915923762881),
+  (10, 4593135266042967422011463256484233142601212075001244522796606496438689911128),
+  (1, 2369857495604672075885586745501376665292538597775222601363517338362885229667),
+  (15, 12055348549749370040492776391518332730517270762405466490330518457489883398286),
+  (0, 12118804860518670145098489159991402417888461380160045337181206144932510518417),
+  (15, 3018937801257910216515047324755150230061739800647458677846584795504153630758),
+  (10, 12432341267527756745256562101780752298590697240126755332407548816141571972251),
+  (12, 789170716349317388151285254225649761838141032716085490053900106686664126803),
+  (9, 610310806950017018757722104526767371315807778323775703978940537639595320464),
+  (15, 8555721953629461299286736829542406442931665950900867472601658309925438163304),
+  (8, 19200870435978225707111062059747084165650991997241425080699860725083300967194),
+  (0, 13536764371732269273912573961853310557438878140379554347802702086337840854307),
+  (0, 12650941915662020058015862023665998998969191525479888727406889100124684769509),
+  (0, 197302210312744933010843010704445784068657690384188106020011018676818793232),
+  (0, 6837567842312086091520287814181175430087169027974246751610506942214842701774),
+  (0, 4419234939496763621076330863786513495701855246241724391626358375488475697872),
+  (0, 21888242871839275222246405745257275088548364400416034343698204186575808495616)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 10944121435919637611123202872628637544274182200208017171849102093287904247808 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 10944121435919637611123202872628637544274182200208017171849102093287904247808 21888242871839275222246405745257275088548364400416034343698204186575808495616 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_2
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_3 : List PowStep := [
+  (1, 5),
+  (0, 152587890625),
+  (2, 8037202955775869412406870020725505882197189478097641211789593127334251249360),
+  (1, 4759077888650811600191416150745058974943034103785895283272512891177953737816),
+  (6, 20083534627871435841749687621055061600172613281486066539283060074311695928077),
+  (15, 8882981302176794031864068783011659468779748786762774419963114200859147083628),
+  (7, 10700824145947868989908994395745693132887365871389599192552975633829167659567),
+  (11, 17455163149858570078826047586125529188746166889230079692916655500351530318016),
+  (10, 13067786389880140130144691076240363650350514260459017027835915247163068827493),
+  (0, 19110509570615877128207235541426214179440675413501503463070073214773278531313),
+  (6, 13680254874423131903697818103101709717163676191455382319438035725538308106447),
+  (5, 5485247783814012597495150941595064306078864788598141094377185993980568785739),
+  (14, 3104785637623269615840722315267620988518023742952291485457362413733363791891),
+  (0, 7558662710053733421942537363459521464356902844544987956229927985341824509135),
+  (0, 6366648251326208753900774143681539080465963960639010277733042050650723456609),
+  (13, 20014650870347985135343477106596601534530774785969718304260497263141862005960),
+  (14, 4083153129425127162061831924382599934321489267865648637869111667429122186193),
+  (8, 9263742128512777146714568649952285847530457540903588848763978830795637529195),
+  (1, 6344013339323154033014728387764045357944669873085412326698960847357427747096),
+  (10, 8558022844865119638077627924981501131957744949337069734074064113539868510039),
+  (12, 1261841679419164339467168399852277422983525985868319356743358901085429287240),
+  (1, 19400527002554197651836567543702569353404468062779150528659422563195302964041),
+  (14, 20925000018848988413512762665229551135654645260148846412983763303999486062109),
+  (7, 10312113056735207384971907968872754251388868859374245589478927735084722648134),
+  (8, 16147476773319212586387644364283574922234953933971886721213294725143809343970),
+  (0, 12481107998784818395939195452165065233683599914898012013623299213285877858508),
+  (8, 9994662305073533838328166993605243662148719951225697239378783889858061410342),
+  (0, 14608837679127557210034486450391853661416918570644539546837465700790336750979),
+  (7, 2666284556220039598227623710517704982688341364958371286251390969244830573250),
+  (2, 409981246203740660144253426326913504477337769191608963534370038466144882674),
+  (12, 16686435766589682231678041297031728071713560268699902046960767807198543375102),
+  (9, 19982250625625444871144033275129367679392015110702217159236755644046536335648),
+  (11, 4473548629398218236794216993903053107958169796449127145639980064816289593000),
+  (8, 3904317179796606491103735835026016998709029863280368056198182337815099542388),
+  (1, 794321474629928386354204619486880271429860306156827724258318081808589813530),
+  (1, 8760920752535850361115102522177012326934108064991332385283947371120211179636),
+  (4, 6660307990697341250375496479205603935697381253360499885313793811017282834212),
+  (13, 6132325150233198364916733160452578037870533679098582162217655040115581090010),
+  (6, 8696818253895699944148394985301138569563824339151934850317310377827538419881),
+  (13, 16628393025806841056631888930177925352105743008575405541596400644341075415198),
+  (7, 7933163959661848587601256451983449398141396727928853849315576806031326597928),
+  (13, 21508172145292717590755536838577060823023080276233767091612665837268746071719),
+  (14, 12713307049669866755926929350387280219631819995378645983311335215360277204420),
+  (8, 5478301249064402739358097493200258754797202849582162520627531346090253356085),
+  (7, 6971089748023471021886456304357954214423781173958739005341167339155108277141),
+  (10, 8514465833905029907038019279959083698036650428997569667879184918393841845675),
+  (13, 6594101388303362703761970381468022872851759721189513074071250457911596652832),
+  (11, 4020852637828133096675405786040468788696373894112042628730739248380294318072),
+  (1, 20855221537022127193088122146591185888884662193247679747714405183812803417102),
+  (6, 2283152843077603091235486853345679879964409738067385127002594441319017560856),
+  (10, 5559312940251109371748016640877469833741805946918249645298069665052066694279),
+  (0, 1869212296732750617951441302557997904677501625239391258938261806937271681490),
+  (10, 17197388473459246194639603054660687754856646838807556625763681569408124901479),
+  (7, 13074846615952684984072223670989585569018304517749537885445010522032505155855),
+  (3, 9278675422264973430837298200138508219398934384291853905502840996032880384542),
+  (1, 17530118110431457463853336356454118194255506468402432719386294600666666996992),
+  (5, 32731794327357592083644034419232168272636089240365817676723289093412795927),
+  (0, 21191220957843918668309684578494719913091853688988170905187177989244257268596),
+  (0, 2368787508991534596413951697057273526944260286055437404268560086580087225224),
+  (0, 15945351209664581495976169035593214991218337414410806935423493143468026708654),
+  (0, 2840886268309701182445191370394397404436223560881452801191953251515335955851),
+  (0, 7893008526474614989282376550582713669440542763891908783290097886313069160279),
+  (0, 18553046819045404058455239539176708534597665700997423782449611735426735463871),
+  (0, 4407920970296243842393367215006156084916469457145843978461)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_3 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 7296080957279758407415468581752425029516121466805344781232734728858602831872 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 7296080957279758407415468581752425029516121466805344781232734728858602831872 4407920970296243842393367215006156084916469457145843978461 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_3
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_13 : List PowStep := [
+  (3, 125),
+  (11, 173472347597680709441192448139190673828125),
+  (8, 1613947510303856046430811018695919681209728106186417237044374132983210108378),
+  (15, 563867656146891529615852890788228629064764063887334649368314223079150770690),
+  (2, 21243997885910626896547071837290528062587643398944000180504914310070075786784),
+  (5, 3118102311133834918705500854083115415519873271538360025484298573409075183279),
+  (7, 1133882821743649618996186899589772406620172528377102230215915148036323323024),
+  (9, 18459147972046453883160604026651996013072827558555370498043226953012634864477),
+  (11, 2346771089321663491824525693693670580071111739854196000612182231472226884195),
+  (2, 13185374493861793998637016504061047312315708278850893510328524057686001386258),
+  (11, 4251169863506742437449511705470241938791603243944018245362287836721982803275),
+  (3, 4114746330838514599095033258808356592779667235177841656907816312419484522092),
+  (3, 11099575347460555086704362383885594835294786914505982198781087480602928141011),
+  (11, 4558220676065243552733931934887617284108007243177474081801750600801161715110),
+  (4, 17828797455254217110345576049978578106691691767616357401025116930850342861766),
+  (7, 17397991122560893179567379357591215074151484592471841118059534522626038735073),
+  (0, 19958730486942905463692009072554834333634183627212918949188526989905619106946),
+  (10, 13001898457075716181932934542452764292701797693459009837408870198105738046444),
+  (3, 15219356024984555862843514161938533127835175235252356821454235150490922207035),
+  (11, 1563938061077328435750259837060043496486433085939115457515363041334214086648),
+  (6, 16679339126251188472516690857073281625766884460120133276840627201863706337358),
+  (9, 21802601500559684159507960458080173006512665630079832907432255684650410253415),
+  (7, 2778502718023158735103437368240865659586549837769949094997900314211253976218),
+  (14, 14492313741608687869382172042957852523600626321338013911426995911813790835846),
+  (2, 1508193999395082862957623589683183664408375737575983323079516650633043530493),
+  (9, 2359843467273313361019903433571539027531581090720320774048207384879919088688),
+  (3, 1745314812771625034305509150778096711009088924284987288150791346360958787127),
+  (12, 7154975335513135491044431136094792309067315684670195113921818593488024792331),
+  (11, 8215404024583870561143887550650514822467057663943500786869968280747419687860),
+  (11, 9842021497962788949340969407450906543021252980077219336750203398624702595365),
+  (8, 19075599878938611994800314375693553225261542163936004056388838681455057773605),
+  (6, 639357856989860842647745481095984239615208935294246225312247825522143994365),
+  (5, 20611683374926519858904547983635308075272728874804844167125210556366221947362),
+  (8, 12714339880283023829321787935719276107712052324459412271699642933347687964490),
+  (13, 1127693004944226095207690028451486210310469910933009249532551272815520132613),
+  (13, 3891094084901227436228992232419760066353942584628876808035330844750671458386),
+  (6, 476045114819273150461735885040197171445609031807085256769778005084337818568),
+  (12, 7049004479345700269384466449789279974697478057693358781525640842099317739758),
+  (10, 8094740849612015579818970378957632333923699301911435839162551469530802305955),
+  (7, 7441927450279448797985543464339371721702993696595158696196592173671637735568),
+  (15, 2525761240155042405362186629742097664950176610356986458443199670809779028893),
+  (8, 2649105202409952903173859063707228657039615120709371052664860591101293102369),
+  (4, 14843025552577497946024042629988209020243203437036744813737686878912932581609),
+  (6, 9912016389570951404347856931855876268935346561213775844266416593428604393930),
+  (11, 12397335546892118562315756606691164181737125910456804902130487697777164599505),
+  (1, 12925308026095656789033961327866774211894719314274126916732356148361999236190),
+  (14, 17210373205731080789016384305136857987641798169811050366207240343000869583383),
+  (13, 8317830741062585482867628680880399007294837481446278570023332595644752642),
+  (13, 1299823619342161966726510329951685167219169051536160688777114944739292786484),
+  (13, 20800359896241388772185615907591766668432845010275585858999770318169133528053),
+  (6, 15966449878413489682026329672157467282012138306280724556301784974021950167469),
+  (4, 13396608567763165302199088929400967419591753127002076715639909864113902802488),
+  (13, 10136168685282903553721167794787772107048461099083457744725193520631499872978),
+  (15, 7831258104251060151361560925806154856405888293193740396140065773705790729897),
+  (7, 1729132869424050464683244322522645065218074209713679485018768191212483560191),
+  (11, 15469426224440047276552913563216987349638402315738114175993259892171887868219),
+  (0, 13245566089625070678008499501013326796952883335628753726067032660326084539241),
+  (0, 21642131873848223915063828068675325129097048667796726645291173458006633771251),
+  (0, 12354542781590627247388569328459668597862132993920803423750449419845148612746),
+  (0, 12404650989235417420723240665736017937972079334016168635011998139180296107880),
+  (0, 12184865045055325299463903526609932208633066884116808944578833279923209618574),
+  (0, 14572317700299195206903742094417946094383182918455064178255218782755392140090),
+  (0, 20846111736645777009767703653665533493788639406277865704073555848150445038125)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_13 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 1683710990141482709403569672712098083734489569262771872592169552813523730432 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 1683710990141482709403569672712098083734489569262771872592169552813523730432 20846111736645777009767703653665533493788639406277865704073555848150445038125 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_13
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_29 : List PowStep := [
+  (1, 5),
+  (10, 1490116119384765625),
+  (11, 8256342701759641828895219496399674581230902110424998893088311328857076402271),
+  (2, 21246274478091776449728612951910660964661227706130709058959736688949900220925),
+  (14, 13288031061673966207064163306418527809553457721214349294081916043449397617038),
+  (13, 7868381044688160519774751466827837158110605815010785797096232551556798604883),
+  (7, 2593172599436332694135729096839139380991982074669237667800681280584676869754),
+  (13, 21858353445997513189490663457187574303109929136528967642793054053416733586057),
+  (2, 8907277905385383149636172720969396632371057230841984938193033488314956256263),
+  (12, 8628449098770850288961439297322563556788807242414407737378811077966515437218),
+  (12, 11726744258520248753420676707109729918280869356893393840126611567641122204317),
+  (11, 20879320700087174579302331209932693077786073784527580645897806479700496549234),
+  (14, 10235481866377499298944003078796939370737687643888003465401260509669727460236),
+  (14, 12939026190646806030429020031125083493530891056297050630569662328200974122444),
+  (6, 9316572841112039585209948736163083721114834201919665068686224423305390784900),
+  (15, 9906847166061216107181196601191912049698445615769728524531751004021895789649),
+  (4, 1052515319913844968336742426950663235087518271986382122102779186177241182279),
+  (11, 21554139673062048550247129528963170859140555538021215162003145156507359565346),
+  (3, 19822949719344943623817267885361671802931711900441311548685109199944533758927),
+  (5, 17459209972807599676866955656058963773160140362217727885587061273352241925816),
+  (1, 1785129025134815607732532370000436144894281803584747959226574589360247014902),
+  (13, 7203051770356146318904915550864118015277997166069196312435412572806973395843),
+  (10, 2647859913435777503059552266134004248646588253371760395242777954779934192898),
+  (2, 17350828854060351934726105639128137112463926787475909754945869357150505014172),
+  (7, 6562242045234594589002011063691536215365996844077160641798284884068016286962),
+  (12, 517246339989089106189984802995821484521362639832841982103273486105128064305),
+  (6, 9456046527437776494605675201191913447873662047963229755772717802493525644255),
+  (10, 1609358330642060986860016629742768934655538738970757913027910874887961861927),
+  (10, 12696705338623665828377768156957706358988749636750696225512791241986106188768),
+  (12, 4294667008624684953700719144609778394287396594863635685387393789265286339673),
+  (5, 19535649600323604394944756942683517546574207945053665531381416650511243819090),
+  (6, 8689022289102169855737429548572782883176634985447916285636968220508823255946),
+  (11, 16085493675415885291820354780811265602891625453009089370768975994867557388088),
+  (5, 1437841576214131144565586611840958596197448065824033192083204833900697510403),
+  (1, 16608508821262912293105842733298532440567495129201887890415684484022013571661),
+  (3, 4265369425453238767441667863877521619141491403583446389484053260373278734923),
+  (12, 12475055088430459882419282910780728158457626300068600121445859286581405538154),
+  (15, 11591235093224924157194795811813354588678206049099319029953638969970627185912),
+  (9, 12571059606377887137660898749393379252060345669752572085698703133451988107913),
+  (10, 20377188649106414168779734265481023142770773190218240268122297438982146850016),
+  (11, 12011681146125821177717492281611734378879225449523320115963461685433399271238),
+  (14, 1445050082810945793294973911687081650780114451690614443910962844717284698555),
+  (11, 15571815796701189625620071961858642822405003467388607328536451888806908188224),
+  (14, 15784731159975253659634325335382094976326950721867342458042268885303189531808),
+  (9, 19127211080567783302412517653939737926874742218328399385452572008050793501762),
+  (6, 535121755674125288256878779203542596872003961727874577926614780476023613906),
+  (6, 9088029901858700564729856296122875083102546912747215763507911561624241578113),
+  (1, 1037683031237049552859385541499069533109592882879738636166689702870803134039),
+  (12, 1484345552043732448820283239642286487870570592013712109960443252052816371229),
+  (13, 16878336336730451717584859775909189477058545641407582279459766905362474029629),
+  (2, 9235679803653669976657194600895579733662683875388285556246414603234469432820),
+  (13, 8066523793075690751932803221877223343669547047426472797941496399642658404960),
+  (3, 12965821874820007756551544115837266842970917194924709831206019667770586382285),
+  (8, 16985670593879976062500287176660434843231976954465946765066109662700248572420),
+  (0, 18521297980410695071610567470895323880522436040072079756738556251002948649159),
+  (11, 21208970671169459066957977500651203138967606718322178649614609778549779574673),
+  (0, 17924014746687414134656716672848173859799070036740723851613683107131423723534),
+  (0, 17966333729845047139143049835538655043633921344536835954713061461504010386427),
+  (0, 3553524707391612070532612876182667174730731653478549186744743460404018132482),
+  (0, 621525154596101100120356708967676316719033427690598776875324505028423459706),
+  (0, 13499349565500463108877547068786575534887045099866230576281731112613882904966),
+  (0, 10386009369402860538046910564990750238804555024787124428569499490103643828131),
+  (0, 18357710930920482893114740859477755941065533295300174657912055312005893977631)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_29 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 754766995580664662836082956733009485812012565531587391162007040916407189504 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 754766995580664662836082956733009485812012565531587391162007040916407189504 18357710930920482893114740859477755941065533295300174657912055312005893977631 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_29
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_983 : List PowStep := [
+  (12, 244140625),
+  (9, 21769372520584044467959299875428796510583705021547138575292169792030209244652),
+  (10, 17811636372779352820146680409317042481544500164311631076771114186246792336633),
+  (4, 6581333600575946047131186115533096467388487235374085084143021590555869534694),
+  (0, 15860122416770237497487089366754367389895303671701038797959126674667774046832),
+  (11, 17204337747498456507599748537845007245029957340080280824923323177600041272768),
+  (3, 2433438507995067902132055507133128291999989378394398576193726758406707872354),
+  (14, 3135148045343802800332752950570242546662921786267467833525997921766970549754),
+  (12, 12115088449904486853240214162544000155485209504591505378605993592281092040429),
+  (8, 2518561279775844737594916605651927572151338835802231357551312302398290567091),
+  (4, 3270029167373405508922679122123569356908635615816629945269009163664938954423),
+  (11, 4214419170943821885051660322681041727141533223128821546328560542794820087541),
+  (8, 4977965558022140470780063665587749233719473472307248009486578540103681570045),
+  (6, 18344592702438434081955511437287743404724061495544875059233227709854284047262),
+  (12, 18913930762560870353929547399852973267398442365996777887514716740611733287258),
+  (12, 7974073566647672824125677558778667117658296788841049366372800194652612255412),
+  (9, 16431183643762941082235162421752475717213009584021574807819529314065319082590),
+  (2, 7677920703201094618206586873933188570261196302880207002945021762582446201361),
+  (1, 7932141271033037969520076672841145857339787261318960421816888809466913060636),
+  (10, 1307848719664647721785438960936459959351050921099417449578317603667128528997),
+  (10, 14528725026549779019168106217651433357590056029154386007559699633367821896107),
+  (8, 21723653422947773324556466386268532846110574003086722962241428989650854295710),
+  (1, 21185785217229842852104212251121161400220616252656893103109862953644949792545),
+  (4, 14738682007741711767731899782811094800150817492709658591944256592435608960338),
+  (13, 19813106647178285524606179025253991674576613583539708184759247465576277592318),
+  (11, 13123046137292158256067729877620196579024431252473590421914863560341246349661),
+  (13, 14228767508589356606969041024743386072720357129313321509556295115994433250593),
+  (2, 12186273088005128887020121032495929477910713773465629852376500735387387730493),
+  (8, 21831609873847048681173653673362302641898062685914170530583860979625403152424),
+  (15, 15178645714445256241318748365201391946121415330324634767543024029799398085958),
+  (11, 15637600520430110864018948828724905067147391759676659127205808816638712590585),
+  (5, 14343582870192808887690912822491177746577477072030815441065903033032845836664),
+  (10, 8763081304299315056151119258367113352317419987091966713077710235105913158668),
+  (6, 16603452716564814948050832244033390960281662390981735212051655764578340343848),
+  (11, 2213549690768929338861092253566066274960457614537137005772780109439750054790),
+  (12, 2403755024927938088084739789378813148252274397370782712789070693905900569514),
+  (10, 19371651754406168502953774306354730074271189886311202185149930907449681214420),
+  (15, 9994678345863861742762129161074109123981205599549613710574164295314997484079),
+  (2, 17301534891674219245594421926951416035172013154739904716070694606171648211720),
+  (5, 11729276961443492437542022878565805446212226856484471786061170492975243904040),
+  (2, 7992691376642088306178701397967270127866880666756988490532118517428706482755),
+  (3, 1532336409701494838480099474969642908765472747520078545997681308048643837087),
+  (9, 7593503974706520491782496164374941684134677907705095625753828523418095600089),
+  (2, 1557354675157779906681727123733617924332002848069413328307976918850950658367),
+  (5, 20688710974897126208275606452973520373084964134218183083613378437410541390644),
+  (14, 19628458937685448588858265449733883170582157251491129632412175178696217894754),
+  (8, 5507655406053363736082973500987766117898374452744043561436563193729309639141),
+  (14, 2487339137513575675907150279446030734461791698059327963210044740930870553111),
+  (4, 3860055192397960547524997624292616665230906584579690598936653422027281531844),
+  (1, 8126659651944159857003304735105304244053203567636643480403973816041831568375),
+  (10, 17098928266003843765157356996664944481538831354235953148931253408744972341459),
+  (8, 6925357996260140927730552651194845683598459783858313127710156179235279193230),
+  (13, 4158988208821633941658913034314508263545712867184542060730975123668569659505),
+  (9, 20989367779434789684925398783466170771127469298215891014063418613072894508193),
+  (0, 11409166176779972866028558421030391379928574325027892834312769961860121921467),
+  (0, 3015082375325203271203436512682389181097247799802728243044859993971507326220),
+  (0, 18243285881836197847388589329899914917533664301779162004074865700453826763420),
+  (0, 8002237536689292034013948277391287279142336017875235265979166695699722645267),
+  (0, 13065105554116266237825386817115367620231093444836302830980299587142825421959),
+  (0, 10303430752695128690998158881998023957583470286875849149184506216182555701053),
+  (0, 16151937248511612831218790030381502136078900305644383989873770910345603053439)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_983 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 22266778099531307448877320188461114027007491760341845720954429487869591552 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 22266778099531307448877320188461114027007491760341845720954429487869591552 16151937248511612831218790030381502136078900305644383989873770910345603053439 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_983
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_11003 : List PowStep := [
+  (1, 5),
+  (2, 3814697265625),
+  (0, 12846770360473699295214443875390121596324342403583417197775416350638582526130),
+  (3, 17492463644578949475019343346334752165623447139086083176511323207618430182917),
+  (11, 11093866345576902199852521991492541979505423431942742789736707922466340658071),
+  (2, 9645879557666971911019159642215544705644898539981973535928646833261966391566),
+  (7, 4521676271438469187113497783677382930072947507069794145983491263232382737097),
+  (5, 6812365910849630047652194483256170181534396721746217076023485025432938343646),
+  (1, 7991023084885450759812953693906774323392433814179561213013626680385382509130),
+  (4, 10069606322893850751182921463170232074627251395645077156382583694614961181377),
+  (0, 4023291273691904002258239201797679368550522870777672002207999606055041872854),
+  (2, 15201559193895536930449787553689236007603300108249401970065480667381819792491),
+  (14, 15691085318386041877360766850078992401712874399406961746046054656876816515121),
+  (14, 16074627871348434635576339793076092542917601740824370760891565151640957615252),
+  (8, 16022913702821454240575806452985067182490177726165936537890844189784955283237),
+  (10, 13324319548870429290964265907359219013153438541424046534459682015323006705974),
+  (8, 9085247654849778102264673149289848653237664303381153229203551932827799471820),
+  (4, 17005749062771083886475228267503853488674560799346119886181444893300345414100),
+  (5, 7028050931970755760094771562680772684817173876755849157454846351423676639282),
+  (0, 17127613281645727260886758131902135756104829215343195073144810385168265317168),
+  (15, 5473173410467153866313588830262114314486492081783805721281782761926676488576),
+  (9, 21320276282856671449952986480681144574106013712788143116775320507869272450807),
+  (10, 21154261553283804419994093660485830342256595204423533202169269402493685700858),
+  (14, 15050315921661676193678383353337989130877651126917720344225802850160715305340),
+  (5, 16887957655768644766797764462787065159724185543175147389714790220956496165874),
+  (6, 1691813747587136417656183599835080006246633094539091909266065673840451039132),
+  (5, 2253174427160220657480787723028855976677294876481807917476542820137044894832),
+  (1, 20994511413984563086087939055123046376363713682153518021029285115900494597328),
+  (15, 7254492971696018842975484943411190923571508022113992922922727134944541352305),
+  (10, 3748479116546901348476200128972031121062894477272903563095571879477331231503),
+  (12, 19458967238386992694776410899669992682785665152244550737319602304709422885944),
+  (8, 14213600908005359190102488656725461992623832225768217074091983771426709331248),
+  (12, 1646956024668592381927591162412030401778029653276825346874325298733743055324),
+  (1, 3705670737278933170996307986065270843799172641064143570518466536153309742471),
+  (1, 13447163279957552224513376962961216591095829135319814489824102743471328172165),
+  (7, 9381165038849968751425591972991070012963022759201458453667059570634213538153),
+  (14, 3973059536460929703668171616236672257330889423425993873698813717456058067093),
+  (8, 594726831748750804670926891164947037012455602166562939134534529230205568707),
+  (1, 1938900901141739530762363883120767094532899976490655721500702859004671139132),
+  (8, 5806107113791522632032841698719326638118703661639492975869445456261214377499),
+  (3, 2200296240380713086276183753228110252507330902672335709184445206757638388515),
+  (0, 13478175016381296787242044985552370334694233945226675641125992440176664816682),
+  (1, 758870381138458792782160130099611245132835526830447888113079086427193138899),
+  (10, 11181126054516022066816779239444566482591252608594212191472455379824592218553),
+  (15, 20484488153704635008210792099504007851515988529774434312015813438438193501785),
+  (7, 5077593223882720991904118007653433712732865287680458560074117791618143812141),
+  (7, 10604183788744626234154021399849664925888417304531814480772303540873388154369),
+  (0, 1711446086635506933777959148515765436821531745054322470958055835358149783710),
+  (9, 16685545069356427320993301273838372807650682270384269701251772609841686600415),
+  (7, 16206785403970271940904368957619411057069107281469538161424363612646801708266),
+  (7, 16525037436550161816024471509513818120934903229883070613332765809073841409960),
+  (7, 1019042077575233512795072669458095838353596534857191860294965257061207678751),
+  (8, 14885721261888220278663203558727760738255405480931680958229164348410497758682),
+  (13, 15735987328023941326763533622441513940394971356408847986041743864974882285112),
+  (0, 11152079415831477589145017139253568807159099172612047767722186693970970101110),
+  (0, 8888414218666999169160716469758136893062596261344836610947568943147787028030),
+  (0, 11489997105924485371962784784834941870113863820058674729139630035217915902545),
+  (0, 267772275490289433777453471727622807924202884510957394013295188299635194991),
+  (0, 19787342070710719110836514952057088529935134873276160724960063536044676764279),
+  (0, 19397280769804751527190722810290071512161212158167267491565142287120470218192),
+  (0, 8299083658399422953216871473066571686783765754016288837524968026835148283600)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_11003 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 1989297725333025104266691424634851866631679033028813445760083994053967872 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 1989297725333025104266691424634851866631679033028813445760083994053967872 8299083658399422953216871473066571686783765754016288837524968026835148283600 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_11003
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_237073 : List PowStep := [
+  (13, 1220703125),
+  (6, 4617877384500652928074809424437679646997916818716800515496493412946613174984),
+  (0, 15243598447058510950149627207515928997922313025438855952870538171423408988870),
+  (9, 8122125913358298021175377288347567060878559575241491962592917178553942519660),
+  (9, 14445767767664835790220017234516408293514183820326701938456612154746512058984),
+  (7, 7507823120173338260024472425478320210340170752132020695382853000395905509620),
+  (1, 6682333059953815459077052210590965429358804718589931453446060449483876114455),
+  (8, 6335673887735797728999944622833555082797597607632486158111161054654750555791),
+  (9, 1550096355229914711115580002949791751188375619709828849190115275693553572768),
+  (13, 5113650692396643792423370644788901042936038127228099365253907869106099528055),
+  (11, 11224415627920589828762166332186006382314687347601300760435046441590290594368),
+  (5, 18220268961995185156690353948145430664340445904787502665902266850482493158735),
+  (12, 6955185775498834353507753361149412573089437925057658084785586529104314784099),
+  (8, 21854031119496693353903710592858622386564256680618961078203069124327498300705),
+  (0, 3765031885321627783912345213310010050702068996018016695057665129319691741467),
+  (6, 10310253426787695659989643810961263906258320498956172115432008366703012691143),
+  (15, 11017164116736431856675443311413260201769691120419370109119096915380417252707),
+  (10, 19223616772834979093606815265273884060562089931116701089028294990334926885015),
+  (1, 2585060391310918168297050680732041313092546417283332430327355088252346259982),
+  (2, 8086127486721890780274074982428958425669502051344365262032669400546689319188),
+  (2, 11579293017353284778582446699282559983908776659291946927578838058150740257803),
+  (13, 14601848787939811332980891038448093147549819388276939809533448336365560612009),
+  (6, 13997314802410820786460587995621648114089187653607541367779070137309065091680),
+  (4, 13650293735319304586356642710061048946778661431216391951768036948538946967818),
+  (14, 1374099336275458550807801031462616110682048314623556324315397682584898685076),
+  (13, 18561365448572043534892703033207863019247837721646294660210552893656351649357),
+  (13, 21581989397524856822409894666383682184449183039151942098446032785733981897598),
+  (11, 13330403152648839447267956362961950361349425949683539660081812537858249053710),
+  (15, 10240723414351713864465281913151586817120561041429223237306173921298658572739),
+  (12, 3226390766421486745584668623304752344415206992514006489856793099109461301215),
+  (3, 13720808261741434560130680179941085746271672454389929945063778559194587401544),
+  (0, 7333328300316088277247235345902770995053314343930159466731950997048816698550),
+  (5, 10584347697037449588153771555310007578724760917780011500809073885010067577257),
+  (0, 815157513932233713543521551615598433366306132039351749170192707490096511450),
+  (11, 10490669588795971132090779422971258554236458320500855904036129066892933308266),
+  (12, 13362749030883873580379146778013708726028013985186839463444878000278270508814),
+  (4, 12123485641713607818439381930938362568925606812167745904147199485993181513188),
+  (15, 20030973994532654680655266670894367725327543137236268891007168869628613140766),
+  (10, 16130741886894739370174555215008021306412997445451686952789270560009365145208),
+  (0, 19937142978081275078494807749266089217105606819739391802756423711638212321376),
+  (6, 10871988713077687463471706417658105361675195439950185602364583344144374901203),
+  (15, 19541621208322085145865059802419446826569770681115097977097217048589577944096),
+  (1, 91408101429707753369673656994284233341599577285945274098256076958820503529),
+  (14, 2108148594294956528217128526229780258418456077548634896427742721242452388432),
+  (5, 2856472337641202218404377800488788829770892113816750611284575241470019641650),
+  (0, 9783898173182397074881285128306172690004969337331996552635739163630055378305),
+  (11, 15420614984384452059131792323025974208236875631910261490341183101340333711258),
+  (14, 7657908684603718112499229535989361127990243194709356425279410427898343931392),
+  (7, 9866380716097872781000338183129321178214499353914245034344026611309431374582),
+  (2, 2811388450948604182359313518289560026896536712749917493584739377555212386138),
+  (4, 17330037001171444224518986526299429394684749684679218994990907549292188610444),
+  (15, 5949618141178396213074365184881592030098188986542785884087243663940882710289),
+  (0, 18626408304882409846513996139199742075517756669711956911945131209654251898915),
+  (0, 9174731617258344054863412989217146313999640456667955609455170487020708711403),
+  (0, 13523775903613384651648313593517484733199311115992958128676272103904290657431),
+  (0, 20198763454297957095454666076929604337902525237927480442786755269376595587195),
+  (0, 4294680762770249124365418666176600651155308193737519421054209116701089574647),
+  (0, 4514205584393989698686104218689934950812482205270977317434620171283028714583),
+  (0, 1135558486015409621676726807058439328573409521523979529600469708688064761941)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_237073 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 92327016875980289709272695521030547926370208334209439049146061283131392 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 92327016875980289709272695521030547926370208334209439049146061283131392 1135558486015409621676726807058439328573409521523979529600469708688064761941 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_237073
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_405928799 : List PowStep := [
+  (2, 25),
+  (0, 23283064365386962890625),
+  (0, 7495163885505393623034273187115628979572515521304066776979959050081691561461),
+  (0, 21009648830092215957608161798189815116587041995525842102414668817247297223533),
+  (3, 11313431585377625354024071994119449027215938618443956149984110681951368942336),
+  (9, 7634591442350600006893369381811370885878360636813892423519566759465614535505),
+  (15, 14753126469623438221105564061052195479294639073639821733984564807991137775105),
+  (15, 15910890928196055738495427673152933225099162594097620085935737655772118570357),
+  (12, 3406684004624509363647107094740851095648957989410535806564777497709959059372),
+  (12, 11152798830083390604660543714522556032997167061154944503681897778350904605070),
+  (6, 716787567889801584304103711528251030464556550119703854798717433861488051423),
+  (6, 696404656816499404161440287665389445922134784667328901212284844369119060973),
+  (15, 8689812745239557078852413927789018481994982002918905074561197669633706625019),
+  (4, 17304353960584971766223419699176716890367080347769275677812601901507090516048),
+  (15, 18930768011660255280126430383614726915025700897157612940310135596926559212577),
+  (15, 5853746841560529258944946397384894563773297491715888291218243654685746793295),
+  (1, 6321189977961961140452827903212499344473649762335054702080232985615669655230),
+  (8, 17778975217553346249811237248327275923096465284697338037024124283657804589883),
+  (4, 17616373819549594103990627952395123770973371407393684385653125048448548262854),
+  (3, 19804283860976698010516167990127434803667089469333207554017747335525880574269),
+  (10, 1351969295561656779407106590710389727075261737920312491413470253364754978717),
+  (10, 4245998792897635759593165746989210640554167274884837822442597436879599572696),
+  (2, 1114286154143916537705509677537186828923914858959184790666764112967137897134),
+  (5, 900465341878333572738773584213853044462881686817462241795363216157151844237),
+  (4, 6447998503129929068290811870565739974436087003154776192605696061816058338372),
+  (0, 20350541361831651791189194829106767881341847303562576345823887574123967647920),
+  (5, 13374555126213110772046555951983137724963412834991976427717729654075433806601),
+  (6, 17968605441066919869359076093333868229547417359162454308611631310143466145302),
+  (7, 9350282285920638451662176732355846934564419038756501542393247890154704870709),
+  (6, 19238788921159421284100439550214332120918504450140301766331447560439783137704),
+  (1, 16516314320827946159568453921106802925784463936638738566054501835769395660280),
+  (0, 2545340215247703552700429285308286532693924186306058160161460108873442889915),
+  (12, 5700167227615245134689722662791162062697283690202341613075332643852788388262),
+  (15, 7113170516504626573531215804171426211713485023904347040364197870641713322498),
+  (7, 3593073823327953002106382010077546864417445898427301751328931978315873135559),
+  (7, 8796359333780479710494996217888686662508044917724387112592389557273376328025),
+  (13, 9989906837484135560701055734647890801856179817248173501806095383183814703999),
+  (15, 11243684098404738217677994798306291170960328768288179141619345018707541945710),
+  (2, 13678737704082626489719601435357067002106597444944879914234851785822478683797),
+  (3, 279162032376712997700546693967190387761403276124301356385637463728042590293),
+  (3, 10315633502597835434616225449691668188573523913489142405984293916909367805411),
+  (1, 17188183661301849814100392191540907108124975057795239604155906798300702567231),
+  (2, 3117467540169099221030926927435098614045452452865937786175622901351403768633),
+  (9, 12635076657035208724821496075723108332248796212291999519036188189160429721269),
+  (4, 18972743381173146381154217690605143125098011832220910284508588953441513695906),
+  (9, 20858885263622733450523560718512520662661684846784141813414260048315025050216),
+  (4, 13683676562706931082405216692310834239058539300437561133661740746348651448716),
+  (14, 3889943303075813458150423644099399994222074786662849744344466519414515848102),
+  (2, 18607733800424790051097582180571944170469297552146742550988086349968571750329),
+  (1, 17679289793488514376369598306129299099092436135543833948409724606820311971076),
+  (0, 14139927539545159572915653762458085461984277144551926906398294535208882687338),
+  (0, 615139435680056525725376910483741240929790328702146850827244823364940263763),
+  (0, 1050783198370434611701666391778545024118827031208879239936919601218215836764),
+  (0, 62154979253520291890010525961583395538162377901075780634840071011563812590),
+  (0, 10141199487723674767708907503109223565765205931536222844165697979114391808055),
+  (0, 7770029538425006487151778288297347334474913214873545500283608987804365664920),
+  (0, 19321818016159037061311250724021617607548090886696614157910334987366532500238)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_405928799 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 53921384552563552462426805409431605981098090062873401459989056323584 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 53921384552563552462426805409431605981098090062873401459989056323584 19321818016159037061311250724021617607548090886696614157910334987366532500238 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_405928799
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_1670836401704629 : List PowStep := [
+  (8, 390625),
+  (2, 21335321719362396876008455392092108010349041058854750716270679997540166795307),
+  (6, 21280612148816262372521309179132354819814888062042552274792484997967971797472),
+  (15, 6274746173241545625384651886891598545689733895107141544904834602606030008852),
+  (10, 7687518274064933194007281365182364824872639408107755900117234176913379258765),
+  (4, 14598334816514834268589256183534657601829339206301229723454091167635549628810),
+  (8, 19832511456723689331305491230959649346369437671473541074771398937870716243609),
+  (13, 1799153986064547343501314350612164194122035883536448380918005818256071817422),
+  (3, 3875392122234190376659434346338224983269009029934866513008850317779098624746),
+  (3, 10808604371522630249338881801188450411603779192774455892552704260469172527256),
+  (14, 1770397524097473417662654392757662056745212927149529673704124824378968972553),
+  (14, 6142945470462961955364463156434622147431408352143342420872763242922902473944),
+  (8, 14145502130757746398187704867113357761752705027088125730439381177436603550414),
+  (0, 7746881953287331001839868693013075036639831944691976436935129163913875887584),
+  (0, 12930464472931373328867401426486328288657214960086815464115023920279845753125),
+  (1, 15237466739784192135931648353134317567775457633571361264672082286015004516719),
+  (5, 8502131374606419514838405334001647206146806701003642212469034956338605193907),
+  (9, 10530552334606765681916311716486458780249303098964907385538925178081161358495),
+  (2, 15032095042341643837824976775640757012564884217781091665668117782432655981296),
+  (8, 16332841269173146963819646611258135569045547379356020660157711547875940278960),
+  (9, 13545259300290756922960829646249538763242844711121973890169630120473388092617),
+  (10, 3521823580676800807413860310101374176392070340524012565937094874710999251972),
+  (14, 4552870678430124068532740540332753819070676444866602338864631024575987330309),
+  (6, 2155568345463972459299712609838538466264846568500261107823496391011892065117),
+  (3, 21685611314307796904264203196480975928371766723815323126794715424259658588617),
+  (5, 18473710259807278167769446119767699081964223741896340118812102171092522346679),
+  (8, 4890270162155930675216656975955999646394250559827647992750041169054030184837),
+  (15, 6477748482186572587018752968684498921040854679539139671956620835029388263113),
+  (14, 14676779354522384384314176033334734248223787334082313068155996783332226567739),
+  (5, 3372956916724561700142013285373233961283676083499036868975438499010132591178),
+  (11, 11556464554186566427387263998269327037855556039513562802207885075216377868510),
+  (10, 1821843912978827055431096577471885879733808947407529419651201597299618066505),
+  (12, 8491119658505951056981031491909856876032780549255129408596364041613797233333),
+  (4, 11427037195450852214990492162614298310081318124957100061469981145293494223539),
+  (12, 12036808699134823681153531216893738676575334360474507411509240115252893328506),
+  (5, 3866392155792504829065449265886696387817417254556383324974605728670351630825),
+  (15, 16225496598723883362695513277210064741315052301289290236578866875528802601330),
+  (8, 6001735687062042196082317190322357839320434792649297072031383726662526147942),
+  (0, 8174206465146135901338583165821714053008919897378255208845348364124155414815),
+  (15, 6770568129093154653450160927198769615247965855412548624218409630066964011430),
+  (0, 506364673800712017543000918308423907188713485276428135956114886310513451861),
+  (12, 2060033498783531132760381914171291444605519296759016444700657592687980623344),
+  (10, 7338445271900934790027295341397218553359639311722893157037602023766299429722),
+  (3, 4597167518899693073744014078836088562737004227101656820805080091319315095913),
+  (0, 2057328670423663547104618328236130229771686956178942541324157761884444049460),
+  (0, 11376407270599110799519566028854375760183108238084418619384558606519016389115),
+  (0, 20024039413756401164017000949941597085491209210768812774053446205946542625691),
+  (0, 11485480349727003116195992674174023521224476319041417224394600682928358204164),
+  (0, 301519919156509197330537435189198310540715209529085122330191057661857949726),
+  (0, 3035610120098432297197753239199019327465362446612004704870821472777999094596),
+  (0, 19643034808648967981397807206080768497060516784825884862247505212574391305991)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_1670836401704629 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 13100171177446423556613374118717413492986637444144570673659904 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 13100171177446423556613374118717413492986637444144570673659904 19643034808648967981397807206080768497060516784825884862247505212574391305991 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_1670836401704629
+    (by decide) (by decide) (by decide) (by decide)
+
+private def trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_13818364434197438864469338081 : List PowStep := [
+  (1, 5),
+  (1, 762939453125),
+  (5, 16679605073524263215315597543264242298511753666208901431889563593310334287109),
+  (7, 4143393628247327952794998335389991651209435833262864673621932424042388996863),
+  (4, 21083409368753843221090276215891518095426795865009070350032142640422297228205),
+  (13, 15432803337989118749689295629187064900908605853259335606853042898231157376941),
+  (13, 17310877544306517700614940269423541408673381667626194105356231945487182557561),
+  (11, 16592823852343488524616838154930964535127012570481074339214891282162862150430),
+  (3, 6422842122618404410085955316550986678835689788297550843809738805842612475736),
+  (2, 19180994098283924367490216878185825339155702287438864613282866487885991197309),
+  (3, 9848082726488869283708227208437458351606250096403942175718327737256658031320),
+  (2, 17847786436791873217522761641900589889226011747198144710240745105833003974474),
+  (5, 21095626667306148037546728707033520163160156881569290420788343159781103645077),
+  (1, 3214906748774053669473540520819532251390834469138825537000733393184774403896),
+  (4, 8201967001817520999393107536185302626746148316005430480900496575340332552906),
+  (15, 3447059202413525369827912636201479613111550041885638671730022666427076273896),
+  (11, 20191234716667627988637675775573625135801544680462242295542427551792164298477),
+  (3, 3716337400421170337055173215228454731898851271388207283785571522123169076708),
+  (12, 2222678319985678112737830774905516245760043912156582793835001179147313403741),
+  (4, 8984305933163211755657766009864175939289811781309055183184403370370753943215),
+  (14, 6596402040120610967507408157707226764732808801517970420309652137569553450459),
+  (3, 13953885168993263974000374082086229643611856434493500165157423139819138954081),
+  (14, 7715765728571903433628511734962198106599525120708349356674355488049991225085),
+  (9, 19165192908110889473783155850911080326760857399400220796198717319245819619112),
+  (12, 14897969706482419120061631509814945759015640563803603740424913469400579505128),
+  (4, 1698712277146630728027024699103969810661495626011969743792714844302651988018),
+  (0, 4047543528616187781725805844241432729579347176217727891459284395223896098057),
+  (8, 18169212040897324722508280624618759234575902297340680214986826029768342551643),
+  (12, 10218152470283015430909219229429677763174898092225443572080526209768546164850),
+  (12, 12807292871920565143342213085624202400382808577692842208774331234114404823906),
+  (2, 737658796152552839691527512634680521413566950973780480339677551371910030554),
+  (5, 17119303073764597678909296258621010220939745072766199536173059668894968273064),
+  (1, 17801088726352043651052775946842239942232230096643786776962728822781195103422),
+  (15, 16396691014163678362074761788426770985134934517581268310236628263713517590642),
+  (0, 12615062912329858076145221858245793645208586507948395002608337500809739939147),
+  (0, 11574130028895582436118472461298847716114387725984284838523197721467336585475),
+  (0, 13455100767135518924539514976194810295462072524210138771339122927048850998705),
+  (0, 35670862350301790266763722062901034075519296819165265938146095067521107483),
+  (0, 2790271347328208494757476644684380552948291706959809559893173930947501808723),
+  (0, 14722090250698929372886103857866496426244941466151919511517028502719623824311),
+  (0, 7740382856488830440021062471495669005558519249383073335662966997885018076746)]
+
+private theorem power_21888242871839275222246405745257275088548364400416034343698204186575808495617_13818364434197438864469338081 : (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ 1583996642733683218748855262055434666238317428736 ≠ 1 :=
+  trace_power_ne_one 21888242871839275222246405745257275088548364400416034343698204186575808495617 5 1583996642733683218748855262055434666238317428736 7740382856488830440021062471495669005558519249383073335662966997885018076746 trace_21888242871839275222246405745257275088548364400416034343698204186575808495617_13818364434197438864469338081
+    (by decide) (by decide) (by decide) (by decide)
+
+theorem prime_21888242871839275222246405745257275088548364400416034343698204186575808495617 : Nat.Prime 21888242871839275222246405745257275088548364400416034343698204186575808495617 := by
+  let factors : List Nat := [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 13, 29, 983, 11003, 237073, 405928799, 1670836401704629, 13818364434197438864469338081]
+  have hf : factors.prod = 21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1 := by decide
+  have hpr : ∀ q ∈ factors, Nat.Prime q := (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_2, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_3, (List.forall_mem_cons.mpr ⟨prime_13, (List.forall_mem_cons.mpr ⟨prime_29, (List.forall_mem_cons.mpr ⟨prime_983, (List.forall_mem_cons.mpr ⟨prime_11003, (List.forall_mem_cons.mpr ⟨prime_237073, (List.forall_mem_cons.mpr ⟨prime_405928799, (List.forall_mem_cons.mpr ⟨prime_1670836401704629, (List.forall_mem_cons.mpr ⟨prime_13818364434197438864469338081, by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  have hn : ∀ q ∈ factors, (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / q) ≠ 1 := (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 2) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_2), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 3) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_3), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 3) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_3), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 13) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_13), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 29) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_29), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 983) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_983), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 11003) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_11003), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 237073) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_237073), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 405928799) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_405928799), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 1670836401704629) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_1670836401704629), (List.forall_mem_cons.mpr ⟨(show (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) ^ ((21888242871839275222246405745257275088548364400416034343698204186575808495617 - 1) / 13818364434197438864469338081) ≠ 1 from power_21888242871839275222246405745257275088548364400416034343698204186575808495617_13818364434197438864469338081), by simp⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)⟩)
+  apply lucas_primality 21888242871839275222246405745257275088548364400416034343698204186575808495617 (5 : ZMod 21888242871839275222246405745257275088548364400416034343698204186575808495617) power_21888242871839275222246405745257275088548364400416034343698204186575808495617_full
+  intro q hq hd
+  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))
+
 theorem secpBase_prime : Nat.Prime 115792089237316195423570985008687907853269984665640564039457584007908834671663 := prime_115792089237316195423570985008687907853269984665640564039457584007908834671663
 
 theorem secpScalar_prime : Nat.Prime 115792089237316195423570985008687907852837564279074904382605163141518161494337 := prime_115792089237316195423570985008687907852837564279074904382605163141518161494337
+
+theorem bn254Scalar_prime : Nat.Prime 21888242871839275222246405745257275088548364400416034343698204186575808495617 := prime_21888242871839275222246405745257275088548364400416034343698204186575808495617
 
 end Witgen.PrimeCertificates

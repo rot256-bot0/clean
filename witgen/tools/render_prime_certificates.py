@@ -64,6 +64,7 @@ def render(data):
                      f'  exact hn q (prime_mem_factors q hq factors hpr (by simpa only [hf] using hd))\n')
     parts.append(f'theorem secpBase_prime : Nat.Prime {data["base"]} := prime_{data["base"]}\n')
     parts.append(f'theorem secpScalar_prime : Nat.Prime {data["scalar"]} := prime_{data["scalar"]}\n')
+    parts.append(f'theorem bn254Scalar_prime : Nat.Prime {data["bn254"]} := prime_{data["bn254"]}\n')
     parts.append('end Witgen.PrimeCertificates\n')
     return '\n'.join(parts)
 

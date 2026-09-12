@@ -22,7 +22,14 @@ class DesignTests(unittest.TestCase):
         self.assertIn("def ofNat", text)
         self.assertIn("n % p", text)
         self.assertIn("Residue.square a", text)
-        self.assertIn("curve.Scale", text)
+        for symbol in ["field.Neg", "field.Inv", "curve.Mul", "curve.Eq", "curve.MSM", "curve.Const",
+                       "inductive CurveOp", "inductive CurveLiteral", "Has (CurveOp c) F",
+                       "match xy with", "inductive BranchOp", "if flag then", "Bool sort"]:
+            self.assertIn(symbol, text)
+        self.assertNotIn("curve.Scale", text)
+        self.assertNotIn("curve.X", text)
+        self.assertNotIn("value.Bind", text)
+        self.assertNotIn("not multiplicative field inversion", text)
         self.assertIn("curve.ToAffine", text)
         self.assertIn("curve.FromAffine", text)
         self.assertIn("struct.Set", text)

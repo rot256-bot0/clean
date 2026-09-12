@@ -17,11 +17,13 @@ def twiceY : Nat := 121583992996938303229678086127133986361553678870416281767988
   (Residue.ofNat (modulus_pos secpBase) generatorX,
    Residue.ofNat (modulus_pos secpBase)
      83121579216557378445487899878180864668798711284981320763518679672151497189239)
-#guard toAffine (scale (Residue.ofNat (modulus_pos secpScalar) (modulus secpScalar - 1)) generator) ==
+#guard toAffine (mul (Residue.ofNat (modulus_pos secpScalar) (modulus secpScalar - 1)) generator) ==
   toAffine (-generator)
-#guard (mixed.eval model h![Residue.ofNat (modulus_pos secpScalar) 1,
-  Residue.ofNat (modulus_pos secpScalar) 1, Residue.ofNat (modulus_pos secpBase) 2]).val ==
-    43747136636754327500751624458466855924713047937606842798585768786127914302874
+#guard (mixed.eval mixedModel h![Residue.ofNat (modulus_pos secpScalar) 1,
+  Residue.ofNat (modulus_pos secpScalar) 1]).map Fin.val ==
+    some 15049581136193944005155656881674271607086196878768533802525739169400035159716
+#guard mixed.eval mixedModel h![Residue.ofNat (modulus_pos secpScalar) 1,
+  Residue.ofNat (modulus_pos secpScalar) 0] == none
 #guard (generatorRoundtrip.eval affineModel .nil).map toAffine == some (toAffine generator)
 #guard invalidPair.eval affineModel h![(Residue.ofNat (modulus_pos secpBase) 0,
   Residue.ofNat (modulus_pos secpBase) 0)] == none

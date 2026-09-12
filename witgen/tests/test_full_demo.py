@@ -4,6 +4,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+sys.path.insert(0, str(ROOT / 'tools'))
+from run_methods import required_cases
 
 
 class FullDemoTests(unittest.TestCase):
@@ -27,7 +30,9 @@ class FullDemoTests(unittest.TestCase):
         self.assertEqual(report.get("crypto", {}).get("status"), "PASS")
         self.assertEqual(report.get("custom_types", {}).get("cases"), 10)
         self.assertEqual(report.get("methods", {}).get("status"), "PASS")
-        self.assertEqual(report["methods"]["native_cases"], 408)
+        self.assertEqual(report["methods"]["native_cases"], len(required_cases()))
+        self.assertEqual(report.get("extended", {}).get("status"), "PASS")
+        self.assertEqual(report["extended"]["cases"], 174)
         self.assertEqual(report.get("caliper", {}).get("status"), "PASS",
                          "full runner must verify Caliper, not only native Rust")
         self.assertEqual(report["caliper"]["runtime_receipt"],

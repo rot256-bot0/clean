@@ -11,9 +11,8 @@ instance basePrime : Fact (modulus secpBase).Prime :=
 instance scalarPrime : Fact (modulus secpScalar).Prime :=
   ⟨Witgen.PrimeCertificates.secpScalar_prime⟩
 
-theorem concrete_mixed_correct (s t : FieldValue secpScalar) (b : FieldValue secpBase) :
-    (mixed.eval model (.cons s (.cons t (.cons b .nil)))).val = mixedSpec s t b :=
-  mixed_correct s t b
+theorem concrete_mixed_correct (s t : FieldValue secpScalar) :
+    mixed.eval mixedModel (.cons s (.cons t .nil)) = mixedSpec s t := mixed_correct s t
 
 theorem concrete_generator_roundtrip : generatorRoundtrip.eval affineModel .nil = some generator :=
   generatorRoundtrip_correct

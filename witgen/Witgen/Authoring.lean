@@ -106,26 +106,79 @@ def inputRefs {S : Type} : (Γ : List S) → HList (Var Γ) Γ
 def Program.withInputs (body : HList (Var Γ) Γ → Program F Γ t) : Program F Γ t :=
   body (inputRefs Γ)
 
-open Lean Parser.Term in
-private def expandNamed (names : List Ident) : List DoElem → MacroM Term
+section
+open Lean Parser.Term
+
+mutual
+private partial def expandNamed (names : List Ident) : List DoElem → MacroM Term
   | [] => Macro.throwError "witgen block must end in return"
   | elem :: rest => do
     match elem with
     | `(doElem| return $value) =>
       unless rest.isEmpty do Macro.throwErrorAt elem "return must end the witgen block"
       `(Program.ret $value)
-    | `(doElem| let $name:ident ← $rhs:term) =>
+    | `(doElem| let $name:ident ← $rhs:doElem) =>
+      let step ← expandEffect names rhs
       let kept := names.filter fun n => n.getId != name.getId
       let mut tail ← expandNamed (name :: kept) rest
       let fresh ← `(fresh)
       tail ← `(let $name := $fresh; $tail)
       for old in kept.reverse do
         tail ← `(let $old := Var.weakenBy $fresh $old; $tail)
-      `(Step.bindNamed $rhs (fun fresh => $tail))
+      `(Step.bindNamed $step (fun fresh => $tail))
     | `(doElem| let $name:ident := $rhs:term) =>
       let tail ← expandNamed (name :: names.filter (fun n => n.getId != name.getId)) rest
       `(let $name := referenceAlias $rhs; $tail)
     | _ => Macro.throwErrorAt elem "witgen supports named let ←, reference-alias let :=, and return; use explicit closed regions for control"
+
+/-- A branch ends in either a return of a reference or an operation producing its
+result. All named inputs are explicit region arguments, not Lean captures. -/
+private partial def expandBranch (names : List Ident) (body : TSyntax ``doSeq)
+    (explicitBinders : Nat := 0) : MacroM Term := do
+  let elems := (getDoElems body).toList
+  let elems ← match elems.reverse with
+    | last :: rest =>
+      if last.raw.isOfKind ``Lean.Parser.Term.doReturn then pure elems else do
+        let result := mkIdent (← Macro.addMacroScope `_branch_result)
+        let bind ← `(doElem| let $result ← $last:doElem)
+        let ret ← `(doElem| return $result)
+        pure (rest.reverse ++ [bind, ret])
+    | [] => Macro.throwErrorAt body "witgen branch must produce a result"
+  let out ← expandNamed names elems
+  let args : Array Term := names.toArray.mapIdx fun i n =>
+    ⟨if i < explicitBinders then n.raw else (mkIdent n.getId).raw⟩
+  `(Program.withInputs (fun | h![$args,*] => $out))
+
+private partial def expandEffect (names : List Ident) (rhs : DoElem) : MacroM Term := do
+  let captures : Array Term := names.toArray.map fun n => ⟨n.raw⟩
+  match rhs with
+  | `(doElem| if $condition then $yes:doSeq else $no:doSeq) =>
+    let yes ← expandBranch names yes
+    let no ← expandBranch names no
+    let builder := mkIdent `Witgen.control.If
+    `($builder $condition h![$captures,*] $yes $no)
+  | `(doElem| match $discr:matchDiscr with | none => $no:doSeq | some $payload:ident => $yes:doSeq) =>
+    unless discr.raw[0].getNumArgs == 0 do Macro.throwErrorAt discr "witgen match does not bind equation proofs"
+    let input : Term := ⟨discr.raw[1]⟩
+    let no ← expandBranch names no
+    let hidden := mkIdent (← Macro.addMacroScope `_shadowed_capture)
+    let someNames := names.map fun n => if n.getId == payload.getId then hidden else n
+    let yes ← expandBranch (payload :: someNames) yes 1
+    let builder := mkIdent `Witgen.value.Match
+    `($builder $input h![$captures,*] $no $yes)
+  | `(doElem| match $discr:matchDiscr with | some $payload:ident => $yes:doSeq | none => $no:doSeq) =>
+    unless discr.raw[0].getNumArgs == 0 do Macro.throwErrorAt discr "witgen match does not bind equation proofs"
+    let input : Term := ⟨discr.raw[1]⟩
+    let no ← expandBranch names no
+    let hidden := mkIdent (← Macro.addMacroScope `_shadowed_capture)
+    let someNames := names.map fun n => if n.getId == payload.getId then hidden else n
+    let yes ← expandBranch (payload :: someNames) yes 1
+    let builder := mkIdent `Witgen.value.Match
+    `($builder $input h![$captures,*] $no $yes)
+  | `(doElem| $term:term) => pure term
+  | _ => Macro.throwErrorAt rhs "witgen effects support operation calls, if/else, and exhaustive Option match"
+end
+end
 
 open Lean Meta in
 /-- Named blocks have a deliberately closed ambient interface, not a syntactic
@@ -139,6 +192,18 @@ private def isClosedAmbientType (type : Expr) : MetaM Bool := do
     return true
   if type.isAppOfArity ``Fin 1 then
     return true
+  if type.isConstOf `Witgen.Typed.CurveId then
+    -- Verify the fixed String + seven Fin fields. A name alone is not a
+    -- reference-free certificate, and other records remain unapproved.
+    let .inductInfo info ← getConstInfo `Witgen.Typed.CurveId | return false
+    if info.numParams != 0 || info.numIndices != 0 || info.ctors.length != 1 then return false
+    let ctor ← getConstInfo info.ctors.head!
+    return ← forallTelescope ctor.type fun fields result => do
+      if fields.size != 8 || !result.isConstOf `Witgen.Typed.CurveId then return false
+      if !(← whnf (← inferType fields[0]!)).isConstOf ``String then return false
+      for field in fields[1:] do
+        if !(← whnf (← inferType field)).isAppOfArity ``Fin 1 then return false
+      return true
   if type.isAppOfArity ``Has 3 then
     -- Has is not a blanket "contains no references" certificate. Its only data
     -- result must stay opaque: a bare abstract destination signature parameter.

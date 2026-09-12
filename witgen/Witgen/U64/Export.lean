@@ -40,20 +40,20 @@ def sourceSquare (f : FieldId) : Program AnyFieldOp [.field f] (.field f) :=
   .let_ (.field f .square) h![.zero] .nil (.ret .zero)
 
 def callerJson {Γ t} (name : String) (inputNames : List String)
-    (p : Program AnyFieldOp Γ t) : Json :=
+    (p : Program AnyFieldOp Γ t) (accepted : (p.mapHandler? lower).isSome) : Json :=
   Json.mkObj [("name", .str name),
     ("inputs", toJson ((inputNames.zip Γ).map fun (n,t) =>
       Json.mkObj [("name", .str n), ("type", typeJson t)])),
     ("output", typeJson t),
-    ("body", programJson typeJson (withCallsCodec codec) (p.mapHandler lower))]
+    ("body", programJson typeJson (withCallsCodec codec) (compile p accepted))]
 
 /-- One shared registry, nine source callers. No duplicated method definitions. -/
 def bundleJson : Json :=
   Json.mkObj [("version", toJson (2 : Nat)), ("kind", .str "u64-shared-library"),
     ("methods", .arr (libraryJson typeJson codec allLibrary)),
     ("programs", .arr (([bn254Fr,secpBase,secpScalar].flatMap fun f =>
-      [callerJson ("field." ++ toString f.val ++ ".add") ["a","b"] (sourceAdd f),
-       callerJson ("field." ++ toString f.val ++ ".mul") ["a","b"] (sourceMul f),
-       callerJson ("field." ++ toString f.val ++ ".square") ["a"] (sourceSquare f)]).toArray))]
+      [callerJson ("field." ++ toString f.val ++ ".add") ["a","b"] (sourceAdd f) (by rfl),
+       callerJson ("field." ++ toString f.val ++ ".mul") ["a","b"] (sourceMul f) (by rfl),
+       callerJson ("field." ++ toString f.val ++ ".square") ["a"] (sourceSquare f) (by rfl)]).toArray))]
 
 end Witgen.U64

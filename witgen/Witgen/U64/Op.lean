@@ -13,9 +13,10 @@ abbrev Val : Ty → Type
   | .u64 => UInt64
   | .bool => Bool
   | .nat => Nat
-  | .point => PUnit
+  | .point _ => PUnit
   | .pair a b => Val a × Val b
   | .option a => Option (Val a)
+  | .list a => List (Val a)
 
 def Word4.limb (a : Word4) (i : Fin 4) : UInt64 :=
   match i.val with

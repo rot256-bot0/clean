@@ -57,9 +57,9 @@ def checkFieldPair (f : FieldId) (a b : Nat) : IO (Array Json) := do
   let sAdd := (sourceAdd f).eval anyFieldModel h![fa,fb]
   let sMul := (sourceMul f).eval anyFieldModel h![fa,fb]
   let sSquare := (sourceSquare f).eval anyFieldModel h![fa]
-  let add := ((sourceAdd f).mapHandler lower).eval (allLibrary.model primitive) h![wa,wb]
-  let mul := ((sourceMul f).mapHandler lower).eval (allLibrary.model primitive) h![wa,wb]
-  let square := ((sourceSquare f).mapHandler lower).eval (allLibrary.model primitive) h![wa]
+  let add := (compile (sourceAdd f) (by rfl)).eval (allLibrary.model primitive) h![wa,wb]
+  let mul := (compile (sourceMul f) (by rfl)).eval (allLibrary.model primitive) h![wa,wb]
+  let square := (compile (sourceSquare f) (by rfl)).eval (allLibrary.model primitive) h![wa]
   require (add.decode == (a+b)%p && add.decode == sAdd.val && add.decode < p) "field Add raw mismatch"
   require (mul.decode == (a*b)%p && mul.decode == sMul.val && mul.decode < p) "field Mul raw mismatch"
   require (square.decode == (a*a)%p && square.decode == sSquare.val && square.decode < p) "field Square raw mismatch"

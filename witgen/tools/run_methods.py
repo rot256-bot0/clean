@@ -29,7 +29,27 @@ TYPED_AUDIT=(
  'Witgen.Typed.Secp.generator_equation','Witgen.Typed.Secp.discriminant_ne_zero',
  'Witgen.Typed.Secp.affine_roundtrip','Witgen.Typed.Secp.fromAffine_isSome_iff',
  'Witgen.Typed.Secp.concrete_mixed_correct','Witgen.Typed.Secp.concrete_generator_roundtrip',
- 'Witgen.Typed.u64FieldProgram_correct')
+ 'Witgen.Typed.ValueOp.case_none','Witgen.Typed.ValueOp.case_some',
+ 'Witgen.Typed.Curve.const_spec','Witgen.Typed.Curve.literal_point_spec',
+ 'Witgen.Typed.Curve.mul_spec','Witgen.Typed.Curve.eq_spec','Witgen.Typed.Curve.msm_spec',
+ 'Witgen.Typed.Curve.msm_nil','Witgen.Typed.Curve.msm_singleton',
+ 'Witgen.Typed.Curve.affine_roundtrip','Witgen.Typed.Curve.fromAffine_toAffine',
+ 'Witgen.Typed.Curve.fromAffine_isSome_iff','Witgen.Typed.Secp.math',
+ 'Witgen.Typed.Secp.mixed_identity_none','Witgen.Typed.Secp.curveEq_correct',
+ 'Witgen.Typed.Secp.curveMSM_correct','Witgen.Typed.Secp.constructedMSM_correct',
+ 'Witgen.Typed.Secp.constantGenerator_correct','Witgen.Typed.Secp.constantIdentity_correct',
+ 'Witgen.Typed.u64FieldProgram_correct',
+ 'Witgen.Typed.Secp.generator_nonsingular','Witgen.Typed.Secp.mul_spec',
+ 'Witgen.Typed.Secp.fromAffine_zero_zero','Witgen.Typed.Secp.generator_roundtrip',
+ 'Witgen.Typed.Secp.mixed_correct','Witgen.Typed.Secp.mixed_one_one',
+ 'Witgen.Typed.Secp.roundtripProgram_eval','Witgen.Typed.Secp.generatorRoundtrip_correct',
+ 'Witgen.Typed.Secp.invalidPair_rejects_zero','Witgen.Typed.Public.mixed_eq',
+ 'Witgen.Typed.Public.mixed_correct','Witgen.Typed.CurveProgramTests.curveEq_correct',
+ 'Witgen.Typed.CurveProgramTests.curveMSM_correct','Witgen.Typed.CurveProgramTests.constructedMSM_correct',
+ 'Witgen.Typed.CurveProgramTests.roundtrip_correct','Witgen.Typed.CurveIntegrationTests.field_neg',
+ 'Witgen.Typed.CurveIntegrationTests.field_inv','Witgen.Typed.CurveIntegrationTests.field_inv_zero',
+ 'Witgen.Typed.CurveIntegrationTests.mixed_correct','Witgen.Typed.CurveIntegrationTests.roundtrip_eval',
+ 'Witgen.Typed.CurveIntegrationTests.generator_roundtrip')
 U64_AUDIT=tuple('Witgen.U64.'+name for name in (
  'addc_correct','subb_correct','adc_correct','sbb_correct','Word4.decode_lt','Word4.decode_encode',
  'Word4.addCarry_correct','Word4.subBorrow_correct','Word4.Add_correct','wordBit_correct',
@@ -79,7 +99,13 @@ def point_reference(p):
 
 
 def normalize(ty,value):
+    if ty == 'bool':
+        if type(value) is not bool:raise ValueError('non-Boolean output')
+        return value
     if isinstance(ty,dict):
+        if 'list' in ty:
+            if not isinstance(value,list):raise ValueError('bad list output')
+            return [normalize(ty['list'],v) for v in value]
         if 'field' in ty:
             if not isinstance(value,str) or not re.fullmatch(r'0|[1-9][0-9]*',value):raise ValueError('non-decimal field output')
             if int(value)>=int(ty['modulus']):raise ValueError('noncanonical field output')
@@ -112,9 +138,16 @@ def expected_independent(case):
         else: raise ValueError('unknown field operation')
         return str(value%p)
     if name=='secp_mixed_fields':
-        s,t,b=map(int,args);k=(s*s*t+s)%N;q=point_add(point_scale(k,G),(G[0],(-G[1])%P))
-        return str((b*b*(0 if q is None else q[0])+G[0])%P)
-    if name=='secp_generator_affine_roundtrip':return point_reference(G)
+        s,t=map(int,args);k=(s*s*t+s)%N;q=point_add(point_scale(k,G),(G[0],(-G[1])%P))
+        return None if q is None else str((q[0]*q[0]*q[1]+q[0])%P)
+    if name in ('secp_generator_affine_roundtrip','curve_const_generator'):return point_reference(G)
+    if name=='curve_const_identity':return point_reference(None)
+    if name=='curve_eq':return point_decode(args[0])==point_decode(args[1])
+    if name=='curve_msm':
+        total=None
+        for scalar,point in args[0]:total=point_add(total,point_scale(int(scalar),point_decode(point)))
+        return point_reference(total)
+    if name=='curve_msm_constructed':return point_reference(point_scale(int(args[0]),point_decode(args[1])))
     if name in ('secp_to_affine','secp_affine_roundtrip'):
         p=point_decode(args[0])
         return None if p is None else list(map(str,p)) if name=='secp_to_affine' else point_reference(p)
@@ -143,19 +176,31 @@ def required_cases():
         for a,b in dict.fromkeys((a%p,b%p) for a,b in pairs):
             for suffix,mode in [('native','native'),('nat_methods','nat'),('u64_methods','u64')]:
                 add(f'field_{f}_{suffix}',mode,[str(a),str(b)])
-    for args in [(0,0,0),(1,1,2),(2,3,5),(N-1,1,P-1),
-                 (2**200+7,2**129+9,2**253),(17,19,23)]:
+    for args in [(0,0),(1,1),(1,0),(2,3),(N-1,1),
+                 (2**200+7,2**129+9),(17,19)]:
         add('secp_mixed_fields','native',list(map(str,args)))
     doubled=point_add(G,G)
     negative=(G[0],(-G[1])%P)
+    def encode(point):
+        return '00' if point is None else '04'+''.join(format(x,'064x') for x in point)
     # -G and (n-1)G intentionally occur twice, including in the input multiset.
-    for point in [None,G,doubled,negative,negative]:
-        encoded='00' if point is None else '04'+''.join(format(x,'064x') for x in point)
+    points=[None,G,doubled,negative,negative]
+    for point in points:
+        encoded=encode(point)
         for name in ['secp_to_affine','secp_affine_roundtrip']:
             add(name,'native',[encoded])
     for xy in [G,doubled,(0,0),(1,1)]:
         add('secp_from_affine','native',[list(map(str,xy))])
-    add('secp_generator_affine_roundtrip','native',[])
+    for a in points:
+        for b in points:add('curve_eq','native',[encode(a),encode(b)])
+    for terms in [[],[(0,G)],[(1,G)],[(1,None)],[(1,G),(1,negative)],
+                  [(2,G),(3,doubled)],[(N-1,G)],
+                  [(2**200+7,G),(2**129+9,negative),(17,None)]]:
+        add('curve_msm','native',[[[str(k),encode(point)] for k,point in terms]])
+    for k,point in [(0,G),(1,G),(N-1,G),(N-1,None),(2**200+7,doubled)]:
+        add('curve_msm_constructed','native',[str(k),encode(point)])
+    for name in ('curve_const_generator','curve_const_identity','secp_generator_affine_roundtrip'):
+        add(name,'native',[])
     for f,modulus in enumerate(FIELD_MODULI):
         p=int(modulus);radix=2**64;capacity=2**256
         edges=[(0,0),(0,1),(1,0),(1,1),(p-1,p-1),(p-1,1),(p-2,p-3),
@@ -392,7 +437,9 @@ def run_all():
     manifest=load_artifact(ART/'bundle/manifest.json')
     modules={entry['name']:(load_artifact(ART/'bundle'/f'{entry["name"]}.json'),entry['mode'])
              for entry in manifest['programs']}
-    if len(modules)!=14 or len(modules)!=len(manifest['programs']):raise ValueError('module coverage mismatch')
+    required_modules={(c['program'],c['mode']) for c in required_cases() if not c['program'].startswith('field.')}
+    if ({(name,mode) for name,(_,mode) in modules.items()}!=required_modules
+            or len(modules)!=len(manifest['programs'])):raise ValueError('module coverage mismatch')
     aliases={'nat':'field_2_nat_methods','u64':'field_2_u64_methods','mixed':'secp_mixed_fields',
              'affine':'secp_generator_affine_roundtrip','from-affine':'secp_from_affine'}
     for alias,source_name in aliases.items():

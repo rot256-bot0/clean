@@ -3,14 +3,17 @@ use witgen_native::typed;
 // program: "secp_affine_roundtrip"
 pub fn run(a0: typed::SecpPoint) -> witgen_native::Result<Option<typed::SecpPoint>> {
     let v0: Option<(typed::SecpBase, typed::SecpBase)> = typed::to_affine(a0.clone());
-    let v3: Option<typed::SecpPoint> = match v0.clone() {
-        Some(some1) => {
-            let v2: Option<typed::SecpPoint> = typed::from_affine(some1.clone());
+    let v4: Option<typed::SecpPoint> = match v0.clone() {
+        None => {
+            let v2: Option<typed::SecpPoint> = None::<typed::SecpPoint>;
             v2.clone()
         }
-        None => None,
+        Some(_some1) => {
+            let v3: Option<typed::SecpPoint> = typed::from_affine(_some1.clone());
+            v3.clone()
+        }
     };
-    Ok(v3.clone())
+    Ok(v4.clone())
 }
 
 fn decode_0(value: &serde_json::Value) -> witgen_native::Result<typed::SecpPoint> {

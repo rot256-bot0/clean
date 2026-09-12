@@ -4,14 +4,17 @@ use witgen_native::typed;
 pub fn run() -> witgen_native::Result<Option<typed::SecpPoint>> {
     let v0: typed::SecpPoint = typed::point_generator();
     let v1: Option<(typed::SecpBase, typed::SecpBase)> = typed::to_affine(v0.clone());
-    let v4: Option<typed::SecpPoint> = match v1.clone() {
-        Some(some2) => {
-            let v3: Option<typed::SecpPoint> = typed::from_affine(some2.clone());
+    let v5: Option<typed::SecpPoint> = match v1.clone() {
+        None => {
+            let v3: Option<typed::SecpPoint> = None::<typed::SecpPoint>;
             v3.clone()
         }
-        None => None,
+        Some(_some2) => {
+            let v4: Option<typed::SecpPoint> = typed::from_affine(_some2.clone());
+            v4.clone()
+        }
     };
-    Ok(v4.clone())
+    Ok(v5.clone())
 }
 
 fn encode_1(value: typed::SecpPoint) -> serde_json::Value {

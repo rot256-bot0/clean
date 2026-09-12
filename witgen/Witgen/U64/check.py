@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fresh, bounded, dependency-free Lean verification for the U64 import closure."""
+"""Fresh local Lean import-closure verification with pinned dependency caches."""
 import argparse
 import hashlib
 import json
@@ -11,6 +11,18 @@ import tempfile
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def export_directory():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--export', default='Witgen/U64/evidence')
+    return (ROOT / parser.parse_args().export).resolve()
+
+
+# Resolve the real CLI target before project imports can fail. No library effects.
+if __name__ == '__main__':
+    (export_directory() / 'verification.json').unlink(missing_ok=True)
+
 sys.path.insert(0, str(ROOT / 'tools'))
 from axiom_audit import check_axioms
 from run_methods import U64_AUDIT
@@ -23,9 +35,9 @@ def verify_axioms(log, expected):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--export', default='Witgen/U64/evidence')
-    opts = parser.parse_args()
+    output = export_directory()
+    output.mkdir(parents=True, exist_ok=True)
+    (output / 'verification.json').unlink(missing_ok=True)
     order, seen = [], set()
 
     def visit(module):
@@ -38,18 +50,21 @@ def main():
                 for dep in line.removeprefix('import ').split():
                     if dep.startswith('Witgen.'):
                         visit(dep)
-                    elif dep.split('.')[0] not in {'Std', 'Lean', 'Init'}:
+                    elif dep.split('.')[0] not in {'Std', 'Lean', 'Init', 'Mathlib'}:
                         raise RuntimeError(f'unexpected external import: {dep}')
         order.append((module, source))
 
     visit('Witgen.U64.Audit')
     visit('MainU64')
     hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for _, p in order}
-    output = (ROOT / opts.export).resolve()
-    output.mkdir(parents=True, exist_ok=True)
-    (output / 'verification.json').unlink(missing_ok=True)
+    configured = subprocess.check_output(['lake', 'env', 'printenv', 'LEAN_PATH'],
+                                         cwd=ROOT, text=True).strip().split(os.pathsep)
+    project_cache = (ROOT / '.lake/build/lib/lean').resolve()
+    dependencies = [p for p in configured if p and Path(p).resolve() != project_cache]
+    pins = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+            for name in ['lean-toolchain', 'lakefile.toml', 'lake-manifest.json']}
     with tempfile.TemporaryDirectory(prefix='witgen-u64-lean-') as build:
-        env = dict(os.environ, LEAN_PATH=build)
+        env = dict(os.environ, LEAN_PATH=os.pathsep.join([build, *dependencies]))
         logs = []
         for module, source in order:
             target = Path(build) / (module.replace('.', '/') + '.olean')
@@ -114,7 +129,10 @@ def main():
             decoded = sum(int(x) << (64*i) for i, x in enumerate(row['limbs']))
             assert 0 <= decoded < p
             assert decoded == int(row['actual']) == int(row['expected']) == expected_value
-        receipt = {'source_sha256': hashes, 'direct_lean_modules': len(order),
+        if any(hashlib.sha256((ROOT / n).read_bytes()).hexdigest() != h for n,h in pins.items()):
+            raise RuntimeError('dependency pins changed during verification')
+        receipt = {'source_sha256': hashes, 'dependency_pin_sha256': pins,
+                   'project_oleans_reused': False, 'direct_lean_modules': len(order),
                    'axiom_endpoints': len(expected), 'axioms': sorted(axioms), 'shared_methods': len(names),
                    'callers': len(bundle['programs']), 'loop_bounds': loops,
                    'call_sites': len(calls), 'python_reference_checks': len(report['fixtures']),

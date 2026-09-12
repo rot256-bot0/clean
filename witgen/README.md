@@ -1,129 +1,124 @@
 # Clean WitGen DSL
 
-Typed, feature-based witness programs in the [Clean fork](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl).
-The generic Core has no mandatory arithmetic, structure, curve or call operations.
-This package uses Lean 4.32.2; parent Clean's WitnessIR/toolchain remain unchanged.
+Typed, feature-based witness programs on the authorized
+[`feat/clean-witgen-dsl`](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl)
+branch. This package uses Lean 4.32.2. Parent Clean's WitnessIR/toolchain and the
+finite `Program`/`Regions` core are unchanged.
 
-## Namespaced, Type-Directed Operations
+## Interfaces and Specifications
 
-```lean
-witgen [a,b] do
-  let aa ← field.Square a
-  let product ← field.Mul aa b
-  let five ← field.Const f 5
-  let out ← field.Add product five
-  return out
-```
+- `FieldOp f`: Const, Add, Mul, Square, Neg, Inv. Operand types select the field;
+  backend selection is separate. `fieldModel` specifies canonical modular arithmetic.
+  Inversion maps zero to zero and satisfies the proved nonzero inverse law.
+- `CurveOp c`: Const, Add, Mul, Inv, Eq, MSM, Generator, Identity, ToAffine,
+  FromAffine. `c` contains field identities and the Weierstrass equation.
+  `Curve.model` interprets real Mathlib points; secp256k1 is the concrete native instance.
+- `CurveLiteral c`: infinity or affine coordinates with a kernel-checked
+  nonsingularity proof. `curve.Const` returns a point directly. Native IR validation
+  also checks canonical coordinates and the configured equation before emitting code.
+- `StructOp desc`: named construction, projection and functional update.
+  `struct.Set` preserves the old record and unrelated fields.
+- `BranchOp bool`: optional conditional control with explicit capture regions.
+  `ValueOp` provides typed pairs, lists and options, including option case analysis.
+  Returning Bool does not require Boolean-logic operations.
 
-This is the body of [fieldProgram](Witgen/Typed/Examples.lean). Operands have sort
-`.field f`; the feature is `FieldOp f`. The library registers BN254 Fr and the
-separate secp256k1 base/scalar fields. `field.Mul/Add/Square` infer the functionality
-from their operands, while backend/lowering selection remains explicit.
-Mixed-field arithmetic and base-as-scalar curve scaling are rejected.
+Reusable examples are capability-polymorphic: `CurvePrograms.mixed` requires
+`Has (CurveOp c) F`, the base/scalar `FieldOp` capabilities and `Has ValueOp F`.
+Concrete feature bundles are chosen at export/instantiation time.
 
-[Public.mixed](Witgen/Typed/Public.lean) demonstrates both field identities with
-actual secp point operations. `curve.Inv` means group inverse `−P`. The real source
-model is Mathlib's secp256k1 Weierstrass curve; both modulus primes have closed
-kernel-checked Lucas certificates. Native curve execution uses Arkworks.
+The named surface supports ordinary operation binds, aliases, `if` and exhaustive
+`none`/`some` matches. Branch captures are reified as typed region inputs. Patterns
+bind payload variables explicitly, including shadowing. Undeclared ambient
+references, incomplete matches and missing capabilities are rejected.
 
-- `curve.ToAffine : Point → Option (Base × Base)` — None at infinity.
-- `curve.FromAffine : Base × Base → Option Point` — None off-curve, never an
-  implicit invalid-coordinate→identity conversion.
-- `curve.X` is an explicitly total convenience view with `X(identity)=0`.
+`curve.X` and `curve.Scale` are removed. The example obtains both coordinates
+through `ToAffine` and uses `curve.Mul`. Affine roundtrip returns `Some p` for finite
+points and `None` at infinity; runtime invalid coordinates return `None`.
+`curve.Eq` compares mathematical points. MSM consumes one list of scalar/point pairs
+and returns identity for the empty list. Native execution uses Arkworks.
 
-The curve feature could instead receive a certified curve→field implementation
-for another backend. That fallback is **not implemented in this revision**.
-Scalar representatives act by their canonical natural value; generator-order/
-cofactor and modulo-order module-action proofs are not claimed.
+## Shared Methods and Lowering
 
-## Functional Structures
+`Methods.lean` provides finite typed signatures, earlier-only call references and
+stored bodies. Evaluation uses those bodies, not host-function payloads. Generic
+substitution, refinement, name-uniqueness and linkage laws are checked.
 
-`struct.Named`, `struct.Get`, and `struct.Set` use generic caller-owned schemas.
-`Set` returns an updated value without modifying the old record or other fields.
-Typed field membership, distinct names, get/set laws and representation-preserving
-updates are proved. Named arguments currently follow schema order. Lists are a
-separate optional feature; pairs/options are library-owned too.
+The Nat implementation stores Add/Mul/Square bodies and retains calls. Neg/Inv
+have field-indexed Nat primitives with proved raw-Nat representation preservation;
+the emitter implements them with GMP.
 
-The named `witgen [...] do` surface elaborates to finite typed syntax and supports
-operation binds, reference aliases and returns. Its fail-closed ambient interface
-admits static scalars, type-valued families and restricted abstract-target Has
-capabilities—not arbitrary captured records/callbacks/proofs or unsolved holes.
-Global low-level AST builders remain trusted; this is not a sandbox.
-See [StructAuthoringAPI](docs/StructAuthoringAPI.md).
+The U64 target has three shared arithmetic bodies and nine thin field wrappers.
+One emitted library serves twelve callers. Multiplication contains one bounded
+256-bit loop; Square calls Mul and Mul calls Add. Four-limb carry/borrow,
+overflow-aware addition, multiplication, squaring, canonicality and raw decoding
+are proved, with separate stored-body evaluation theorems.
 
-## Shared Methods and Field → U64
-
-[Methods.lean](Witgen/Methods.lean) provides typed signatures, earlier-only call
-references and finite method bodies. Evaluation uses those actual bodies, not
-host-function payloads. Generic call/refinement/linkage laws are checked.
-
-The Field→Nat backend stores Add/Mul/Square bodies and retains calls. The **real
-Field→U64 backend** has three shared arithmetic bodies and nine thin wrappers for
-the three fields. One emitted unit shares them across twelve callers. Multiplication
-contains one bounded 256-bit loop; Square calls Mul and Mul calls Add. The caller
-never expands that arithmetic at each source operation.
-
-Four-limb carry/borrow, overflow-aware modular addition, multiplication, squaring,
-canonical outputs and raw decoding are proved; separate theorems connect the
-stored AST bodies to the algorithms. No whole-field Nat/GMP/native field operation
-is hidden inside U64 method arithmetic. Input/output codecs and public loop indices
-are separate from the word data path. This is a reference double/add implementation,
-not optimized Montgomery arithmetic or a constant-time certificate.
-
-- [Field/method API](docs/FieldMethodsAPI.md)
-- [U64 arithmetic, bodies and lowering](docs/U64FieldAPI.md)
-- [Actual shared generated library](backend/src/generated_methods/shared_u64.rs)
-- [secp256k1 feature and affine API](docs/SecpAPI.md)
-- [Code-first design](../doc/witgen-dsl-design.md)
+U64 supports Const/Add/Mul/Square. Its partial handler declines Neg/Inv rather than
+inventing a word implementation. `U64.compile` requires an acceptance proof;
+`PartialCertifiedLowering` proves preservation for accepted programs. Nested
+unsupported operations fail closed. Nat lowering remains total for all six field
+operations. No whole-field Nat/GMP/native-field arithmetic is hidden in U64 bodies.
 
 ## Reproduce
 
-Prerequisites: Elan/Lean, Python 3.11+, Rust 1.85+, rustfmt and system GMP development
-libraries. Dependencies are locked. Run from **this `witgen/` directory**:
+Prerequisites: Elan/Lean, Python 3.11+, Rust 1.85+, rustfmt and GMP development
+libraries. Dependencies and toolchains are pinned. Run from this directory:
 
 ```sh
-lake update
 lake exe cache get
-python3 tools/run_methods.py
 python3 tools/run_demo.py
 python3 -m unittest discover -s tests -v
-cargo test --locked --manifest-path backend/Cargo.toml --test typed --test crypto --test providers
+cargo test --locked --manifest-path backend/Cargo.toml
+cargo test --locked --manifest-path backend/Cargo.toml --features asm
 ```
 
-Fresh methods/curve/U64 evidence and source/artifact hashes are written to
-`artifacts/methods/verification.json`. The native `witgen-methods` binary accepts
-JSONL with `program` and typed `inputs`. Whole field inputs/outputs are decimal
-strings; point inputs use SEC1 hex (`00` is identity). Pair values are two-element
-JSON arrays. `None` is null; an ordinary `Some` uses its payload, while nested
-optional payloads use a single-key `{"some": ...}` tag to keep `Some(None)` distinct
-from `None`. No field value is truncated through one u64.
+Focused paths:
 
 ```sh
-lake env lean --run MainMethods.lean export artifacts/methods/bundle
-lake env lean --run MainU64.lean export artifacts/u64
-python3 -B Witgen/U64/check.py  # fresh Std-only U64 import-closure check
+python3 tools/run_methods.py
+python3 tools/run_extended.py
+python3 -B Witgen/U64/check.py
 ```
 
-The new native pipeline executes 408 fixture cases (not all distinct pairs),
-including real curve/affine cases and raw U64 field outputs. U64 source checks cover
-601 pairs across 14 moduli, testing both algorithms and stored method ASTs. Exact
-nonempty audits cover methods/fields/curve, U64 and structural updates. The older
-48-case BN254 full-witness, ten-case custom-type and 7,472-case bounded suites remain
-regressions; the small fields are not the main example.
+- Methods: 449 exact cases, including 25 curve equalities, MSMs, point constants,
+  affine conversions and 279 raw U64 field results.
+- Extended: 174 exact cases across 18 programs, checking native/GMP Neg/Inv and
+  both outcomes of named conditionals and option matches.
+- U64 source: 601 pairs across 14 moduli, with 1,803 algorithm and 1,803 stored-body
+  checks. The cold command rebuilds the entire local import closure without project
+  oleans, using the pinned dependency caches; it records their manifests.
+- Existing full-witness BN254, custom types, bounded small-field and Caliper suites
+  remain integrated regressions.
 
-## Proof and Analysis Boundaries
+Receipts live in `artifacts/{methods,extended}/verification.json`. They bind source,
+exported inputs, exact independently enumerated case multisets, raw native results,
+and the actual Cargo-reported executable. The methods receipt supports historical
+hash validation and artifact/executable mutation controls.
 
-Kernel proofs cover the stated feature/method/model/arithmetic/curve/structure
-contracts. Serialization, Rust emission/compiler and Arkworks/GMP are tested TCB,
-not kernel-verified native execution. Certificate generators propose prime data;
-Lean checks the factors and modular-power traces. No custom axioms, native-decision
-shortcut or heartbeat/recursion-limit increases are used.
+JSON fields use full-width decimal strings. Point inputs use SEC1 hex (`00` is
+infinity). Pairs and lists use arrays. Optional payloads preserve `None` separately
+from `Some(None)` using a nested-option tag. Native IR descriptors preserve and
+validate curve name, fields, moduli and coefficients.
 
-The existing Caliper backend still certifies its documented static word examples.
-It has not been extended to a complete cost analysis of the new method library,
-curve feature or generated Rust. Its 99-cycle word-ModMul example is not a runtime
-bound for U64 field multiplication. Buffer capacity excludes registers.
+## Proof Scope
 
-Remaining separate work includes recursive methods, automatic lowering search,
-curve→field lowering, full new-library Caliper/native timing, and production Clean
-integration. These are not claimed by the current examples.
+Kernel proofs cover the declared models, typed programs, representation relations,
+method bodies and arithmetic. Prime certificates for all three field moduli are
+checked by Lean. No custom axioms, native-decision shortcuts or raised proof limits
+are used. Serialization, Rust emission/compiler, Arkworks and GMP are tested TCB,
+not kernel-verified native code. Scalar multiplication uses canonical natural
+representatives; generator-order/cofactor/module-action theorems are not claimed.
+
+Curve-to-field lowering is outside this PoC. Caliper remains a U64-level analysis
+backend: it has no field/curve implementations. Its documented abstract costs are
+not native runtime or hardware timing, and buffer capacity excludes registers.
+
+## Source Guides
+
+- [Code-first design](../doc/witgen-dsl-design.md)
+- [Generic curve specification and typed literals](docs/CurveAPI.md)
+- [Branching surface and region protocol](docs/BranchAPI.md)
+- [Field and method interfaces](docs/FieldMethodsAPI.md)
+- [Word arithmetic and shared methods](docs/U64FieldAPI.md)
+- [Native metadata and codecs](docs/NativeMethodsAPI.md)
+- [Named structures and capture policy](docs/StructAuthoringAPI.md)

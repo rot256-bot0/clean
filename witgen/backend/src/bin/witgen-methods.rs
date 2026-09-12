@@ -8,8 +8,23 @@ mod module_1;
 #[path = "../generated_methods/module_10.rs"]
 mod module_10;
 #[allow(dead_code)]
-#[path = "../generated_methods/shared_u64.rs"]
+#[path = "../generated_methods/module_11.rs"]
 mod module_11;
+#[allow(dead_code)]
+#[path = "../generated_methods/module_12.rs"]
+mod module_12;
+#[allow(dead_code)]
+#[path = "../generated_methods/module_13.rs"]
+mod module_13;
+#[allow(dead_code)]
+#[path = "../generated_methods/module_14.rs"]
+mod module_14;
+#[allow(dead_code)]
+#[path = "../generated_methods/module_15.rs"]
+mod module_15;
+#[allow(dead_code)]
+#[path = "../generated_methods/shared_u64.rs"]
+mod module_16;
 #[allow(dead_code)]
 #[path = "../generated_methods/module_2.rs"]
 mod module_2;
@@ -58,18 +73,23 @@ fn execute(request: &serde_json::Value) -> witgen_native::Result<serde_json::Val
         "secp_from_affine" => module_8::run_json(inputs),
         "secp_to_affine" => module_9::run_json(inputs),
         "secp_affine_roundtrip" => module_10::run_json(inputs),
-        "field.0.add" => module_11::run_json(0, inputs),
-        "field.0.mul" => module_11::run_json(1, inputs),
-        "field.0.square" => module_11::run_json(2, inputs),
-        "field.1.add" => module_11::run_json(3, inputs),
-        "field.1.mul" => module_11::run_json(4, inputs),
-        "field.1.square" => module_11::run_json(5, inputs),
-        "field.2.add" => module_11::run_json(6, inputs),
-        "field.2.mul" => module_11::run_json(7, inputs),
-        "field.2.square" => module_11::run_json(8, inputs),
-        "field_0_u64_methods" => module_11::run_json(9, inputs),
-        "field_1_u64_methods" => module_11::run_json(10, inputs),
-        "field_2_u64_methods" => module_11::run_json(11, inputs),
+        "curve_eq" => module_11::run_json(inputs),
+        "curve_msm" => module_12::run_json(inputs),
+        "curve_msm_constructed" => module_13::run_json(inputs),
+        "curve_const_generator" => module_14::run_json(inputs),
+        "curve_const_identity" => module_15::run_json(inputs),
+        "field.0.add" => module_16::run_json(0, inputs),
+        "field.0.mul" => module_16::run_json(1, inputs),
+        "field.0.square" => module_16::run_json(2, inputs),
+        "field.1.add" => module_16::run_json(3, inputs),
+        "field.1.mul" => module_16::run_json(4, inputs),
+        "field.1.square" => module_16::run_json(5, inputs),
+        "field.2.add" => module_16::run_json(6, inputs),
+        "field.2.mul" => module_16::run_json(7, inputs),
+        "field.2.square" => module_16::run_json(8, inputs),
+        "field_0_u64_methods" => module_16::run_json(9, inputs),
+        "field_1_u64_methods" => module_16::run_json(10, inputs),
+        "field_2_u64_methods" => module_16::run_json(11, inputs),
         _ => Err(witgen_native::Error::UnknownProgram(program.to_owned())),
     }
 }

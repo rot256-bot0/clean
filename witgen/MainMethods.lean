@@ -12,7 +12,7 @@ def nativeFieldJson (f : FieldId) : Except String Json :=
   moduleJson typeJson fieldCodec .nil ("field_" ++ toString f.val ++ "_native") ["a","b"]
     ((fieldProgram f).mapHandler Sum.inl)
 
-def toAffineProgram : Program Secp.Feature [.point]
+def toAffineProgram : Program Secp.Feature [.point secp256k1]
     (.option (.pair (.field secpBase) (.field secpBase))) :=
   witgen [p] do
     let coordinates ← curve.ToAffine p
@@ -81,21 +81,22 @@ def exportAll (directory : System.FilePath) : IO Unit := do
         let actualMode := if mode == "nat_methods" then "nat" else if mode == "u64_methods" then "u64" else mode
         cases := cases.push (fixture ("field_" ++ toString f.val ++ "_" ++ mode) actualMode
           #[decimal a,decimal b] (decimal source.val))
-  for result in [Public.mixedJson, Secp.generatorRoundtripJson, Secp.fromAffineJson, toAffineJson, roundtripJson] do
+  for result in [Public.mixedJson, Secp.generatorRoundtripJson, Secp.fromAffineJson, toAffineJson, roundtripJson,
+      Secp.curveEqJson, Secp.curveMSMJson, Secp.constructedMSMJson,
+      Secp.constantGeneratorJson, Secp.constantIdentityJson] do
     let module ← checked result
     let name ← IO.ofExcept (module.getObjValAs? String "name")
     IO.FS.writeFile (directory / (name ++ ".json")) (module.pretty ++ "\n")
     programs := programs.push (Json.mkObj [("name",.str name),("mode",.str "native")])
-  for (s,t,b) in ([(0,0,0),(1,1,2),(2,3,5),(modulus secpScalar-1,1,modulus secpBase-1),
-      (2^200+7,2^129+9,2^253),(17,19,23)] : List (Nat × Nat × Nat)) do
+  for (s,t) in ([(0,0),(1,1),(1,0),(2,3),(modulus secpScalar-1,1),
+      (2^200+7,2^129+9),(17,19)] : List (Nat × Nat)) do
     let fs := Residue.ofNat (modulus_pos secpScalar) s
     let ft := Residue.ofNat (modulus_pos secpScalar) t
-    let fb := Residue.ofNat (modulus_pos secpBase) b
-    let out := Public.mixed.eval Secp.model h![fs,ft,fb]
+    let out := Secp.mixed.eval Secp.mixedModel h![fs,ft]
     cases := cases.push (fixture "secp_mixed_fields" "native"
-      #[decimal fs.val,decimal ft.val,decimal fb.val] (decimal out.val))
+      #[decimal fs.val,decimal ft.val] (optionReference (fun x => decimal x.val) out))
   let points : List Secp.Point := [0,Secp.generator,Secp.generator+Secp.generator,-Secp.generator,
-    Secp.scale (Residue.ofNat (modulus_pos secpScalar) (modulus secpScalar-1)) Secp.generator]
+    Secp.mul (Residue.ofNat (modulus_pos secpScalar) (modulus secpScalar-1)) Secp.generator]
   for p in points do
     let coords := toAffineProgram.eval Secp.model h![p]
     cases := cases.push (fixture "secp_to_affine" "native" #[pointInput p]
@@ -112,6 +113,33 @@ def exportAll (directory : System.FilePath) : IO Unit := do
       let result := Secp.invalidPair.eval Secp.affineModel h![pair]
       cases := cases.push (fixture "secp_from_affine" "native" #[pairReference pair]
         (optionReference pointReference result))
+  for p in points do
+    for q in points do
+      let result := Secp.curveEq.eval Secp.secpModel h![p,q]
+      cases := cases.push (fixture "curve_eq" "native" #[pointInput p,pointInput q] (.bool result))
+  let scalar := Residue.ofNat (modulus_pos secpScalar)
+  let termSets : List (List (FieldValue secpScalar × Secp.Point)) :=
+    [[], [(scalar 0,Secp.generator)], [(scalar 1,Secp.generator)], [(scalar 1,0)],
+      [(scalar 1,Secp.generator),(scalar 1,-Secp.generator)],
+      [(scalar 2,Secp.generator),(scalar 3,Secp.generator+Secp.generator)],
+      [(scalar (modulus secpScalar-1),Secp.generator)],
+      [(scalar (2^200+7),Secp.generator),(scalar (2^129+9),-Secp.generator),(scalar 17,0)]]
+  for terms in termSets do
+    let result := Secp.curveMSM.eval Secp.secpModel h![terms]
+    let input := Json.arr (terms.toArray.map fun (s,p) => .arr #[decimal s.val,pointInput p])
+    cases := cases.push (fixture "curve_msm" "native" #[input] (pointReference result))
+  for (s,p) in [(scalar 0,Secp.generator),(scalar 1,Secp.generator),
+      (scalar (modulus secpScalar-1),Secp.generator),(scalar (modulus secpScalar-1),0),
+      (scalar (2^200+7),Secp.generator+Secp.generator)] do
+    let result := Secp.constructedMSM.eval Secp.affineModel h![s,p]
+    cases := cases.push (fixture "curve_msm_constructed" "native"
+      #[decimal s.val,pointInput p] (pointReference result))
+  cases := cases.push (fixture "curve_const_generator" "native" #[]
+    (pointReference (Program.eval (F := CurveOp secp256k1) (V := Secp.Val)
+      (t := Ty.point secp256k1) Secp.secpModel Secp.constantGenerator .nil)))
+  cases := cases.push (fixture "curve_const_identity" "native" #[]
+    (pointReference (Program.eval (F := CurveOp secp256k1) (V := Secp.Val)
+      (t := Ty.point secp256k1) Secp.secpModel Secp.constantIdentity .nil)))
   let generatorBack := Secp.generatorRoundtrip.eval Secp.affineModel .nil
   cases := cases.push (fixture "secp_generator_affine_roundtrip" "native" #[]
     (optionReference pointReference generatorBack))

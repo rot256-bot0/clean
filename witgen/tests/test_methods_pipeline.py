@@ -6,6 +6,9 @@ import os
 import hashlib
 import tempfile
 import unittest
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
+import run_methods as methods_runner
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -64,14 +67,14 @@ class MethodsPipelineTests(unittest.TestCase):
         records=[json.loads(line) for line in (ROOT/'artifacts/methods/case-results.jsonl').read_text().splitlines()]
         requests=[json.loads(line) for line in (ROOT/'artifacts/methods/native-requests.jsonl').read_text().splitlines()]
         results=[json.loads(line) for line in (ROOT/'artifacts/methods/native-results.jsonl').read_text().splitlines()]
-        self.assertEqual(len(records),408)
+        self.assertEqual(len(records),len(methods_runner.required_cases()))
         self.assertEqual(len(requests),len(records))
         for i,record in enumerate(records):
             self.assertEqual(record['case_index'],i)
             self.assertEqual(requests[i],{k:record['case'][k] for k in ('program','inputs')})
             self.assertEqual(record['result'],results[i])
             self.assertEqual(record['normalized'],record['independent_expected'])
-        self.assertEqual(report['case_coverage'],{'total':408,'unique':391,'intentional_duplicates':17})
+        self.assertEqual(report['case_coverage'],methods_runner.validate_case_coverage(methods_runner.required_cases()))
         self.assertIn('configuration_hashes',report['build'])
         self.assertIn('rustc_version',report['build'])
         self.assertIn('cargo_version',report['build'])

@@ -12,15 +12,18 @@ inductive Op : Signature Ty where
   | add : Op [.nat, .nat] [] .nat
   | mul : Op [.nat, .nat] [] .nat
   | mod (p : Nat) : Op [.nat] [] .nat
+  | neg (f : FieldId) : Op [.field f] [] (.field f)
+  | inv (f : FieldId) : Op [.field f] [] (.field f)
 
 abbrev Val : Ty → Type
   | .field _ | .nat => Nat
   | .bool => Bool
   | .u64 => UInt64
   | .word4 => UInt64 × UInt64 × UInt64 × UInt64
-  | .point => PUnit
+  | .point _ => PUnit
   | .pair a b => Val a × Val b
   | .option a => Option (Val a)
+  | .list a => List (Val a)
 
 def model : Model Op Val where
   eval := fun op args _ => match op, args with
@@ -30,6 +33,8 @@ def model : Model Op Val where
     | .add, .cons a (.cons b .nil) => a + b
     | .mul, .cons a (.cons b .nil) => a * b
     | .mod p, .cons a .nil => a % p
+    | .neg f, .cons a .nil => (modulus f - a % modulus f) % modulus f
+    | .inv f, .cons a .nil => inverseNat (modulus f) a
 
 def addSig (f : FieldId) : MethodSig Ty :=
   ⟨"field." ++ toString f.val ++ ".add.nat", [.field f, .field f], .field f⟩
@@ -81,6 +86,8 @@ def handler (f : FieldId) : Handler (FieldOp f) (WithCalls Op [squareSig f, mulS
   | _, _, _, .add => .inr (.call (.succ (.succ .zero)))
   | _, _, _, .mul => .inr (.call (.succ .zero))
   | _, _, _, .square => .inr (.call .zero)
+  | _, _, _, .neg => .inl (.neg f)
+  | _, _, _, .inv => .inl (.inv f)
 
 def Rel : ∀ t, FieldVal t → Val t → Prop
   | .field _, a, b => a.val = b
@@ -88,9 +95,10 @@ def Rel : ∀ t, FieldVal t → Val t → Prop
   | .bool, a, b => a = b
   | .u64, a, b => a = b
   | .word4, a, b => a = b
-  | .point, a, b => a = b
+  | .point _, a, b => a = b
   | .pair a b, x, y => Rel a x.1 y.1 ∧ Rel b x.2 y.2
   | .option a, x, y => Option.Rel (Rel a) x y
+  | .list a, x, y => ListRel (Rel a) x y
 
 theorem handler_respects (f : FieldId) :
     (fieldModel f).Respects ((library f).model model) (handler f) Rel := by
@@ -120,6 +128,19 @@ theorem handler_respects (f : FieldId) :
     change a.val ^ 2 % modulus f = (x * x) % modulus f
     change a.val = x at ha
     simp [ha, Nat.pow_succ]
+  | neg =>
+    cases xs; rename_i a xs; cases xs
+    cases ys; rename_i x ys; cases ys
+    obtain ⟨ha, _⟩ := hr
+    change (modulus f - a.val) % modulus f = (modulus f - x % modulus f) % modulus f
+    change a.val = x at ha
+    rw [← ha, Nat.mod_eq_of_lt a.isLt]
+  | inv =>
+    cases xs; rename_i a xs; cases xs
+    cases ys; rename_i x ys; cases ys
+    obtain ⟨ha, _⟩ := hr
+    change inverseNat (modulus f) a.val = inverseNat (modulus f) x
+    exact congrArg (inverseNat (modulus f)) ha
 
 def lowering (f : FieldId) : CertifiedLowering (fieldModel f) ((library f).model model) Rel :=
   .ofHandler _ _ (handler f) Rel (handler_respects f)
@@ -134,6 +155,8 @@ def codec : OpCodec Op := fun op =>
     | .add => ("nat.add", [])
     | .mul => ("nat.mul", [])
     | .mod p => ("nat.mod", [("modulus", .str (toString p))])
+    | .neg f => ("nat.field.neg", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
+    | .inv f => ("nat.field.inv", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
   Json.mkObj [("op", .str tag), ("static", Json.mkObj data)]
 
 end Witgen.Typed.NatMethods

@@ -1,7 +1,7 @@
 //! Primitive and codec seam for typed method-library exports.
 //! U64 arithmetic helpers use only word operations; Integer conversions are ABI-only.
 use crate::{Error, Result};
-use ark_ec::{AffineRepr, CurveGroup, PrimeGroup};
+use ark_ec::{AffineRepr, CurveGroup, PrimeGroup, VariableBaseMSM};
 use ark_ff::{AdditiveGroup, BigInt, BigInteger, Field, PrimeField};
 use rug::{integer::Order, Integer};
 use serde_json::Value;
@@ -85,6 +85,31 @@ fn canonical(value: Integer, id: u8) -> Result<Integer> {
 pub fn parse_nat_field<const ID: u8>(value: &Value) -> Result<NatField<ID>> {
     Ok(NatField(canonical(parse_nat(value)?, ID)?))
 }
+/// Explicit Nat primitive: (p - (a % p)) % p, including raw a >= p.
+/// This is arithmetic, not a change to the raw pack or strict input codec.
+pub fn nat_field_neg<const ID: u8>(a: NatField<ID>) -> Result<NatField<ID>> {
+    let modulus = field_modulus(ID)?;
+    if a.0 < 0 {
+        return Err(Error::NegativeNatural);
+    }
+    Ok(NatField((modulus.clone() - (a.0 % &modulus)) % modulus))
+}
+/// ZMod inversion over the registered prime modulus; multiples of p map to 0.
+pub fn nat_field_inv<const ID: u8>(a: NatField<ID>) -> Result<NatField<ID>> {
+    let modulus = field_modulus(ID)?;
+    if a.0 < 0 {
+        return Err(Error::NegativeNatural);
+    }
+    let residue = a.0 % &modulus;
+    if residue == 0 {
+        return Ok(NatField(Integer::from(0)));
+    }
+    Ok(NatField(
+        residue
+            .invert(&modulus)
+            .map_err(|_| Error::DivisionByZero)?,
+    ))
+}
 pub fn parse_word_field<const ID: u8>(value: &Value) -> Result<WordField<ID>> {
     let value = canonical(parse_nat(value)?, ID)?;
     let digits = value.to_digits::<u64>(Order::Lsf);
@@ -145,6 +170,12 @@ pub fn secp_base_mul(a: SecpBase, b: SecpBase) -> SecpBase {
 pub fn secp_base_square(a: SecpBase) -> SecpBase {
     a.square()
 }
+pub fn secp_base_neg(a: SecpBase) -> SecpBase {
+    -a
+}
+pub fn secp_base_inv(a: SecpBase) -> SecpBase {
+    a.inverse().unwrap_or(SecpBase::ZERO)
+}
 pub fn secp_scalar_add(a: SecpScalar, b: SecpScalar) -> SecpScalar {
     a + b
 }
@@ -154,8 +185,20 @@ pub fn secp_scalar_mul(a: SecpScalar, b: SecpScalar) -> SecpScalar {
 pub fn secp_scalar_square(a: SecpScalar) -> SecpScalar {
     a.square()
 }
+pub fn secp_scalar_neg(a: SecpScalar) -> SecpScalar {
+    -a
+}
+pub fn secp_scalar_inv(a: SecpScalar) -> SecpScalar {
+    a.inverse().unwrap_or(SecpScalar::ZERO)
+}
 pub fn bn254_square(a: crate::Bn254Scalar) -> crate::Bn254Scalar {
     a.square()
+}
+pub fn bn254_neg(a: crate::Bn254Scalar) -> crate::Bn254Scalar {
+    -a
+}
+pub fn bn254_inv(a: crate::Bn254Scalar) -> crate::Bn254Scalar {
+    a.inverse().unwrap_or(crate::Bn254Scalar::ZERO)
 }
 
 pub fn point_generator() -> SecpPoint {
@@ -164,11 +207,29 @@ pub fn point_generator() -> SecpPoint {
 pub fn point_identity() -> SecpPoint {
     SecpPoint::ZERO
 }
+/// Construct an affine literal whose equation and canonical coordinates were
+/// checked by the emitter. Dynamic coordinates must use `from_affine` instead.
+pub fn point_const(x: SecpBase, y: SecpBase) -> SecpPoint {
+    ark_secp256k1::Affine::new_unchecked(x, y).into_group()
+}
 pub fn point_add(a: SecpPoint, b: SecpPoint) -> SecpPoint {
     a + b
 }
-pub fn point_scale(scalar: SecpScalar, point: SecpPoint) -> SecpPoint {
+pub fn point_eq(a: SecpPoint, b: SecpPoint) -> bool {
+    a == b
+}
+pub fn point_mul(scalar: SecpScalar, point: SecpPoint) -> SecpPoint {
     point * scalar
+}
+pub fn point_msm(terms: Vec<(SecpScalar, SecpPoint)>) -> Result<SecpPoint> {
+    // Paired inputs keep scalar/point lengths equal by construction. Normalize
+    // together and use Arkworks' checked variable-base MSM, not a truncating zip.
+    let (scalars, points): (Vec<_>, Vec<_>) = terms.into_iter().unzip();
+    let bases = SecpPoint::normalize_batch(&points);
+    SecpPoint::msm(&bases, &scalars).map_err(|_| Error::InputLength {
+        expected: bases.len(),
+        actual: scalars.len(),
+    })
 }
 pub fn point_inv(point: SecpPoint) -> SecpPoint {
     -point
@@ -188,11 +249,6 @@ pub fn from_affine(pair: (SecpBase, SecpBase)) -> Option<SecpPoint> {
     } else {
         None
     }
-}
-pub fn point_x(point: SecpPoint) -> SecpBase {
-    to_affine(point)
-        .map(|pair| pair.0)
-        .unwrap_or(SecpBase::ZERO)
 }
 pub fn point_hex(point: SecpPoint) -> String {
     match to_affine(point) {

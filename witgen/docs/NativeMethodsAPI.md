@@ -1,80 +1,185 @@
 # Native method emitter seam
 
-Parent owns `backend/src/typed.rs`, Cargo/error/lib changes, native runtime tests, and full runner/publication. A delegated emitter may own only `tools/emit_methods.py` and its Python tests.
+```python
+source = emit_module(exported_module, "native")  # also "nat" / "u64"
+```
 
-## Input
+The v2 module has `version:2, name, inputs:[{name,type}], output, body,
+methods:[{name,args,result,body}]`. Methods are oldest-first; a call's
+`static.index` selects from the **newest-first prior scope**. The emitter checks
+name/index agreement, exact signatures, and duplicate/forward/missing links,
+then emits one function per method and preserves calls. Program refs are
+newest-first. Names are escaped comment receipts, not Rust identifiers.
 
-Actual v2 JSON exports are in `artifacts/methods/{nat,u64,mixed,affine,from-affine}.json`.
-Top-level: `version:2, name, inputs:[{name,type}], output, body, methods:[{name,args,result,body}]`.
-Methods are oldest-first. Method call `static.index` is into the **newest-first prior scope**: a method sees only earlier definitions, caller sees all. Check index and name agree, exact args/result, no duplicate/forward/missing links. Emit each definition once; do not inline into callers. IR refs are newest-first normal Program refs.
+## Types and curve identity
 
-Types: field `{field:0|1|2,modulus:exactDecimalString}`, `nat`, `bool`, `u64`, `word4`, point `{point:"secp256k1"}`, pair `{pair:[A,B]}`, option `{option:A}`. All field tags survive validation, even if physically represented alike. Known IDs: 0 BN254 Fr, 1 secp base, 2 secp scalar (exact moduli in Typed.Types and runtime `FIELD_MODULI`).
+Field types are `{field:0|1|2,modulus:exactDecimalString}`. IDs are 0 BN254 Fr,
+1 secp256k1 base, and 2 secp256k1 scalar. A point type carries its entire curve
+descriptor:
 
-## Rust runtime (`witgen_native::typed`)
+```json
+{"point":{"id":"secp256k1","base":{"field":1,"modulus":"115792089237316195423570985008687907853269984665640564039457584007908834671663"},"scalar":{"field":2,"modulus":"115792089237316195423570985008687907852837564279074904382605163141518161494337"},"weierstrass":["0","0","0","0","7"]}}
+```
+
+The native backend admits only this exact descriptor. It validates keys, curve
+ID, field IDs, canonical decimal moduli and the five exact Weierstrass
+coefficients in every point type and primitive
+static descriptor, including nested signatures and method calls. Another curve
+name with identical fields is not an alias. See [CurveAPI.md](CurveAPI.md).
+
+Other types are `nat`, `bool`, `u64`, `word4`, `{pair:[A,B]}`, `{option:A}`,
+and `{list:A}`. Recursive metadata is retained; physically similar field
+representations do not make their logical types interchangeable.
 
 ```rust
 pub type Word4 = [u64; 4];
-pub struct WordField<const ID: u8>(pub Word4); // Clone, Copy, Debug
-pub struct NatField<const ID: u8>(pub rug::Integer); // Clone, Debug
+pub struct WordField<const ID: u8>(pub Word4);
+pub struct NatField<const ID: u8>(pub rug::Integer);
 pub type SecpBase = ark_secp256k1::Fq;
 pub type SecpScalar = ark_secp256k1::Fr;
 pub type SecpPoint = ark_secp256k1::Projective;
 ```
 
-Fields in `native` mode map IDs 0→`witgen_native::Bn254Scalar`, 1→`typed::SecpBase`, 2→`typed::SecpScalar`. `nat` mode uses `typed::NatField<ID>`, with pack/unpack raw `.0`/constructor (NO hidden modular reduction). `u64` mode uses `typed::WordField<ID>`, with toWord/fromWord raw `.0`/constructor. Generic `word4` is `[u64;4]`.
+Native fields map to `witgen_native::Bn254Scalar`, `typed::SecpBase`, and
+`typed::SecpScalar`. Nat and U64 fields map to `typed::NatField<ID>` and
+`typed::WordField<ID>`. Pack/unpack and toWord/fromWord are raw constructors
+and projections, without hidden modular reduction. Pairs, options, and lists
+map recursively to Rust tuples, `Option<T>`, and `Vec<T>`.
 
-Primitive helpers:
+## Curve primitives
 
-- `typed::adc(a:u64,b:u64,c:bool)->(u64,bool)`, `sbb(...)` analogous; word/flag projections `.0`/`.1`.
-- `typed::bit_at(a:Word4,index:usize)->bool` (false if >=256).
-- `typed::secp_base_from_nat(&Integer)->witgen_native::Result<SecpBase>`; `secp_scalar_from_nat` analogous; `*_from_str(&str)`.
-- `typed::secp_base_to_nat(SecpBase)->Integer`, `secp_scalar_to_nat` analogous.
-- `typed::secp_base_add/mul/square`, scalar variants, pure values.
-- `typed::bn254_square(Bn254Scalar)->Bn254Scalar`; existing bn254_add/mul/from_nat/from_str/to_nat remain at crate root.
-- `typed::point_add(P,Q)`, `point_scale(s:SecpScalar,P)`, `point_inv(P)`, `point_generator()`, `point_identity()`, `point_x(P)->SecpBase` with X(identity)=0.
-- `typed::to_affine(P)->Option<(SecpBase,SecpBase)>`, `from_affine((x,y))->Option<SecpPoint>`; None=infinity on output, off-curve on input.
+Every curve tag except Const has static metadata exactly `{"curve": descriptor}` and no
+regions. `P` below is the descriptor's point type, `S` its scalar field and `B`
+its base field. Runtime helpers live in `witgen_native::typed`.
 
-JSON helpers (all parsing returns `witgen_native::Result<T>`):
+| IR tag | Signature | Native helper |
+|---|---|---|
+| `curve.add` | `[P,P] → P` | `point_add` |
+| `curve.mul` | `[S,P] → P` | `point_mul` |
+| `curve.eq` | `[P,P] → bool` | `point_eq` |
+| `curve.msm` | `[List<(S,P)>] → P` | `point_msm` |
+| `curve.inv` | `[P] → P` | `point_inv` |
+| `curve.generator` | `[] → P` | `point_generator` |
+| `curve.identity` | `[] → P` | `point_identity` |
+| `curve.const` | `[] → P` | `point_const` / `point_identity` |
+| `curve.toAffine` | `[P] → Option<(B,B)>` | `to_affine` |
+| `curve.fromAffine` | `[(B,B)] → Option<P>` | `from_affine` |
 
-- `typed::parse_nat(&serde_json::Value)->Result<Integer>` decimal string/nonnegative.
-- `typed::parse_u64(&Value)->Result<u64>` decimal string with bounds.
-- `typed::parse_word4(&Value)->Result<Word4>` exactly four little-endian decimal word strings.
-- `typed::parse_word_field::<ID>(&Value)->Result<WordField<ID>>` canonical decimal representative (not a raw limb array).
-- `typed::parse_nat_field::<ID>(&Value)->Result<NatField<ID>>` canonical decimal representative.
-- `typed::parse_point(&Value)->Result<SecpPoint>` SEC1 hex string, identity "00".
-- `typed::word_field_decimal::<ID>(WordField<ID>)->String`; `word4_json(Word4)->Value` (4 word strings); `point_hex(P)->String`.
-- `typed::field_modulus(ID:u8)->Result<Integer>` for input validation / static literal support. No use inside U64 method arithmetic.
+`point_mul(scalar, point)` uses Arkworks scalar multiplication. `point_eq(a,b)`
+returns Arkworks' semantic projective equality directly, not encoded-byte or
+coordinate-tuple equality. It needs the curve operation capability, not a
+Boolean-operations feature.
 
-Use existing enum errors for wrong arity/type/length and `?` where conversions can fail. Native method signatures may uniformly return `witgen_native::Result<T>`; U64 bodies then just return Ok.
+`point_msm(Vec<(SecpScalar,SecpPoint)>) -> Result<SecpPoint>` splits already-typed
+pairs, batch-normalizes their points and calls checked Arkworks
+`VariableBaseMSM::msm`. It accepts no independent parallel arrays. Empty input
+returns identity; singleton input agrees with Mul. The complete JSON list is
+decoded before invoking a method or primitive, including zero-scalar and unused
+terms. Malformed pairs, noncanonical scalars and invalid SEC1 points return
+structured errors rather than partially evaluating the MSM.
 
-## Control / admission
+`curve.const` uses exactly `{"curve":descriptor,"value":{"infinity":true}}`
+or `{"curve":descriptor,"value":{"x":"decimal","y":"decimal"}}`.
+The emitter verifies the descriptor, canonical coordinates, and secp256k1
+equation before emitting any Rust. Infinity emits `point_identity()`; a valid
+affine literal emits `point_const(x:SecpBase,y:SecpBase) -> SecpPoint`, a direct
+Arkworks constructor. The literal has no runtime arguments, Option result,
+validity branch, or invalid-to-infinity fallback. Dynamic affine inputs continue
+to use checked `from_affine`.
 
-`u64.repeat` has arguments `[p,a,b,acc]`, one region `[natIndex,acc,p,a,b] -> word4`, and literal count; emit one descending `for i in (0..count).rev()` loop, never unroll256 iterations. `nat` in U64 mode is a bounded public `usize` index ONLY; reject external nat params/results in this mode rather than claim arbitrary Nat ABI. No whole-field GMP/BigInt/native field operations inside U64 method bodies. Parsing/decimal serialization may use Integer outside those bodies.
+There are no `curve.x`, `secp.x`, `curve.scale`, or `secp.scale` primitives,
+or `point_x` / `point_scale` runtime exports. Coordinate access is ToAffine
+followed by pair projections inside an Option branch. Identity remains `None`.
 
-Support only the mode's registered ops: native field+curve/value, Nat arithmetic+raw field pack/unpack+calls, or exact U64Op tags+calls. Reject point sorts outside native mode: field-only Nat/U64 models use PUnit for that unused sort and do not certify EC lowering. The compiler does not use model evaluation to invent source.
+## Field and word helpers
 
-## Recursive option JSON policy
+- `typed::adc(a:u64,b:u64,c:bool)->(u64,bool)`, `sbb(...)` analogous.
+- `typed::bit_at(a:Word4,index:usize)->bool`, false for indices at least 256.
+- `typed::secp_base_from_nat(&Integer)->Result<SecpBase>`, scalar variant;
+  `*_from_str`, `*_to_nat`, and pure `*_add/mul/square/neg/inv` variants.
+- `typed::bn254_square/neg/inv`; root `witgen_native::bn254_add/mul/from_nat/from_str/to_nat`.
+- Native `field.neg` / `field.inv` are unary same-field operations with exactly
+  `{field,modulus}` metadata. Neg is Arkworks field negation; Inv is Arkworks
+  inversion with `0 → 0`.
+- Nat-only lowered `nat.field.neg` / `nat.field.inv` take `[Field(id)] → Field(id)`,
+  exactly `{field:id,modulus:exactDecimalString}`, and no regions. They emit
+  `typed::nat_field_neg/inv::<ID>(NatField<ID>) -> Result<NatField<ID>>`.
+  For raw nonnegative `a`, Neg is `(p - (a % p)) % p`; Inv is the canonical
+  modular inverse, with every multiple of `p` mapping to zero. The registered
+  moduli are prime. Internal `a ≥ p` is allowed by these arithmetic primitives;
+  pack/unpack remain raw and external field input parsing remains strict.
+  Source and lowered Neg/Inv are rejected in U64 mode, never silently replaced.
 
-Pairs encode as two-element arrays. `None` always encodes as JSON `null`.
-For `Option<A>`, `Some(x)` encodes as the ordinary encoding of `x` **unless `A`
-is itself an Option**. In that case it encodes as the single-key object
-`{"some": encode(x)}`. The rule applies recursively, in all admitted modes:
+`u64.repeat` receives `[p,a,b,acc]`, one closed region
+`[natIndex,acc,p,a,b] → word4`, and a static count. Emission is one descending
+`for i in (0..count).rev()` loop. U64 admits Nat only as a bounded internal
+`usize` index: external Nat is rejected even inside list/pair/option types.
+U64 arithmetic uses word helpers, not whole-field GMP or native field calls.
+Points are admitted only in native mode.
 
-| `Option<Option<bool>>` value | JSON |
+## Closed branches and structural values
+
+All these tags use exactly empty static metadata:
+
+- `value.pair`, `value.fst`, `value.snd`, `option.some`, `option.none`.
+- `value.nil : [] → List<A>`; `value.cons : [A,List<A>] → List<A>` preserves order.
+- `option.bind : [Option<A>] → Option<B>` has one closed `[A] → Option<B>` region.
+- `control.if : [bool] ++ captures → R` has two closed `captures → R` regions,
+  ordered true then false.
+- `option.match : [Option<A>] ++ captures → R` has two closed regions, ordered
+  none (`captures → R`) then some (`[A] ++ captures → R`).
+
+`control.if` and `option.match` emit Rust `if` and `match` expressions with each
+region body inside its arm. Only the selected region executes. Both regions
+are statically validated, with exact signatures and no access to undeclared
+parent refs. A Bool condition requires only the Bool sort. See
+[BranchAPI.md](BranchAPI.md).
+
+## JSON boundary
+
+Each generated module exposes `run(...) -> witgen_native::Result<T>` and
+`run_json(&[serde_json::Value]) -> witgen_native::Result<Value>`. The U64 shared
+bundle emits one registry and oldest-first `program_N` / `program_N_json`
+functions, plus `run_json(program_index, inputs)`.
+
+- Nat/U64/field inputs are nonnegative decimal strings; field inputs must be
+  canonical. `word4` is exactly four little-endian decimal word strings.
+- Points are SEC1 hex strings: compressed or uncompressed finite points, or
+  `"00"` for identity. Output uses compressed SEC1 or `"00"`.
+- Pairs are exactly two-element arrays. Lists are ordered arrays, recursively
+  encoded with no truncation or element coercion. MSM input is one array such
+  as `[["1","02…"],["0","00"]]`.
+- `None` is JSON `null`. `Some(x)` uses the child's ordinary encoding unless
+  its immediate child type is itself Option, in which case it uses exactly
+  `{"some":encode(x)}`. This keeps `None` and `Some(None)` distinct.
+
+| `Option<Option<bool>>` | JSON |
 |---|---|
 | `None` | `null` |
 | `Some(None)` | `{"some":null}` |
 | `Some(Some(false))` | `{"some":false}` |
 | `Some(Some(true))` | `{"some":true}` |
 
-Nested-option decoders require exactly the lowercase `some` key on non-null
-objects, reject missing/unknown/additional keys, and validate the contained value
-recursively. Untagged non-null nested-option inputs are rejected with
-`invalid_input_type`; there is no lossy legacy fallback or comparator normalization.
+Nested-option objects require exactly the lowercase `some` key and recursively
+valid payloads. Lists and pairs are never null, so `Option<List<A>>` and
+`Option<Pair<A,B>>` stay untagged arrays for Some; tags appear only at immediate
+Option-of-Option boundaries. The policy is unchanged inside lists.
 
-`Option<Point>` remains `null` or the SEC1 string. `Option<Pair<A,B>>` remains
-`null` or `[encode(a),encode(b)]`, even when the pair contains nested options;
-only those nested fields acquire tags. Thus the existing affine boundary remains
-compatible: infinity/off-curve returns `null`, valid affine/point values keep their
-ordinary array/string representation. This is a tested JSON/Rust boundary policy,
-not a kernel proof of serialization or native execution.
+Parsing helpers return existing structured `witgen_native::Error` variants:
+`parse_nat`, `parse_u64`, `parse_word4`, `parse_nat_field::<ID>`,
+`parse_word_field::<ID>`, and `parse_point`. Serialization uses
+`word_field_decimal::<ID>`, `word4_json`, `point_hex`, or recursive generated
+encoders. Decimal codecs and `field_modulus` remain outside U64 arithmetic.
+
+## Execution checks
+
+```sh
+python3 -B tests/test_method_emitter.py GenericCurveEmitterTests BranchEmitterTests FieldNegInvEmitterTests -v
+python3 -B -m unittest discover -s tests -p test_method_emitter.py -v
+cargo test --offline --locked --test typed
+```
+
+Tests exercise actual emitted Rust, independent integer/affine group arithmetic,
+strict metadata and input rejection, projectively equivalent points, recursive
+roundtrips, and unselected-branch non-evaluation. This JSON/Rust/foreign-arithmetic
+boundary is tested TCB; Lean's semantic proofs are separate.

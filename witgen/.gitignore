@@ -8,3 +8,5 @@ backend/src/bin/from_lean_*.rs
 backend/src/bin/batch_writer_test.rs
 backend/src/bin/wrong_slots.rs
 backend/src/crypto_test_generated/
+backend/src/generated_extended/
+backend/src/bin/witgen-extended.rs

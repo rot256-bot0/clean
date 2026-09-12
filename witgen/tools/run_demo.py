@@ -15,6 +15,7 @@ from emit_rust import EmitError, emit_module
 from run_caliper import run_all as run_caliper
 from run_crypto import run_all as run_crypto
 from run_methods import run_all as run_methods
+from run_extended import main as run_extended
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "artifacts"
@@ -249,6 +250,9 @@ def main():
     methods = run_methods()
     if methods.get("status") != "PASS":
         raise AssertionError("Typed methods verification did not pass")
+    extended = run_extended()
+    if extended.get("status") != "PASS":
+        raise AssertionError("Field inverse and named branching verification did not pass")
     hashes = {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in sorted((ROOT / "Witgen").rglob("*.lean"))
@@ -272,6 +276,8 @@ def main():
                    "verification_receipt": "artifacts/crypto/verification.json"},
         "methods": {"status": methods["status"], "native_cases": methods["native_cases"],
                     "verification_receipt": "artifacts/methods/verification.json"},
+        "extended": {"status": extended["status"], "cases": extended["cases"],
+                     "verification_receipt": "artifacts/extended/verification.json"},
         "caliper": {
             "status": caliper["status"],
             "verification_receipt": "artifacts/caliper/verification.json",

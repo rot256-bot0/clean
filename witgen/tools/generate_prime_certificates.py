@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts/secp-prime-certificate-data.json'
 P = ZZ(2)**256 - ZZ(2)**32 - 977
 N = ZZ('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141', 16)
+BN254 = ZZ('21888242871839275222246405745257275088548364400416034343698204186575808495617')
 seen = {}
 
 def certificate(p):
@@ -29,6 +30,7 @@ def certificate(p):
 
 certificate(P)
 certificate(N)
+certificate(BN254)
 OUT.parent.mkdir(exist_ok=True)
-OUT.write_text(json.dumps({'base':str(P),'scalar':str(N),'nodes':list(seen.values())},indent=2)+'\n')
+OUT.write_text(json.dumps({'base':str(P),'scalar':str(N),'bn254':str(BN254),'nodes':list(seen.values())},indent=2)+'\n')
 print('nodes',len(seen),'output',OUT,flush=True)

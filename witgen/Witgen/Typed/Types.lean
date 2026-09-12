@@ -8,13 +8,6 @@ def bn254Fr : FieldId := 0
 def secpBase : FieldId := 1
 def secpScalar : FieldId := 2
 
-inductive Ty where
-  | field (id : FieldId)
-  | nat | bool | u64 | word4 | point
-  | pair (left right : Ty)
-  | option (element : Ty)
-  deriving DecidableEq, Repr
-
 def modulus (f : FieldId) : Nat :=
   if f = bn254Fr then
     21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -28,6 +21,30 @@ theorem modulus_pos (f : FieldId) : 0 < modulus f := by
   split <;> first | decide | (split <;> decide)
 
 abbrev FieldValue (f : FieldId) := Fin (modulus f)
+
+/-- User-owned identity and field association; equal field types do not erase identity. -/
+structure CurveId where
+  name : String
+  base : FieldId
+  scalar : FieldId
+  a1 : FieldValue base := ⟨0, modulus_pos base⟩
+  a2 : FieldValue base := ⟨0, modulus_pos base⟩
+  a3 : FieldValue base := ⟨0, modulus_pos base⟩
+  a4 : FieldValue base := ⟨0, modulus_pos base⟩
+  a6 : FieldValue base := ⟨0, modulus_pos base⟩
+  deriving DecidableEq, Repr
+
+abbrev secp256k1 : CurveId :=
+  { name := "secp256k1", base := secpBase, scalar := secpScalar, a6 := ⟨7, by decide⟩ }
+
+inductive Ty where
+  | field (id : FieldId)
+  | nat | bool | u64 | word4
+  | point (curve : CurveId)
+  | pair (left right : Ty)
+  | option (element : Ty)
+  | list (element : Ty)
+  deriving DecidableEq, Repr
 
 namespace Residue
 
@@ -46,19 +63,26 @@ theorem square_eq_mul {p : Nat} (a : Fin p) : square a = mul a a := by
 
 end Residue
 
+/-- Length-preserving structural relation for library-owned list sorts. -/
+def ListRel (r : α → β → Prop) : List α → List β → Prop
+  | [], [] => True
+  | x :: xs, y :: ys => r x y ∧ ListRel r xs ys
+  | _, _ => False
+
 /-- Shared structural interpretation of pair/option sorts. Computational carriers
 remain parameters: this does not add a mandatory primitive feature. -/
-abbrev Value (fields : FieldId → Type) (words points : Type) : Ty → Type
+abbrev Value (fields : FieldId → Type) (words : Type) (points : CurveId → Type) : Ty → Type
   | .field f => fields f
   | .nat => Nat
   | .bool => Bool
   | .u64 => UInt64
   | .word4 => words
-  | .point => points
+  | .point c => points c
   | .pair a b => Value fields words points a × Value fields words points b
   | .option a => Option (Value fields words points a)
+  | .list a => List (Value fields words points a)
 
 /-- Field-only interpretation; the point sort has no point operations in this model. -/
-abbrev FieldVal := Value FieldValue (UInt64 × UInt64 × UInt64 × UInt64) PUnit
+abbrev FieldVal := Value FieldValue (UInt64 × UInt64 × UInt64 × UInt64) (fun _ => PUnit)
 
 end Witgen.Typed

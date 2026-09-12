@@ -1,30 +1,74 @@
-# secp256k1 typed feature
-
-Implementation uses Mathlib `WeierstrassCurve.Affine.Point` over `ZMod (Typed.modulus Typed.secpBase)`, curve coefficients `(0,0,0,0,7)`. No discrete-log representation, synthetic point carrier, or host curve oracle.
-
-Concrete entry point: `import Witgen.Typed.Secp`. Instances `Secp.basePrime` and `Secp.scalarPrime` use `Witgen.PrimeCertificates.secpBase_prime` and `.secpScalar_prime` for the exact decimal moduli in `Typed.Types`. These are closed kernel-checked Lucas certificates. The reusable curve foundation is parameterized, but this public entry point supplies both facts without assumptions.
-
-**Computability finding:** pinned Mathlib `Affine/Point.lean` lines 768–772 defines the point `AddCommGroup.nsmul := nsmulBinRec` (not linear recursion). Canonical scalar multiplication `s.val • P` therefore already uses binary recursion; we should reuse the existing proven implementation rather than add another scale algorithm.
-
-Checked checkpoint: `lake build Witgen.Typed.Secp Witgen.Typed.SecpConcreteTests` passes. Generator membership/nonsingularity use bounded kernel `decide` on the actual ZMod equation, not primality factoring. `mixed_correct` proves an explicit modular-arithmetic/point-group specification; `mixed_one_one` proves the real point calculation 2G−G=G. Exact `#guard_msgs` tests reject base-as-scalar. Concrete runtime checks evaluate known 2G and −G coordinates, high-width (n−1)G=−G, the mixed program, generator affine roundtrip, invalid(0,0) rejection, and infinity conversion. The high-width sample is a runtime test, not a proof of the generator's order.
-
-Public aliases in `Witgen.Typed.Public` are `Witgen.curve.Add P Q`, `Scale scalar P`, `Inv P` (group inverse `-P`), `Generator`, `Identity`, and `X P` (base-field coordinate with explicit identity convention `X(0)=0`). The earlier `Witgen.secp.*` helpers remain available. `Scale` accepts only `.field secpScalar`; `X` returns `.field secpBase`. `Witgen.secp256k1.Base/Scalar` name the distinct field IDs.
-
-## Affine conversion API and JSON seam
+# secp256k1 instance
 
 ```lean
--- exact input/output types; explicit optionality
-curve.ToAffine   : Var Γ .point → Step F Γ (.option (.pair (.field secpBase) (.field secpBase)))
-curve.FromAffine : Var Γ (.pair (.field secpBase) (.field secpBase)) → Step F Γ (.option .point)
+namespace Witgen.Typed.Secp
+abbrev curve : WeierstrassCurve.Affine Base := secp256k1.equation
+abbrev Point := curve.Point
+
+def math [Fact (modulus secpBase).Prime] : Curve.Math secp256k1 where
+  basePrime := inferInstance
+  nonsingular := discriminant_ne_zero
+  generator := generator
+end Witgen.Typed.Secp
 ```
 
-`ToAffine(0)=None`; `FromAffine(0,0)=None` (off curve); `FromAffine` never uses infinity as an error sentinel. `fromAffine_isSome_iff` proves acceptance iff `y²=x³+7` over the actual base field. `affine_roundtrip` proves every nonsingular affine point roundtrips, using the proved nonzero discriminant. `concrete_generator_roundtrip` evaluates a finite `Program` containing ToAffine, optional bind with a closed region, and FromAffine.
+The descriptor fixes coefficients `(0,0,0,0,7)` over `ZMod (modulus secpBase)`.
+`Secp.basePrime` and `Secp.scalarPrime` supply the closed Lucas certificates for the exact base and scalar moduli. `Secp.secpModel = Curve.model Secp.math`; its carrier is Mathlib’s `WeierstrassCurve.Affine.Point`, not a discrete-log representation.
 
-Type JSON: pair is `{"pair":[leftType,rightType]}`, option is `{"option":elementType}`; both affine component types retain `field:1` and the base modulus. Operation tags are `curve.toAffine`, `curve.fromAffine`. `option.bind` has one closed region with one unwrapped input and optional result. The optional `ValueOp` adds `value.pair/fst/snd`, `option.some/none/bind` without altering the core.
+## Arithmetic and affine values
 
-Commands: `lake env lean --run MainTyped.lean affine` emits the generator roundtrip; `... from-affine` emits a typed pair-input conversion. Native option implementations must preserve None/Some, not coerce invalid pairs to identity.
-## Scope
+```lean
+-- c is inferred from point/term operands.
+curve.Mul scalar point
+curve.Add point other
+curve.Inv point
+curve.Eq point other        -- Bool; only the curve capability is required
+curve.MSM terms             -- List (scalar × point)
+curve.ToAffine point        -- Option (base × base)
+curve.FromAffine c xy       -- Option (point c)
+curve.Generator c
+curve.Identity c
+```
 
-The native implementation uses `ark-secp256k1`/`ark-ec` 0.6.0 and preserves these typed signatures. Its affine constructor checks the actual equation before constructing an Arkworks affine value, so Arkworks' distinguished infinity representation is not accepted as an ordinary coordinate pair. Source/native tests cover valid points, invalid `(0,0)`, and explicit infinity. A certified curve→field fallback would be a separate implementation of this same feature; it is not supplied here.
+Mul is the canonical natural action `scalar.val • point`; Mathlib’s point group uses `nsmulBinRec`.
+MSM is the sum of those same actions over a list of pairs. Empty MSM is identity, and singleton MSM equals Mul. There is no assumption that arbitrary scalar representatives act modulo the group order.
+Eq is exactly `decide (P = Q)`.
 
-The mixed example computes scalar Mul/Add/Square, actual point scaling/addition/inverse, and base Mul/Add/Square using the actual computed point coordinate view. Base arithmetic is *not* silently used as scalar arithmetic. Scope excludes proving generator order/cofactor and lowering point arithmetic to U64; scalar representatives act by their canonical natural value, not by an unproved modulo-order action law.
+```lean
+def roundtrip {F : Signature Ty} (c : CurveId)
+    [Has (CurveOp c) F] [Has ValueOp F] :
+    Program F [.point c] (.option (.point c)) :=
+  witgen [p] do
+    let xy ← curve.ToAffine p
+    let out ← match xy with
+      | none => value.None (.point c)
+      | some coordinates => curve.FromAffine c coordinates
+    return out
+```
+
+Infinity has no affine coordinates, so the None branch preserves it as absent. The Some branch receives the coordinate pair and checks the exact curve equation. `Secp.fromAffine_isSome_iff` proves acceptance exactly when `y² = x³ + 7`; `Secp.affine_roundtrip` proves every finite point returns unchanged.
+The optional `ValueOp` feature supplies the match operation; the frontend stores two closed region ASTs and passes named captures explicitly. It is not a Lean callback in the serialized program.
+
+## Checked literals
+
+```lean
+def generatorLiteral : CurveLiteral secp256k1 :=
+  .affine (Residue.ofNat (modulus_pos secpBase) Secp.generatorX)
+    (Residue.ofNat (modulus_pos secpBase) Secp.generatorY)
+    Secp.generator_nonsingular
+
+-- Both are point-valued, with no runtime inputs or Option result.
+curve.Const secp256k1 generatorLiteral
+curve.Const secp256k1 .infinity
+```
+
+The literal’s proof refers to the equation embedded in its descriptor. Native emission accepts only the exact secp descriptor, coefficients, and valid canonical coordinates. The JSON representation and generic signatures are specified in [CurveAPI.md](CurveAPI.md).
+
+## Mixed fields
+
+`CurvePrograms.mixed` is capability-polymorphic. It requires `CurveOp c`, `FieldOp c.scalar`, `FieldOp c.base`, and `ValueOp`, not a concrete feature bundle. The secp export specializes this source to `Secp.MixedFeature`.
+
+For scalar inputs `s,t`, let `k = ((s² mod n)·t + s) mod n` and `Q = kG − G`.
+The program returns None when Q is infinity; for `ToAffine Q = some (x,y)`, it returns `some (x²·y+x)` in the base field. Fst/Snd and all base arithmetic are inside the Some branch.
+
+`MainTyped.lean` exports `eq`, `msm`, `msm-constructed`, `const`, `const-identity`, `affine`, and `from-affine`; its default is the mixed program. `MainMethods.lean` emits those actual ASTs together with source-evaluated reference values.

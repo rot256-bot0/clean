@@ -72,7 +72,7 @@ class HistoricalReceiptTests(unittest.TestCase):
     def test_real_receipt_replays_complete_records(self):
         report=runner.validate_historical_receipt(self.receipt())
         self.assertEqual(report['status'],'PASS')
-        self.assertEqual(report['native_cases'],408)
+        self.assertEqual(report['native_cases'],len(runner.required_cases()))
 
     def test_every_consumed_u64_copy_and_execution_artifact_is_bound(self):
         receipt=self.receipt()
@@ -82,6 +82,8 @@ class HistoricalReceiptTests(unittest.TestCase):
         paths += [ROOT/'artifacts/methods'/name for name in ('bundle/reference.json',
             'native-requests.jsonl','native-results.jsonl','case-results.jsonl',
             'negative-requests.jsonl','negative-case-results.jsonl','source-config.json','required-cases.json')]
+        manifest=json.loads((ROOT/'artifacts/methods/bundle/manifest.json').read_text())
+        paths += [ROOT/'artifacts/methods/bundle'/(entry['name']+'.json') for entry in manifest['programs']]
         paths.append(Path(report['executed_binary']['path']))
         for path in paths:
             with self.subTest(path=str(path)):

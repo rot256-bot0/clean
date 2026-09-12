@@ -1,48 +1,38 @@
 # Executed Scope
 
-Work remains on the authorized `feat/clean-witgen-dsl` branch in `rot256-bot0/clean`.
+Authorized branch: `feat/clean-witgen-dsl` in `rot256-bot0/clean`.
 No Codex, main/master edits, dependency-source changes or upstream pushes.
-Parent Clean's WitnessIR remains unchanged.
+The finite Core and parent Clean integration remain unchanged.
 
-## Typed Functionality and Structures
+## Implemented
 
-- Field identity is part of `.field id` and `FieldOp id`. Namespaced Add/Mul/Square
-  infer it from operands; constants name the field. Base/scalar mixing is rejected.
-- Generic `struct.Named/Get/Set` operates on caller-owned schemas. Set is functional;
-  update, other-field, representation and original-value laws are checked.
-- Named do authoring keeps its fail-closed ambient-parameter policy; no relaxation
-  of the previous scoping fix is part of this work.
+- Generic structures with functional Set and preservation laws.
+- Field-indexed Const/Add/Mul/Square/Neg/Inv with model semantics and named helpers.
+- Kernel-checked primality for BN254 scalar and secp256k1 base/scalar moduli.
+- Generic curve descriptors/equations and `CurveOp c`, real Mathlib point models,
+  Mul/Eq/MSM, statically checked point constants and explicit affine optionality.
+- Capability-polymorphic programs; removed primitive X and renamed Scale to Mul.
+- Named if/match elaboration to finite typed regions, explicit captures,
+  payload shadowing and fail-closed ambient/capability/exhaustiveness controls.
+- Typed earlier-only method libraries and emit-once shared U64 bodies/callers.
+- Total Nat field lowering; partial U64 lowering with checked acceptance,
+  no fallback and no hidden whole-field arithmetic.
+- Real Arkworks/GMP native execution, strict curve metadata and recursive codecs,
+  exact independent case coverage and Cargo-reported executable receipts.
 
-## Methods and Field Lowerings
+## Verification
 
-- Optional typed method signatures/references and acyclic libraries contain actual
-  finite Program bodies. Calls evaluate those bodies, not host callbacks.
-- Field→Nat stores explicit arithmetic/reduction bodies and keeps calls.
-- Field→U64 is a real four-limb implementation with carry/borrow, overflow-aware
-  modular addition and bounded multiplication/squaring. Three generic arithmetic
-  bodies are shared, with nine field wrappers and twelve emitted callers.
-- U64 bodies contain word operations, layouts, calls and one bounded loop. Big-integer
-  parsing/serialization and proof/reference calculations are outside the data path.
+Required: full Python/Rust regressions, typed/extended/structure/core/crypto/Caliper
+axiom inventories, cold local U64 closure, source/native/oracle comparisons,
+independent frozen-source review, and live publication/readback.
 
-## secp256k1
+Methods cover 449 cases; the extended runner covers 174. Existing full-witness,
+custom-type and bounded regressions remain in the standard runner.
 
-- Distinct base/scalar fields have closed kernel-checked Lucas primality certificates.
-- Real Mathlib curve model; point Add/Scale/Inv and typed coordinate operations.
-- ToAffine returns None at infinity; FromAffine returns None off-curve.
-- Native curve implementation uses Arkworks. Curve→field/U64 lowering is a separate
-  possible implementation of this feature, not an implemented path here.
-- Generator order/cofactor/module-action and constant-time claims are not made.
+## Publication
 
-## Verification and Publication
-
-The standard runner includes real native/Nat/U64 method and curve cases, exact
-nonempty axiom inventories, call-linkage/definition-sharing checks and hashes.
-Independent source/native review and a Claude review precede final publication.
-The design quotes actual source/generated methods and has no backend-error essay.
-Publication is an explicit snapshot update followed by exact remote readback.
-
-Existing bounded and BN254 full-witness regressions are retained. No full new-library
-Caliper or hardware timing theorem is claimed by the correctness results.
-
-Required attribution:
-`Co-authored-by: Mathias Hall-Andersen <mathias@hall-andersen.dk>`.
+Code-first artifact includes actual field/curve specifications, Has-polymorphic
+programs, checked constants, if/match behavior, structures and shared methods.
+No final checks/boundaries section or error-API discussion. Caliper is described as
+U64-only, with no field/curve implementation inside it. The artifact is updated
+once at the end, at the existing URL, after verification.

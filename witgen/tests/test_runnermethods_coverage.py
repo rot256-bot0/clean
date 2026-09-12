@@ -16,8 +16,27 @@ def exported_cases():
     if not reference.exists():
         raise unittest.SkipTest('run test_methods_pipeline.py to create real exports')
     cases=json.loads(reference.read_text())
-    fixtures=json.loads((ROOT/'Witgen/U64/evidence/u64-tests.json').read_text())['fixtures']
+    fixtures=json.loads((ROOT/'artifacts/u64/u64-tests.json').read_text())['fixtures']
     return cases+[dict(x,mode='u64') for x in fixtures]
+
+
+class IndependentCurveCasesTests(unittest.TestCase):
+    def test_curve_api_multiset_and_independent_arithmetic(self):
+        cases=runner.required_cases()
+        by_program={name:[c for c in cases if c['program']==name]
+                    for name in {c['program'] for c in cases}}
+        for name,count in {'secp_mixed_fields':7,'curve_eq':25,'curve_msm':8,
+                           'curve_msm_constructed':5,'curve_const_generator':1,
+                           'curve_const_identity':1}.items():
+            self.assertEqual(len(by_program.get(name,[])),count,name)
+        self.assertEqual([c['inputs'] for c in by_program['secp_mixed_fields']],
+                         [[str(s),str(t)] for s,t in [(0,0),(1,1),(1,0),(2,3),
+                          (runner.N-1,1),(2**200+7,2**129+9),(17,19)]])
+        self.assertIsNone(runner.expected_independent({'program':'secp_mixed_fields','inputs':['1','0']}))
+        self.assertEqual(runner.expected_independent({'program':'curve_msm','inputs':[[]]}),{'infinity':True})
+        self.assertIs(runner.expected_independent({'program':'curve_eq','inputs':['00','00']}),True)
+        self.assertEqual(runner.expected_independent({'program':'curve_const_generator','inputs':[]}),
+                         runner.point_reference(runner.G))
 
 
 class ExactCoverageTests(unittest.TestCase):
@@ -30,14 +49,19 @@ class ExactCoverageTests(unittest.TestCase):
         cases=exported_cases()
         self.check_coverage(cases)
         counts=Counter((c['program'],json.dumps(c['inputs'])) for c in cases)
-        self.assertEqual(len(cases),408)
-        self.assertEqual(len(counts),391)
-        self.assertEqual(sum(n-1 for n in counts.values()),17)
+        specified=Counter((c['program'],json.dumps(c['inputs'])) for c in runner.required_cases())
+        self.assertEqual(counts,specified)
+        self.assertEqual(len(cases),sum(specified.values()))
+        self.assertEqual(len(counts),len(specified))
+        self.assertEqual(sum(n-1 for n in counts.values()),sum(n-1 for n in specified.values()))
+        self.assertGreater(sum(n-1 for n in counts.values()),0)
         self.check_coverage(list(reversed(cases)))
 
     def test_replacing_required_cases_preserves_old_gates_but_fails(self):
         original=exported_cases()
-        controls=[('secp_from_affine',[['0','0']]),
+        controls=[('secp_mixed_fields',['1','0']),('curve_eq',['00','00']),
+                  ('curve_msm',[[]]),('curve_msm_constructed',['0','04'+format(runner.G[0],'064x')+format(runner.G[1],'064x')]),
+                  ('secp_from_affine',[['0','0']]),
                   ('secp_from_affine',[['1','1']]),
                   ('secp_to_affine',['00']),
                   ('secp_affine_roundtrip',['00']),
@@ -69,7 +93,7 @@ def exported_output_types():
         module=json.loads(file.read_text())
         if isinstance(module,dict) and 'output' in module:
             result[module['name']]=module['output']
-    shared=json.loads((ROOT/'Witgen/U64/evidence/u64-shared.json').read_text())
+    shared=json.loads((ROOT/'artifacts/u64/u64-shared.json').read_text())
     result.update((p['name'],p['output']) for p in shared['programs'])
     return result
 
@@ -120,6 +144,28 @@ class ExecutedAssertionTests(unittest.TestCase):
 
 
 class NestedOptionComparatorTests(unittest.TestCase):
+    def test_recursive_list_pair_options_validate_leaves_and_keep_null_tags(self):
+        field={'field':0,'modulus':runner.FIELD_MODULI[0]}
+        ty={'list':{'option':{'option':{'pair':[field,{'list':field}]}}}}
+        good=[None,{'some':None},{'some':['7',['0','17']]}]
+        self.assertEqual(runner.normalize(ty,good),good)
+        for bad in (None,{},[[]],[{'some':['7',[runner.FIELD_MODULI[0]]]}],
+                    [{'some':['7',['01']]}],[{'some':['7',None]}],
+                    [{'some':['7',[]],'extra':0}]):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                runner.normalize(ty,bad)
+        point={'point':{'id':'secp256k1','base':{'field':1,'modulus':runner.FIELD_MODULI[1]},
+                        'scalar':{'field':2,'modulus':runner.FIELD_MODULI[2]},
+                        'weierstrass':['0','0','0','0','7']}}
+        self.assertEqual(runner.normalize({'list':{'option':point}},[None,'00']),
+                         [None,{'infinity':True}])
+
+    def test_bool_outputs_do_not_accept_integer_aliases(self):
+        self.assertIs(runner.normalize('bool',True),True)
+        for bad in (0,1,'true',None):
+            with self.subTest(bad=bad),self.assertRaises(ValueError):
+                runner.normalize('bool',bad)
+
     def test_nested_tags_remain_distinct(self):
         field={'field':0,'modulus':runner.FIELD_MODULI[0]}
         nested={'option':{'option':field}}
