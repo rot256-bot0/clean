@@ -12,6 +12,7 @@ from pathlib import Path
 from axiom_audit import check_axioms
 from build_native import build
 from emit_rust import EmitError, emit_module
+from run_caliper import run_all as run_caliper
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "artifacts"
@@ -94,6 +95,7 @@ def satisfies(program, inputs, result):
 
 def main():
     ART.mkdir(exist_ok=True)
+    (ART / "verification.json").unlink(missing_ok=True)
     targets = [
         "Witgen.CoreTests",
         "Witgen.ArithmeticTests",
@@ -208,9 +210,12 @@ def main():
     counts = Counter(x["program"] for x in cases)
     large = [x for x in cases if x["program"] == "modmul_nat_raw"]
     assert large and int(large[0]["inputs"][0]).bit_length() == 4096
+    caliper = run_caliper()
+    if caliper.get("status") != "PASS":
+        raise AssertionError("Caliper verification did not pass")
     hashes = {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted((ROOT / "Witgen").glob("*.lean"))
+        for p in sorted((ROOT / "Witgen").rglob("*.lean"))
     }
     report = {
         "status": "PASS",
@@ -225,10 +230,16 @@ def main():
         "wrong_slot_cells": bad_cells,
         "missing_cell_layout_rejected": True,
         "gmp_large_integer_case": True,
+        "caliper": {
+            "status": caliper["status"],
+            "verification_receipt": "artifacts/caliper/verification.json",
+            "runtime_receipt": "artifacts/caliper/runtime.json",
+        },
         "source_hashes": hashes,
         "trust_boundary": [
             "Lean kernel and its standard foundations for proofs",
             "Lean JSON serialization, Python Rust emission, rustc, arkworks and GMP/rug tested, not kernel-verified",
+            "Caliper Exec/Triple costs concern emitted analysis programs, not Rust or hardware runtime; buffer capacity excludes registers",
         ],
     }
     (ART / "verification.json").write_text(json.dumps(report, indent=2) + "\n")

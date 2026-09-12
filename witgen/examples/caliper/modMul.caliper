@@ -1,0 +1,13 @@
+mul  r3, r0, r1
+udiv r4, r3, r2
+umod r5, r3, r2
+skip
+skip
+mem.alloci b0, 6
+mem.push  b0, r0
+mem.push  b0, r1
+mem.push  b0, r2
+mem.push  b0, r3
+mem.push  b0, r4
+mem.push  b0, r5
+skip

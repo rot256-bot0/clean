@@ -24,6 +24,14 @@ class FullDemoTests(unittest.TestCase):
         self.assertTrue(report["direct_vs_lowered_code_differs"])
         self.assertTrue(report["wrong_slot_control_rejected"])
         self.assertTrue(report["gmp_large_integer_case"])
+        self.assertEqual(report.get("caliper", {}).get("status"), "PASS",
+                         "full runner must verify Caliper, not only native Rust")
+        self.assertEqual(report["caliper"]["runtime_receipt"],
+                         "artifacts/caliper/runtime.json")
+        for name in ("quadratic.caliper", "modMul.caliper", "fixedGated.caliper", "runtime.json"):
+            self.assertEqual((ROOT / "examples/caliper" / name).read_bytes(),
+                             (ROOT / "artifacts/caliper" / name).read_bytes(),
+                             "published Caliper snapshot differs from actual export: " + name)
 
 
 if __name__ == "__main__":

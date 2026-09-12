@@ -13,3 +13,7 @@ root = "Main"
 name = "caliper"
 git = "https://github.com/zksecurity/caliper"
 rev = "b62f7c8be35df0aa728e5a6aac7bae85eef67449"
+
+[[lean_exe]]
+name = "witgen-caliper"
+root = "MainCaliper"

@@ -92,6 +92,44 @@ The fixed ABI matters: arbitrary host adapters cannot silently be chosen as part
 
 Source, reference outputs, native results, hashes and axiom reports are retained in `artifacts/` by the runner. The source range gates and writer are independently checked, and native output is also compared with separately written arithmetic checks.
 
+## Caliper Integration and Runtime Proofs
+
+```sh
+# Build, directly recheck proofs/tests, audit axioms and export actual Stmt/run results.
+python3 tools/run_caliper.py
+
+# Export only, without a large native Mathlib build:
+lake build Witgen.Backends.CaliperExamples
+lake env lean --run MainCaliper.lean export artifacts/caliper
+```
+
+The full `tools/run_demo.py` entry point also runs the Caliper checks. Plain
+`lake build` / `import Witgen` intentionally retains the core-only dependency
+boundary; import `Witgen.Backends.CaliperExamples` for this optional backend.
+
+- [Runtime walkthrough](../doc/witgen-dsl-design.md#7-caliper-integration-and-runtime-proofs): checked compilation, full writer, `Exec` versus `Triple`, and a runnable proof example.
+- [Compiler API](docs/CaliperBackendAPI.md): static layouts, freshness checks and explicit branch-shape rejection.
+- [Cost/circuit API](docs/CaliperCostAPI.md): complete buffer correspondence, cost formulas, frames and precise input domains.
+- [Checked runtime example](Witgen/Backends/CaliperRuntimeGuide.lean): quadratic `.cycles` total-correctness bound and exact cost, both `90 / 4 / 4` for time/net/peak buffer growth.
+- [Generated assembly and observations](examples/caliper): real checked compiler outputs plus witness population, exported by `Caliper.Stmt.renderString` and `Caliper.run`.
+
+Costs include allocation **and** every population push. `.cycles` is an abstract
+Caliper table, not measured hardware cycles or a Rust runtime bound. Inputs start
+in registers; input parsing, host conversion and Lean code generation are outside
+the bound. Memory counts reserved buffer words, not register liveness.
+
+Whole-program proofs currently cover quadratic, bounded modular multiplication,
+and a **two-row** fixed gated word program (both branches). The first two additionally
+connect the actual buffer to the circuit constraints under their canonical/bounded
+input hypotheses. The gated certificate is not for the separate three-row batch
+circuit. There is no generic whole-compiler preservation theorem or general dynamic
+list ABI; a new source program still needs a preservation/cost proof.
+
+Fresh evidence is written to `artifacts/caliper/`: assembly, `runtime.json`, exact
+axiom audit, direct-check logs, source hashes and `verification.json`. Failure removes
+the previous verification receipt. Checked-in `examples/caliper/` is an explicit
+snapshot, not a live symlink.
+
 ## Examples and Scope
 
 1. **Quadratic, field17:** square and output are both witness cells. Three feature/model implementations share one unchanged circuit.
@@ -103,7 +141,7 @@ The modular quotient/remainder pattern is inspired by [zk.golf's RSA challenge](
 
 ## Verified Versus Trusted
 
-**Kernel-checked:** typed scope, local realization/lowering laws, composed program semantics, circuit soundness, complete logical witnesses, fixed cell layouts, pure vector population and negative controls. Inspected endpoints use only standard `propext` and `Quot.sound`, not custom axioms or native-decision proofs.
+**Kernel-checked:** typed scope, local realization/lowering laws, composed program semantics, circuit soundness, complete logical witnesses, fixed cell layouts, pure vector population and negative controls. Core endpoints use only standard `propext` and `Quot.sound`. The separate Caliper compiler/writer/`Exec`/`Triple`/runtime-guide audit additionally permits standard `Classical.choice`; neither audit permits custom axioms or native-decision proofs.
 
 **Tested TCB:** Lean JSON serialization, Python JSON checking/Rust printing, rustfmt/rustc, arkworks, GMP/rug, native execution and the comparison harness. No claim that foreign code, printing or machine execution is kernel-verified.
 

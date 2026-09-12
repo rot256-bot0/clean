@@ -6,7 +6,9 @@ from collections import Counter
 ALLOWED_AXIOMS = {"propext", "Quot.sound"}
 
 
-def check_axioms(text, expected):
+def check_axioms(text, expected, *, allowed_axioms=None):
+    """Check exact coverage; alternate trust policies must be explicit per call."""
+    allowed = ALLOWED_AXIOMS if allowed_axioms is None else set(allowed_axioms)
     if not expected or len(expected) != len(set(expected)):
         raise ValueError("expected axiom declarations must be nonempty and unique")
     pattern = (
@@ -21,8 +23,8 @@ def check_axioms(text, expected):
     dependencies = {
         name.strip() for _, deps in reports for name in deps.split(",") if name.strip()
     }
-    if dependencies - ALLOWED_AXIOMS:
+    if dependencies - allowed:
         raise ValueError(
-            f"unexpected axiom dependencies: {sorted(dependencies - ALLOWED_AXIOMS)!r}"
+            f"unexpected axiom dependencies: {sorted(dependencies - allowed)!r}"
         )
     return sorted(dependencies)
