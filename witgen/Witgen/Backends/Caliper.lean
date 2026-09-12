@@ -59,17 +59,31 @@ def compileWord : WordOp args shapes t → HList Loc args → Nat → Compiled t
   | .mod, .cons a (.cons b .nil), fresh => ⟨.bin .umod fresh a b, fresh, fresh + 1⟩
   | .eq, .cons a (.cons b .nil), fresh => ⟨.bin .eq fresh a b, fresh, fresh + 1⟩
 
-/-- Records and containers are layouts; construction/projection emits no work. -/
-def compileData : DataOp args shapes t → HList Loc args → Loc t
-  | .quad, .cons a (.cons b .nil) => ⟨a, b⟩
-  | .square, .cons q .nil => q.square
-  | .output, .cons q .nil => q.output
-  | .modmul, .cons p (.cons q (.cons r .nil)) => ⟨p, q, r⟩
-  | .product, .cons q .nil => q.product
-  | .quotient, .cons q .nil => q.quotient
-  | .remainder, .cons q .nil => q.remainder
+/-- Caller-owned isomorphisms for static record layouts. The compiler's
+structure operations below are independent of the schema family. -/
+def locSchemaRepr : (k : Schema) → StructRepr Loc (schemaDesc k)
+  | .quad => {
+      pack := fun | .cons a (.cons b .nil) => ⟨a, b⟩
+      unpack := fun w => .cons w.square (.cons w.output .nil)
+      unpack_pack := by intro xs; cases_type* HList; rfl
+      pack_unpack := by intro x; cases x; rfl }
+  | .modmul => {
+      pack := fun | .cons a (.cons b (.cons c .nil)) => ⟨a, b, c⟩
+      unpack := fun w => .cons w.product (.cons w.quotient (.cons w.remainder .nil))
+      unpack_pack := by intro xs; cases_type* HList; rfl
+      pack_unpack := by intro x; cases x; rfl }
+
+def compileStruct : StructOp schemaDesc args shapes t → HList Loc args → Loc t
+  | .make k, xs => (locSchemaRepr k).pack xs
+  | .get k field, .cons x .nil => field.ref.get ((locSchemaRepr k).unpack x)
+
+def compileList : ListOp args shapes t → HList Loc args → Loc t
   | .empty _, .nil => []
   | .push _, .cons xs (.cons x .nil) => xs ++ [x]
+
+def compileAggregate : AggregateSig args shapes t → HList Loc args → Loc t
+  | .inl op, xs => compileStruct op xs
+  | .inr op, xs => compileList op xs
 
 /-- Both arms write into the same *new* layout, so parallel-copy cycles cannot
 occur even when records share registers or a branch returns its captures. -/
@@ -132,7 +146,7 @@ def compileControl : Control args shapes t → HList Loc args →
 def compileOp : WordSig args shapes t → HList Loc args →
     HList CompilerBody shapes → Nat → Except CompileError (Compiled t)
   | .inl op, args, _, n => .ok (compileWord op args n)
-  | .inr (.inl op), args, _, n => .ok ⟨.skip, compileData op args, n⟩
+  | .inr (.inl op), args, _, n => .ok ⟨.skip, compileAggregate op args, n⟩
   | .inr (.inr op), args, bodies, n => compileControl op args bodies n
 
 mutual
@@ -199,13 +213,56 @@ theorem compileWord_correct (op : WordOp args [] t) (xs : HList Loc args)
   all_goals simp [compileWord, _root_.Caliper.run, Loc.read, wordScalarModel, HList.map]
   rfl
 
-/-- Layout construction/projection commutes with reading the machine state. -/
-theorem compileData_correct (op : DataOp args [] t) (xs : HList Loc args)
+/-- Reading a layout is the representation relation for the generic structure law. -/
+def ReadRel (state : _root_.Caliper.State64) (t : Ty) (x : Loc t) (y : Val UInt64 t) : Prop :=
+  Loc.read x state = y
+
+theorem read_env (state : _root_.Caliper.State64) (xs : HList Loc args) :
+    HList.Rel (ReadRel state) xs (xs.map (fun x => Loc.read x state)) := by
+  induction xs with
+  | nil => trivial
+  | cons x xs ih => exact ⟨rfl, ih⟩
+
+theorem locSchema_respects (state : _root_.Caliper.State64) :
+    (structModel locSchemaRepr).Respects (structModel (schemaRepr UInt64))
+      (Handler.id _) (ReadRel state) := by
+  apply structModel_respects
+  · intro k xs ys hr
+    cases k <;> cases_type* HList
+    all_goals rcases hr with ⟨rfl, rfl, h⟩
+    · rfl
+    · rcases h with ⟨rfl, _⟩; rfl
+  · intro k x y hr
+    have h : Loc.read x state = y := hr
+    subst y
+    cases k
+    · exact ⟨rfl, rfl, trivial⟩
+    · exact ⟨rfl, rfl, rfl, trivial⟩
+
+/-- Generic construction/projection commutes with reading the machine state. -/
+theorem compileStruct_correct (op : StructOp schemaDesc args [] t) (xs : HList Loc args)
     (s : _root_.Caliper.State64) :
-    Loc.read (compileData op xs) s =
-      (dataModel UInt64).eval op (xs.map (fun x => Loc.read x s)) .nil := by
+    Loc.read (compileStruct op xs) s =
+      (structModel (schemaRepr UInt64)).eval op (xs.map (fun x => Loc.read x s)) .nil := by
+  have h := locSchema_respects s op xs (xs.map (fun x => Loc.read x s)) .nil .nil (read_env s xs) trivial
+  cases op with
+  | make k => exact h
+  | get k field => cases xs with | cons x xs => cases xs; exact h
+
+theorem compileList_correct (op : ListOp args [] t) (xs : HList Loc args)
+    (s : _root_.Caliper.State64) :
+    Loc.read (compileList op xs) s =
+      (listModel UInt64).eval op (xs.map (fun x => Loc.read x s)) .nil := by
   cases op <;> cases_type* HList
-  all_goals simp [compileData, Loc.read, dataModel, HList.map]
+  all_goals simp [compileList, Loc.read, listModel, HList.map]
+
+theorem compileAggregate_correct (op : AggregateSig args [] t) (xs : HList Loc args)
+    (s : _root_.Caliper.State64) :
+    Loc.read (compileAggregate op xs) s =
+      (aggregateModel UInt64).eval op (xs.map (fun x => Loc.read x s)) .nil := by
+  cases op with
+  | inl op => exact compileStruct_correct op xs s
+  | inr op => exact compileList_correct op xs s
 
 /-- Exact compiler results, obtained by checked extraction without any fallback. -/
 def quadraticCompiled : Compiled .quad :=
@@ -264,7 +321,7 @@ theorem modMul_run (s : _root_.Caliper.State64) (C : _root_.Caliper.CostModel)
 runtime list. The list length is supplied by the compile-time input layout. -/
 def zeroQuadWord : Program WordSig [.scalar, .scalar] .quad :=
   .let_ (.inl (.const 0)) .nil .nil <|
-  .let_ (.inr (.inl .quad)) (.cons .zero (.cons .zero .nil)) .nil (.ret .zero)
+  .let_ (.inr (.inl (.inl (.make .quad)))) (.cons .zero (.cons .zero .nil)) .nil (.ret .zero)
 
 def mapQuadWord (body : Program WordSig [.scalar, .scalar] .quad) :
     Program WordSig [.list .scalar, .scalar] (.list .quad) :=

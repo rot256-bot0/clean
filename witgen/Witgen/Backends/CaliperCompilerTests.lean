@@ -118,7 +118,7 @@ example : (quadraticCompiled.nextReg, modMulCompiled.nextReg, fixedGatedCompiled
 
 #print axioms compile_inputs_fresh
 #print axioms compileWord_correct
-#print axioms compileData_correct
+#print axioms compileAggregate_correct
 #print axioms compileWord_frame
 #print axioms quadratic_run
 #print axioms modMul_run

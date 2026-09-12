@@ -6,7 +6,7 @@ pub struct Quad {
     pub output: u64,
 }
 
-pub fn generate(enabled: bool, xs: Vec<u64>, c: u64) -> Result<Vec<Quad>, String> {
+pub fn generate(enabled: bool, xs: Vec<u64>, c: u64) -> witgen_native::Result<Vec<Quad>> {
     let _wg12: Vec<Quad> = {
         let mut _wg1: Vec<Quad> = Vec::with_capacity(xs.len());
         for _wg0 in xs.iter().cloned() {
@@ -39,10 +39,10 @@ pub fn generate(enabled: bool, xs: Vec<u64>, c: u64) -> Result<Vec<Quad>, String
     Ok((_wg12).clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::F17; 11]) -> Result<(), String> {
+pub fn populate(cells: &mut [witgen_native::F17; 11]) -> witgen_native::Result<()> {
     let _bit0 = witgen_native::f17_to_u64(cells[0]);
     if _bit0 > 1 {
-        return Err("non-Boolean input cell".into());
+        return Err(witgen_native::Error::NonBooleanCell { slot: 0 });
     }
     let result = generate(
         _bit0 == 1,
@@ -54,7 +54,10 @@ pub fn populate(cells: &mut [witgen_native::F17; 11]) -> Result<(), String> {
         witgen_native::f17_to_u64(cells[4]),
     )?;
     if result.len() != 3 {
-        return Err("witness result length mismatch".into());
+        return Err(witgen_native::Error::WitnessLength {
+            expected: 3,
+            actual: result.len(),
+        });
     }
     let _cell0 = witgen_native::f17_from_u64(result[0].square)?;
     let _cell1 = witgen_native::f17_from_u64(result[0].output)?;

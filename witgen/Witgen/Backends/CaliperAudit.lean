@@ -1,5 +1,6 @@
 import Witgen.Backends.CaliperRuntimeGuide
 
+
 /-! Exact public compiler, writer, example and runtime-guide theorem inventory.
 The Python harness independently pins this list and checks every axiom report. -/
 
@@ -10,7 +11,11 @@ The Python harness independently pins this list and checks every axiom report. -
 #print axioms Witgen.Backends.Caliper.decode_div
 #print axioms Witgen.Backends.Caliper.decode_mod
 #print axioms Witgen.Backends.Caliper.compileWord_correct
-#print axioms Witgen.Backends.Caliper.compileData_correct
+#print axioms Witgen.Backends.Caliper.read_env
+#print axioms Witgen.Backends.Caliper.locSchema_respects
+#print axioms Witgen.Backends.Caliper.compileStruct_correct
+#print axioms Witgen.Backends.Caliper.compileList_correct
+#print axioms Witgen.Backends.Caliper.compileAggregate_correct
 #print axioms Witgen.Backends.Caliper.quadratic_compiles
 #print axioms Witgen.Backends.Caliper.modMul_compiles
 #print axioms Witgen.Backends.Caliper.quadratic_code
@@ -92,3 +97,5 @@ The Python harness independently pins this list and checks every axiom report. -
 -- CaliperRuntimeGuide
 #print axioms Witgen.Backends.CaliperRuntimeGuide.quadratic_runtime
 #print axioms Witgen.Backends.CaliperRuntimeGuide.quadratic_exact_cost
+#print axioms Witgen.Backends.CaliperRuntimeGuide.modMul_runtime
+#print axioms Witgen.Backends.CaliperRuntimeGuide.modMul_exact_cost

@@ -1,6 +1,7 @@
 import Witgen.Export
 import Witgen.Integration
 import Witgen.Batch
+import Witgen.Custom
 
 set_option autoImplicit false
 
@@ -174,6 +175,30 @@ def fixtures (path : System.FilePath) : IO Unit := do
   IO.FS.writeFile path (Json.arr cases).compress
   IO.println (Json.mkObj [("fixtures", toJson cases.size)]).compress
 
+/-- Separate generic-extension artifact set; existing regression manifests stay stable. -/
+def customExport (directory : System.FilePath) : IO Unit := do
+  IO.FS.createDirAll directory
+  let modules := [("custom_split", Custom.exportSplit 65536), ("custom_low", Custom.exportLow 65536)]
+  for (name, result) in modules do
+    let source ← jsonOrError result
+    IO.FS.writeFile (directory / (name ++ ".json")) source.pretty
+  IO.FS.writeFile (directory / "manifest.json")
+    (Json.mkObj [("programs", toJson (modules.map Prod.fst))]).pretty
+  IO.println (Json.mkObj [("exported", toJson modules.length)]).compress
+
+def customFixtures (path : System.FilePath) : IO Unit := do
+  let mut cases : Array Json := #[]
+  for x in [0, 1, 65535, 65536, 2^128 + 19] do
+    let fields := ((Custom.splitProgram 65536).lower Custom.lowerSplit).eval Custom.targetModel h![x]
+    match fields with
+    | .cons lo (.cons hi .nil) =>
+      cases := cases.push (fixture "custom_split" [natJson x]
+        (Json.mkObj [("value", Json.mkObj [("low", natJson lo), ("high", natJson hi)])]))
+    let lo := ((Custom.lowProgram 65536).lower Custom.lowerSplit).eval Custom.targetModel h![x]
+    cases := cases.push (fixture "custom_low" [natJson x] (Json.mkObj [("value", natJson lo)]))
+  IO.FS.writeFile path (Json.arr cases).compress
+  IO.println (Json.mkObj [("fixtures", toJson cases.size)]).compress
+
 def demo : IO Unit := do
   let input : Circuits.Quadratic.Input := ⟨3, 4⟩
   let witness := Integration.quadraticFieldWitgen.generate input
@@ -185,8 +210,10 @@ end Driver
 def main (args : List String) : IO UInt32 := do
   match args with
   | ["export", directory] => Driver.exportAll directory; return 0
+  | ["custom-export", directory] => Driver.customExport directory; return 0
+  | ["custom-fixtures", path] => Driver.customFixtures path; return 0
   | ["demo"] => Driver.demo; return 0
   | ["fixtures", path] => Driver.fixtures path; return 0
   | _ =>
-    IO.eprintln "usage: witgen export DIR | witgen fixtures FILE | witgen demo"
+    IO.eprintln "usage: witgen export DIR | witgen fixtures FILE | witgen custom-export DIR | witgen custom-fixtures FILE | witgen demo"
     return 1

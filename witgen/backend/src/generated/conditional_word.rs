@@ -6,7 +6,7 @@ pub struct Quad {
     pub output: u64,
 }
 
-pub fn generate(enabled: bool, xs: Vec<u64>, offset: u64) -> Result<Vec<Quad>, String> {
+pub fn generate(enabled: bool, xs: Vec<u64>, offset: u64) -> witgen_native::Result<Vec<Quad>> {
     let _wg11: Vec<Quad> = if enabled {
         let _wg9: Vec<Quad> = {
             let mut _wg1: Vec<Quad> = Vec::with_capacity(xs.len());

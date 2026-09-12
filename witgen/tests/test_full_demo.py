@@ -24,6 +24,8 @@ class FullDemoTests(unittest.TestCase):
         self.assertTrue(report["direct_vs_lowered_code_differs"])
         self.assertTrue(report["wrong_slot_control_rejected"])
         self.assertTrue(report["gmp_large_integer_case"])
+        self.assertEqual(report.get("crypto", {}).get("status"), "PASS")
+        self.assertEqual(report.get("custom_types", {}).get("cases"), 10)
         self.assertEqual(report.get("caliper", {}).get("status"), "PASS",
                          "full runner must verify Caliper, not only native Rust")
         self.assertEqual(report["caliper"]["runtime_receipt"],

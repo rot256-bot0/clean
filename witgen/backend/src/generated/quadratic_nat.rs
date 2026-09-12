@@ -6,7 +6,7 @@ pub struct Quad {
     pub output: rug::Integer,
 }
 
-pub fn generate(x: rug::Integer, y: rug::Integer) -> Result<Quad, String> {
+pub fn generate(x: rug::Integer, y: rug::Integer) -> witgen_native::Result<Quad> {
     let _wg0: rug::Integer = witgen_native::nat_mul(&x, &x);
     let _wg1: rug::Integer = witgen_native::nat_from_str("17")?;
     let _wg2: rug::Integer = witgen_native::nat_mod(&_wg0, &_wg1)?;
@@ -20,7 +20,7 @@ pub fn generate(x: rug::Integer, y: rug::Integer) -> Result<Quad, String> {
     Ok((_wg6).clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::F17; 4]) -> Result<(), String> {
+pub fn populate(cells: &mut [witgen_native::F17; 4]) -> witgen_native::Result<()> {
     let result = generate(
         rug::Integer::from(witgen_native::f17_to_u64(cells[0])),
         rug::Integer::from(witgen_native::f17_to_u64(cells[1])),

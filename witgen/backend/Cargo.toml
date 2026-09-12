@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
 
+[features]
+default = []
+asm = ["ark-ff/asm"]
+
 [dependencies]
 ark-ff = { version = "=0.6.0", features = ["std"] }
 rug = { version = "=1.30.0", default-features = false, features = ["integer", "std"] }

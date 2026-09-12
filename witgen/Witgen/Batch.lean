@@ -22,19 +22,21 @@ def encodeField (i : Input) : HList (Val Field17) Context :=
   .cons i.enabled (.cons [i.x0, i.x1, i.x2] (.cons i.c .nil))
 
 /-- Even the disabled record is built by field/data operation syntax. -/
-def zeroQuad {F : Signature Ty} [Has FieldOp F] [Has DataOp F] :
+def zeroQuad {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] :
     Program F [.scalar, .scalar] .quad :=
-  .let_ (Has.inject (FieldOp.const 0)) .nil .nil <|
-  .let_ (Has.inject DataOp.quad) (.cons .zero (.cons .zero .nil)) .nil (.ret .zero)
+  witgen [_x, _c] do
+    let zero ← fieldConst 0
+    let result ← makeNamedStruct schemaDesc .quad fields![square := zero, output := zero]
+    return result
 
 /-- Map body receives [element, enabled, c]; branch regions receive [element,c]. -/
-def gatedQuad {F : Signature Ty} [Has FieldOp F] [Has DataOp F] [Has Control F] :
+def gatedQuad {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] [Has Control F] :
     Program F [.scalar, .bool, .scalar] .quad :=
   .let_ (Has.inject (Control.branch [.scalar, .scalar] .quad))
     (.cons (.succ .zero) (.cons .zero (.cons (.succ (.succ .zero)) .nil)))
     (.cons quadratic (.cons zeroQuad .nil)) (.ret .zero)
 
-def gatedBatch {F : Signature Ty} [Has FieldOp F] [Has DataOp F] [Has Control F] :
+def gatedBatch {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] [Has Control F] :
     Program F Context (.list .quad) :=
   .let_ (Has.inject (Control.map [.bool, .scalar] .scalar .quad))
     (.cons (.succ .zero) (.cons .zero (.cons (.succ (.succ .zero)) .nil)))

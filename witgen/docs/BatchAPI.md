@@ -1,4 +1,6 @@
-# Fixed-shape gated batch API
+# Bounded Fixed-Shape Gated Batch API
+
+This small-field suite is retained for regressions; [CryptoAPI.md](CryptoAPI.md) describes the main BN254 examples.
 
 Module `Witgen.Batch`, namespace `Witgen.Batch`; imports Demo/Pipeline/Circuits.
 This is separate from `Demo.conditionalBatchField`, whose disabled result remains empty.
@@ -13,7 +15,7 @@ packs **only** `[enabled, [x0,x1,x2], c]`; packing performs no arithmetic.
 All six programs return `.list .quad`, with native record `Quad { square, output }`:
 
 - `gatedBatchField`: map over xs; each body branches on captured enabled, selecting
-  `Demo.quadratic` or an AST-built zero Quad (`FieldOp.const 0`, `DataOp.quad`).
+  `Demo.quadratic` or an AST-built zero Quad (`FieldOp.const 0`, generic `StructOp.make .quad`).
 - `gatedBatchFoldField`: actual `gatedBatchField.lower (Demo.mapToFold Demo.FieldOp)`.
 - `gatedBatchNat`: actual `gatedBatchField.lower Demo.fieldToNat`.
 - `gatedBatchWord`: actual `gatedBatchNat.mapHandler Demo.natToWord`.

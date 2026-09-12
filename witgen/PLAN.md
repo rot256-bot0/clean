@@ -1,51 +1,54 @@
-# Executed Scope and Continuation
+# Executed Scope
 
-This package is developed on `feat/clean-witgen-dsl` in the authorized
-`rot256-bot0/clean` fork. Parent Clean's current WitnessIR and Lean toolchain remain
-unchanged; no production circuit API replacement or RSA signature-verifier
-submission is claimed.
+Development remains on the authorized `feat/clean-witgen-dsl` branch in
+`rot256-bot0/clean`. Parent Clean's WitnessIR and toolchain remain unchanged.
+No Codex, main/master edits, dependency-source changes or upstream pushes.
 
-## Feature DSL and Native Execution
+## Authoring and Generic Structures
 
-- Typed open-feature IR with explicit scoped regions and optional record/list/control
-  vocabulary. Feature-to-subprogram lowering and composition have semantic proofs.
-- Field → Nat → UInt64 lowering under explicit representation/no-overflow domains;
-  arbitrary unbounded big integers are not represented in one machine word.
-- Generator-independent quadratic, bounded modular-multiplication and fixed three-row
-  gated circuit relations, full satisfying witnesses, and fixed ABI/cell layouts.
-- Actual AST-driven Rust emission with arkworks, GMP/rug and UInt64 implementations,
-  exhaustive small-domain comparisons and raw 4096-bit integer arithmetic examples.
-- Foreign serialization/emission/compilers/libraries are tested TCB, not kernel proofs.
+- `witgen [...] do` supports named operation bindings, reference aliases and returns,
+  elaborating into the unchanged finite typed Core AST. Undeclared ambient captures
+  and unsupported statement forms fail explicitly.
+- `StructDesc`/`StructOp` provide caller-owned schemas, unique field names, generic
+  construction and typed named projection. Named construction checks schema order.
+- `StructRepr` includes pack/unpack inverse laws. `ListOp` is separate; no concrete
+  computational feature is mandatory in Core.
+- `Witgen.Custom` gives a separate caller-owned type/feature family and a certified
+  native-record→structural-field-list lowering, with actual Rust/GMP export/execution.
 
-RSA inspiration: `zksecurity/zk-golf-challenges` revision
-`fb9e89a5de99022a53089f0d11a18331c4c321a3`,
-`Solution/RSASSAPKCS1v15_SHA256_4096_65537/MulMod.lean`.
-Full RSA padding/exponentiation and production limb/carry circuits remain outside scope.
+## Main Cryptographic Examples
 
-## Caliper Continuation
+- BN254 scalar Fr, represented by four native limbs and modeled as canonical residues
+  modulo its exact scalar prime. Decimal strings preserve full-width input/output.
+- Circuit-feature→Field/StructOp→Nat lowering is proved compositionally. Direct
+  Arkworks and lowered GMP execute the same actual AST-derived full witness.
+- Both ordinary and nested custom structures retain the internal square and public
+  result, exact buffer slots and unchanged input bindings.
+- The arithmetic proofs require a positive modulus, not a formal primality proof.
+  No Lean algebraic Field instance or 254-bit security claim is made.
+- Small fields remain bounded exhaustive regression fixtures, not the main example.
 
-1. Recover and directly recheck the actual WordSig → Caliper compiler: fresh registers,
-   static map/fold unrolling, branch joins and explicit incompatible-shape rejection.
-2. Verify generic reserve-then-push writer and complete producer/writer execution,
-   frame, well-formedness, time/net/peak and actual-buffer circuit correspondence.
-3. Export actual assembly and reference-interpreter observations; require nonempty
-   exact axiom coverage, standard foundations only and fresh source-bound receipts.
-4. Include Caliper verification in the full native/demo runner. Keep `import Witgen`
-   core-only; Caliper remains an optional analysis import, never Rust's engine.
-5. Publish a code-first integration/runtime-proof walkthrough backed by
-   `CaliperRuntimeGuide.lean`, distinguishing exact `Exec` from bounded `Triple`.
-6. Independently review the compiler/proofs and final harness/documentation; run all
-   package tests, regenerate examples, then commit with the required coauthor and
-   push only the fork branch. Explicitly update/read back the existing publication.
+## Native Errors and Verification
 
-Universal whole-program Caliper certificates cover quadratic, bounded ModMul and
-**two-row** gated word semantics, not an arbitrary-compiler theorem or the separate
-three-row batch circuit. Circuit-domain assumptions, register-vs-buffer footprint,
-input ABI exclusions and abstract cost model are stated in the runtime walkthrough.
-Runtime-sized containers, generic compiler preservation, general bignum lowering and
-production Clean integration are future work, not completion claims for this slice.
+- Shared `Error` enum and fixed `Result<T>` alias; structured domains/lengths/arity,
+  standard `Display`/`Error`, and original parse/JSON/I/O sources.
+- Providers and generated APIs propagate typed errors; only the CLI formats the
+  diagnostic string and adds a stable error code.
+- Full-width canonicality/reduction, typed errors, generic structure metadata and
+  source/reference/native correspondence have executable tests. Fresh runners retain
+  exact case/axiom inventories, command receipts and hashes.
+- Foreign libraries, serializers, emitter and compiler are tested TCB, not kernel proofs.
 
-Toolchain is pinned by `lean-toolchain`, `lake-manifest.json` and Cargo.lock.
-No Codex, master edits, dependency-source changes, custom axioms, `sorry`,
-`native_decide` or heartbeat increases. Author attribution:
+## Caliper and Publication
+
+- Existing compiler certificates survive the generic-structure migration. The public
+  runtime walkthrough now uses parameterized word modular multiplication, with exact
+  abstract cycles 99 and net/peak buffer-capacity growth 6/6.
+- This is not a full-width BN254 Caliper backend, generic compiler-preservation theorem,
+  or Rust/hardware timing claim. General multi-limb lowering remains future work.
+- Code-first documentation is regenerated from exact Lean/Rust/Caliper source excerpts.
+  Full tests and immutable independent reviews precede the coauthored commit/push.
+  Publication updates are explicit snapshots with exact remote readback.
+
+Required commit attribution:
 `Co-authored-by: Mathias Hall-Andersen <mathias@hall-andersen.dk>`.

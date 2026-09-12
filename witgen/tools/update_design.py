@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh the code-first design document from the actual implementation."""
+"""Publish code-first interfaces by copying the checked implementation verbatim."""
 from pathlib import Path
 import hashlib
 import json
@@ -11,8 +11,7 @@ receipts = []
 
 
 def sample(relative, start=None, end=None, language="lean"):
-    path = PACKAGE / relative
-    source = path.read_text()
+    source = (PACKAGE / relative).read_text()
     first = source.index(start) if start else 0
     last = source.index(end, first) if end else len(source)
     text = source[first:last].rstrip()
@@ -24,252 +23,175 @@ def sample(relative, start=None, end=None, language="lean"):
     return f"[{relative}]({link})\n\n```{language}\n{text}\n```\n"
 
 
-def caliper_profiles():
-    runtime = json.loads((PACKAGE / "examples/caliper/runtime.json").read_text())
-    labels = {"quadratic": "Quadratic", "modMul": "Modular Multiplication",
-              "fixedGated/on": "Two-Row Gated, Enabled",
-              "fixedGated/off": "Two-Row Gated, Disabled"}
-    lines = []
-    observed = []
-    for program in runtime["programs"]:
-        assembly = PACKAGE / "examples/caliper" / (program["name"] + ".caliper")
-        assert assembly.read_text() == program["assembly"] + "\n"
-        cases = {}
-        for run in program["runs"]:
-            costs = cases.setdefault(run["case"], {})
-            assert run["cost_model"] not in costs
-            costs[run["cost_model"]] = run
-        for case, costs in cases.items():
-            assert set(costs) == {"unit", "cycles"}
-            unit, cycles = costs["unit"], costs["cycles"]
-            assert unit["cells"] == cycles["cells"]
-            assert unit["net_words"] == cycles["net_words"]
-            assert unit["peak_words"] == cycles["peak_words"]
-            observed.append(case)
-            lines.append(f"- **{labels[case]}:** `.unit` time {unit['time']}; "
-                         f"`.cycles` time {cycles['time']}; net/peak buffer growth "
-                         f"{unit['net_words']}/{unit['peak_words']} words; "
-                         f"static register endpoint {program['next_register']}.")
-    assert set(observed) == set(labels) and len(observed) == len(labels)
-    return "\n".join(lines) + "\n"
-
-
 parts = ["""# Clean WitGen DSL
 
-**Implementation reference.** Code blocks below are copied from the fork branch, not invented APIs. The new package is in `witgen/`; parent Clean's current circuit API/toolchain remain unchanged while this replacement is developed.
+[Source branch](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl) · [Run instructions](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/README.md)
 
-[Branch](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl) · [Run instructions](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/README.md)
+All code blocks below are extracted from checked source or actual generated output. This package is developed inside the Clean fork; it does not yet replace the parent Clean WitnessIR.
 
 <details>
 <summary>Contents</summary>
 
-- [The Same Program, Different Targets](#1-the-same-program-different-targets)
-- [Actual Rust Output](#2-actual-rust-output)
-- [The Small Typed Core](#3-the-small-typed-core)
+- [Write the WitGen](#1-write-the-witgen)
+- [General Structures](#2-general-structures)
+- [Custom Types and Features](#3-custom-types-and-features)
 - [Proof-Bearing Lowering](#4-proof-bearing-lowering)
-- [Map, Branch, and Records](#5-map-branch-and-records)
-- [Circuits and Witness Cells](#6-circuits-and-witness-cells)
+- [Native Code and Typed Errors](#5-native-code-and-typed-errors)
+- [The Full Circuit Witness](#6-the-full-circuit-witness)
 - [Caliper Integration and Runtime Proofs](#7-caliper-integration-and-runtime-proofs)
-- [Verification and Limits](#8-verification-and-limits)
+- [Checks and Boundaries](#8-checks-and-boundaries)
 
 </details>
 
-## 1. The Same Program, Different Targets
+## 1. Write the WitGen
 
-The source requests field arithmetic and record construction. `Has` chooses a typed feature embedding, not a native implementation.
+The main example uses the **BN254 scalar field**, not a small test field. The author asks for field arithmetic and generic structure operations, using named bindings and named fields:
 
-""",
- sample("Witgen/Demo.lean", "def quadratic {", "theorem quadraticField_eval"),
- "The two arithmetic passes operate on that same AST:\n\n",
- sample("Witgen/Pipeline.lean", "def quadraticNat :", "theorem quadraticNat_correct"),
- "Field operations become target subprograms, including explicit modular reduction:\n\n",
- sample("Witgen/Pipeline.lean", "def fieldScalarToNat :", "def natScalarToWord :"),
- """
-The backend receives different remaining features:
+""", sample("Witgen/Crypto/Program.lean", "def quadratic {", "/-- Circuit-level feature"), """
+`Has` requests a feature in the program signature; it does not select a backend implementation. `fieldMul` and `fieldAdd` are smart constructors for the arithmetic feature. `makeNamedStruct` is the same reusable operation for every caller-defined schema.
 
-- Source Field17 program → arkworks field operations.
-- Field → Nat lowering → GMP-backed `rug::Integer` operations.
-- Field → Nat → bounded UInt64 lowering → word operations.
+`witgen [x, y] do` elaborates to finite, intrinsically typed `Program` syntax. Ordinary authoring does not expose de Bruijn indices or explicit feature injections. Names and aliases are weakened across bindings; nested regions declare their inputs/captures explicitly. The implemented surface supports `let x ← step`, reference aliases `let x := reference`, and `return reference`. Other statements and ambient reference captures are rejected, not given guessed scoping semantics. This is an implemented authoring subset, not a claim to support every Lean `do` construct.
 
-All three use the same circuit and full witness layout. The word theorem is conditional on representability; this is not arbitrary bignum arithmetic squeezed into one word.
+The ambient-parameter interface is deliberately closed: static scalar values, type-valued families, and restricted direct uses of abstract-target `Has` capabilities are supported. Unknown records, containers, value callbacks, proof carriers and unsolved holes are rejected rather than presumed reference-free. Define schemas and smart builders globally and pass region data as explicit named inputs. Global low-level builders remain trusted; this elaborator check is not a kernel provenance theorem or a sandbox for arbitrary Lean code. [Exact policy and diagnostics](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/StructAuthoringAPI.md#closed-ambient-parameter-interface).
 
-## 2. Actual Rust Output
+The exact field modulus is:
 
-Each example returns a native record, then the generated `populate` adapter writes its fields into the reserved witness cells. Input cells stay unchanged. The code is generated from the AST above, not transcribed from its evaluated result.
+""", sample("backend/src/crypto.rs", "pub const BN254_MODULUS", "#[derive", language="rust"), """
+This is BN254 **Fr**, distinct from its base field Fq. The native representation has four 64-bit limbs. Canonical inputs and output cells use decimal strings at the JSON boundary; no conversion through `u64` or floating point occurs. The parameter's size is not a claim of 254-bit cryptographic security.
 
-### Direct Field Backend
+## 2. General Structures
 
-""",
- sample("backend/src/generated/quadratic_field.rs", language="rust"),
- "\n### After Field → Nat: GMP Backend\n\n",
- sample("backend/src/generated/quadratic_nat.rs", language="rust"),
- "\n### After Field → Nat → UInt64\n\n",
- sample("backend/src/generated/quadratic_word.rs", language="rust"),
- """
-For inputs `3,4`, every path fills `[3,4,9,13]`. The square is an actual witness cell, not an unexported local. A source-local `let` becomes a witness only through the explicit result/layout binding.
+A schema names the result sort and its ordered fields. The sort universe and schema family belong to the caller:
 
-## 3. The Small Typed Core
+""", sample("Witgen/Structs.lean", "structure StructDesc", "def StructDesc.sorts"),
+ sample("Witgen/Structs.lean", "inductive StructOp", "/-- Explicit isomorphism"), """
+There are only two structural operations: make a structure, and get a typed field. Adding `QuadWitness`, a nested envelope, a limb record, or a circuit-specific structure does not add another constructor to this operation family or to the core DSL.
 
-The sort universe and feature signature are parameters. Records, words, lists, and control are in optional libraries, not kernel constructors. Return values are typed references; continuations and regions are finite syntax.
+Here are the actual caller-owned schemas for the cryptographic example:
 
-""",
- sample("Witgen/Core.lean", "structure RegionShape", "namespace Var"),
- sample("Witgen/Core.lean", "mutual\n  inductive Program", "abbrev Body"),
- """
-Regions have explicit input contexts. Captures are passed as arguments, not hidden host closures. The optional demo library introduces actual record sorts and preserves their names/field order through Rust emission:
+""", sample("Witgen/Crypto/Features.lean", "@[reducible] def schemaDesc", "def schemaRepr"), """
+`fields![square := square, output := output]` checks both the names and their declared order. Duplicate field names are forbidden. `getField schemaDesc .envelope "trace" envelope` checks that the field exists and has the requested sort. Field order is explicit; this version does not automatically reorder named arguments.
 
-""",
- sample("Witgen/Demo.lean", "inductive Ty", "def Val.map"),
- """
+The semantic representation is not an unchecked bag of constructor/projection callbacks. It includes both inverse laws:
+
+""", sample("Witgen/Structs.lean", "structure StructRepr", "def structModel"), """
+`structModel_respects` proves the generic representation law for every schema and field. Lists are a separate `ListOp` feature with `empty` and `push`; branching/map/fold are a separate optional control feature. No arithmetic, structure, list, or control vocabulary is mandatory in `Witgen.Core`.
+
+## 3. Custom Types and Features
+
+A circuit can expose its own type and operations first, then lower them to structures. This is more than giving a standard tuple another name. The executable example introduces a native `SplitWitness` and a source `SplitOp`; the target representation of the same abstract sort is an ordered heterogeneous field list:
+
+""", sample("Witgen/Custom.lean", "@[reducible] def Native", "def repr"),
+ sample("Witgen/Custom.lean", "def splitProgram", "/-- The lowering author"), """
+The implementation expands the custom feature into Nat arithmetic and generic structure operations. Access to a custom field becomes a checked structural projection:
+
+""", sample("Witgen/Custom.lean", "def lowerSplit", "def Related"),
+ sample("Witgen/Custom.lean", "def Related", "/-- Per-feature proof"), """
+`lowerSplit_law` proves each replacement against the source specification. The generic core theorem then handles every program using that feature:
+
+""", sample("Witgen/Custom.lean", "def certifiedLowering", "/-- A circuit-facing"), """
+The relation preserves both limbs, not merely the low output. Separate theorems establish reconstruction and the low-limb bound. The native demonstration fixes a positive base and includes an input larger than `u64`; the pure Nat model's totalized zero division is not a promise that native division accepts zero.
+
+**Type conversion here changes semantic representation, not abstract sort indices.** A source sort can mean a native circuit structure in one model and a field-list representation in another. Reindexing into a different sort universe is a separate pass not implemented here. A custom feature still needs a lowering proof and a data-only serializer for the selected backend; it is not automatically supported merely because it has a type.
+
 ## 4. Proof-Bearing Lowering
 
-A template supplies a target **subprogram** for each source operation. `Template.Respects` proves that subprogram implements the original feature semantics, uniformly over related region bodies. The generic theorem lifts the local proof through the caller and its continuation.
+The cryptographic example itself begins as a circuit-level `QuadFeature`. Its implementation lowers to field arithmetic and `StructOp`; field operations can then lower to arbitrary-precision Nat arithmetic with explicit reduction:
 
-""",
- sample("Witgen/Core.lean", "abbrev Template", "mutual\n  theorem Program.eval_lower_related"),
- sample("Witgen/Core.lean", "structure CertifiedLowering", "def CertifiedLowering.ofHandler"),
- "Manual composition preserves the intermediate representation relation. No automatic lowering planner is required.\n\n",
- sample("Witgen/Core.lean", "def CertifiedLowering.comp", "/-- Drop a formal result binder"),
- """
-## 5. Map, Branch, and Records
+""", sample("Witgen/Crypto/Program.lean", "def quadraticField :", "theorem quadraticField_eval"), """
+The proof-bearing interface keeps models and representation relations explicit:
 
-Map may remain available to the Rust backend, or be lowered on the Lean side to Fold plus list construction. The body remains typed code with explicit captures.
+""", sample("Witgen/Core.lean", "structure CertifiedLowering", "def CertifiedLowering.ofHandler"), """
+A `Template` maps a source operation to a **target subprogram**, not just another operation tag. Its law quantifies over related arguments and regions. `Program.eval_lower_related` lifts that law through all continuations and nested regions; certified passes compose without erasing intermediate representation conditions.
 
-""",
- sample("Witgen/Pipeline.lean", "def mapBodyToFold", "theorem mapBodyToFold_eval"),
- "The fixed-size gated circuit maps a branch-producing record body over three inputs:\n\n",
- sample("Witgen/Batch.lean", "def gatedQuad", "/-- Mathematical specification"),
- """
-The generated Rust uses real `if` and `for` constructs. Both branches return three records; disabled execution writes all six zeros. A short return is rejected before indexing or writing, not padded with fabricated values.
+For BN254, `fieldToNat_correct` covers arbitrary finite programs over the supplied arithmetic/structure signature at any positive modulus. `quadToField_correct` certifies the preceding custom-feature expansion. Neither theorem asserts that BN254 arithmetic fits in one machine word.
 
-- [Direct batch Rust](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated/batch_field.rs)
-- [Map → Fold → Field → Nat → UInt64 Rust](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/backend/src/generated/batch_fold_word.rs)
+## 5. Native Code and Typed Errors
 
-## 6. Circuits and Witness Cells
+Both following files are generated from the actual certified ASTs. Each returns a native structure; `populate` writes every required witness cell without overwriting inputs.
 
-The circuit relation is independent of generator choice. A generator proves the **full** relation, including internal cells, rather than only the public output spec. Feature-relative completeness also fixes the boundary adapters: arbitrary host computation cannot be existentially hidden in a newly chosen encoder/decoder.
+### Direct BN254 Backend
 
-""",
- sample("Witgen/Circuits.lean", "structure Circuit", "namespace FormalWitgen"),
- "The compiled field generator is the actual program stored in the certificate:\n\n",
- sample("Witgen/Integration.lean", "def quadraticFieldWitgen", "theorem quadraticField_buffer"),
- """
-Layouts are fixed and proved complete. Native encoders validate every output before any store. The three circuit families are:
+""", sample("backend/src/generated_crypto/quad_bn254.rs", language="rust"), """
+### After Field → Nat: GMP Backend
 
-- Quadratic over field17: input cells `0,1`; square/output cells `2,3`.
-- Modular multiplication over field257: inputs `0,1,2`; product/quotient/remainder `3,4,5`.
-- Gated batch: inputs `0..4`; three square/output pairs `5..10`.
+""", sample("backend/src/generated_crypto/quad_nat.rs", language="rust"), """
+The same emitter handles the nested `QuadEnvelope` schema and the lowered custom `SplitWitness` without adding special record-operation cases. Structure names and ordered field types travel in the schema metadata.
 
-The modular multiplication pattern uses `a*b = q*n+r` and `r<n`; the example is not full RSA signature verification. The GMP path additionally executes raw modular multiplication on 4096-bit inputs without claiming those values fit the small field257 circuit.
+### Errors Are Values, Not Strings
+
+The shared native API has a concrete error enum and a fixed result alias:
+
+""", sample("backend/src/error.rs", "pub type Result", "impl Error", language="rust"), """
+Callers can match `Error::DivisionByZero`, inspect expected/actual lengths, or distinguish canonical-field failures from malformed input. `Error` implements `Display` and `std::error::Error`; integer-parse, JSON and I/O errors retain their original `source()`. Providers, generated functions, writers and dispatch all propagate this type. Only the CLI formats a diagnostic string, alongside a stable `error_code`.
+
+The tests execute high-width multiplication/reduction and reject noncanonical field values, negative Nat values, malformed integers, wrong arities and bad lengths. Output validation is completed before any witness stores. The raw Nat backend remains arbitrary precision; the BN254 backend admits only canonical scalar representatives.
+
+## 6. The Full Circuit Witness
+
+A correct public output alone is insufficient. The BN254 quadratic witness exposes both the internal square and the public output. The complete buffer is `[x, y, square, output]`, and its independent relation requires:
+
+```text
+inputs are bound unchanged
+0 ≤ square, output < p
+square = x*x mod p
+output = square+y mod p
+```
+
+`QuadCircuit.sound` is generator-independent. `quadFieldWitgen` and `quadNatWitgen` store the actual programs with fixed input/output adapters. `quad_nat_raw_buffer` proves that the **raw** Nat result already equals the field witness buffer—no hidden modular repair in an output decoder. `envelope_nat_buffer_correct` carries the same complete witness through a nested custom structure.
+
+The arithmetic proof models canonical residues as `Fin p` and uses `0 < p`. It does not prove primality or declare a Lean algebraic `Field` instance; the exact known-prime BN254 scalar parameter identifies the intended native field. The add/multiply/reduction proofs do not need primality.
+
+The main native validation executes four actual ASTs on twelve input pairs, for 48 complete witnesses. Ten pairs have an input outside `u64`; unreduced squares reach 508 bits. Both backends are compared to Lean and to a separate integer arithmetic oracle. These are boundary/representative tests, not an exhaustive enumeration of a cryptographic field.
 
 ## 7. Caliper Integration and Runtime Proofs
 
-Caliper is a second **analysis target**, not the native execution engine. We lower the source features until only words, records, static lists and supported control remain; the Caliper backend then traverses that actual `Program WordSig` into `Caliper.Stmt 64`. The Rust backend remains separate.
+Caliper is an **analysis backend**, not the native execution engine. Its current target handles words, static structure/list layouts and supported control. It does not yet implement full-width BN254 field arithmetic; such a path would need a certified multi-limb implementation. The example below is instead parameterized **word modular multiplication**, kept separate from the cryptographic field examples.
 
-### Compile the Program, Not a Handwritten Lookalike
+This is the actual emitted producer followed by its complete input-and-witness writer:
 
-The checked examples are extracted from `compile`; there is no failure fallback to unrelated code:
+""", sample("examples/caliper/modMul.caliper", language="text"), """
+It starts with operands/modulus in registers and fills `[a,b,n,product,quotient,remainder]`. Allocation reserves an empty buffer; each `mem.push` initializes one cell. Zero-cost `skip` nodes are retained rather than silently optimized away.
 
-""",
- sample("Witgen/Backends/Caliper.lean", "def quadraticCompiled :", "/-- Constructor equality"),
- """
-Input registers must be below the first fresh register. Records become register layouts. Map/fold unroll static lists, while branches emit `ifNZ` and copies into a common fresh result layout. Unequal branch-result shapes are rejected, including nested list mismatches. Field/Nat/GMP are not opaque Caliper precompiles: any such operation must first be lowered with its required representation proof.
+### A Checked Runtime Bound and an Exact Cost
 
-Then append the full witness writer. The named buffer contains **inputs and every witness cell**, not just the public result:
+Import `Witgen.Backends.CaliperExamples`, open `Caliper` and `Witgen.Backends.CaliperExamples`, and use these checked declarations:
 
-""",
- sample("Witgen/Backends/CaliperExamples.lean", "def withWitness", "def quadraticTime"),
- "The complete generated quadratic program, rendered directly by pinned Caliper:\n\n",
- sample("examples/caliper/quadratic.caliper", language="text"),
- """
-The zero-cost `skip` nodes are retained, not silently optimized away. Input registers `r0,r1` are preserved; the output layout copies `[r0,r1,r4,r7]` into buffer `b0`.
+""", sample("Witgen/Backends/CaliperRuntimeGuide.lean", "theorem modMul_runtime", "end Witgen.Backends.CaliperRuntimeGuide"), r"""
+`Triple C tape P code Q T D M` proves terminating execution from every state satisfying `P`, with postcondition `Q` and upper bounds on time, net capacity growth and peak growth. `Exec` carries exact costs. The second theorem uses determinism to establish exact values for every completed run.
 
-### Charge Allocation and Initialization
-
-Reserving capacity does not initialize readable cells. The actual writer reserves an empty buffer and pushes each register value in layout order:
-
-""",
- sample("Witgen/Backends/CaliperWitness.lean", "def pushRegs", "/-- The exact state transformer"),
- r"""
-For a memory-neutral producer and a fresh output buffer of $n$ words, the proved composed cost is
+For a memory-neutral producer and a fresh output buffer of $n$ words, the writer-composition theorem charges
 
 $$
-T_{\mathrm{full}} = T_{\mathrm{producer}}
- + C.\mathrm{memAlloc}
- + n\,C.\mathrm{allocPerWord}
- + n\,C.\mathrm{memPush}.
+\begin{aligned}
+T_{\mathrm{full}} &= T_{\mathrm{producer}} + C.\mathrm{memAlloc}\\
+&\quad + n\,C.\mathrm{allocPerWord} + n\,C.\mathrm{memPush}.
+\end{aligned}
 $$
 
-`writeRegs_exec` proves the generic writer execution. `withWitness_exec` composes it with a producer's `Exec` theorem, full-cell correspondence, preserved input registers and buffer/tape frame. Net and peak **buffer-capacity growth** are both $n$; physical-memory claims additionally require a well-formed initial state. Loading from reserved-but-uninitialized storage is explicitly rejected.
+This word example costs 15 under `.unit` and 99 under `.cycles`, with net/peak buffer growth 6/6. These are abstract model charges, **not a Rust runtime or measured hardware cycles**. Inputs start in registers: parsing, host conversion, Lean code generation and compilation are outside the clock. Buffer capacity excludes registers; static register endpoints are not liveness peaks.
 
-### A Checked Runtime Proof
+To analyze another WitGen: fix its input/representation assumptions and source program; prove the feature fallbacks; compile the actual word AST with checked fresh registers and static shapes; prove its execution/value correspondence and cost formula; compose with `withWitness_exec`; finally connect every copied cell to the circuit relation. For size-dependent bounds, prove the parameterized family—not merely a timed or checked instance.
 
-This complete Lean example specializes the generic quadratic certificate to Caliper's shipped `.cycles` cost table. It is compiled by the tests and included in the named axiom audit:
+**There is no generic whole-compiler preservation theorem yet.** Current whole-program certificates cover the documented word examples and fixed two-row gated program. Branch outputs with incompatible static shapes are rejected. Runtime-length containers and a general multi-limb field lowering are not implemented. The word execution model covers wrapping and totalized zero division; Nat/circuit correctness needs the stated bounds and positive-modulus hypotheses.
 
-""",
- sample("Witgen/Backends/CaliperRuntimeGuide.lean"),
- """
-`Triple C tape P code Q T D M` proves: every state satisfying `P` has a terminating `Exec` reaching `Q`, with time at most `T`, net capacity growth at most `D`, and peak growth at most `M`. Here the result includes the full buffer, unchanged inputs/other buffers/tape, and preserved well-formedness. The second theorem uses determinism to show the exact resource values for every completed run; an upper bound alone would not establish that.
+[Compiler API](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperBackendAPI.md) · [Cost and Circuit Theorems](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperCostAPI.md)
 
-The clock starts with inputs already in registers. It counts all emitted producer instructions and output allocation/population, but not Lean code generation, compilation, input parsing, or host ABI conversion. **The number 90 is an abstract Caliper charge, not a Rust runtime or a measured hardware cycle count.** Changing the cost table specializes the generic proof; it does not calibrate a real processor.
-
-### Observed Runs and Proved Profiles
-
-These profiles include **the complete producer plus input-and-witness buffer allocation and population**. The sample observations are exported by `Caliper.run`; the universal execution theorems above, not the sample runs, justify the program-wide claims:
-
-""",
- caliper_profiles(),
- """
-[All Assembly and Runtime Observations](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl/witgen/examples/caliper)
-
-Reproduce without compiling all of Mathlib to native code:
+## 8. Checks and Boundaries
 
 ```sh
 cd witgen
-python3 tools/run_caliper.py
-# Or export after building the imported Lean modules:
-lake build Witgen.Backends.CaliperExamples
-lake env lean --run MainCaliper.lean export artifacts/caliper
-```
-
-The verification runner builds the proof modules, directly rechecks the compiler/interpreter test files and axiom audit, requires every named theorem report, and checks the canonical quadratic and bounded modular-multiplication domains. Runtime JSON and assembly are tested serialization; proofs concern the actual `Stmt`, not the printer.
-
-### Connect Runtime to Correct Witnesses
-
-Runtime without a semantic link could certify a fast program computing the wrong thing. The current chain is:
-
-1. The existing feature-lowering theorems relate the source program to its word program under explicit representation bounds.
-2. `quadratic_run` / `modMul_run` prove the **actual compiler outputs** return the source word records, universally over input word values, initial scratch registers, tapes and cost models.
-3. `quadratic_witness_exec` / `modMul_witness_exec` append the actual full-layout writer.
-4. `quadratic_circuit_exec` / `modMul_circuit_exec` additionally prove that the Nat view of the **actual filled buffer** satisfies the unchanged circuit constraints, with the stated input-domain hypotheses.
-
-For quadratic, the circuit claim requires canonical Field17 inputs. For modular multiplication it requires `0 < n ≤ 16`, `a < n`, `b < n`. The unrestricted word execution theorems cover wrapping arithmetic and totalized zero division, not an unrestricted Nat or circuit guarantee.
-
-### Apply the Method to Another WitGen
-
-Fix the source program, input domain, ABI and cost model. Prove each feature fallback preserves its unchanged semantics, then compile the resulting word AST with an explicit input layout. Prove preservation and an `Exec` resource formula for that **checked compiler result**; reuse the primitive correspondence lemmas, frame rules and `withWitness_exec`. Finally connect every copied witness cell to the circuit relation and derive a `Triple`.
-
-For a variable-size family, parameterize the program/layout and prove a bound in its size parameter; checking one size or timing the reference interpreter is not an asymptotic proof. Static map/fold lowering is available, but **there is no generic whole-compiler preservation theorem yet**. Only the documented quadratic, modular-multiplication and fixed two-row gated artifacts currently have universal whole-program certificates. A new arbitrary program still needs that proof step.
-
-The two-row gated artifact covers word semantics and both branches; it is **not** a proof for the separate three-row batch circuit. Dynamic output shapes, general runtime-length containers, arbitrary named subroutines and general bignum-to-word lowering are not supplied by this backend. Register endpoints are static namespaces, not liveness peaks; buffer-memory numbers exclude registers and are not total machine memory.
-
-[Compiler API](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperBackendAPI.md) · [Witness, Cost and Circuit Theorems](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/CaliperCostAPI.md)
-
-## 8. Verification and Limits
-
-The native comparison suite checks the actual Lean reference interpreter against emitted Rust and separately checks every circuit cell: **7,472 cases across18 variants**. Wrong-slot, missing-cell, bad-length, noncanonical-input and dirty-disabled-buffer controls are included. An exact named axiom audit rejects empty/missing reports and permits only the documented standard foundations.
-
-```sh
-cd witgen
-python3 tools/run_demo.py
+python3 tools/run_crypto.py       # main BN254 field/GMP examples
+python3 tools/run_demo.py         # full suite, custom types and Caliper included
 python3 -m unittest discover -s tests -v
+cargo test --locked --manifest-path backend/Cargo.toml --test crypto --test errors --test providers
 ```
 
-**Proved:** typed scope, feature/subprogram lowering, composed semantics, full circuit witnesses, the pure vector writer, and the scoped Caliper compiler-output/witness/cost theorems above. The core axiom audit permits `propext` and `Quot.sound`; the separate Caliper audit also permits standard `Classical.choice`. Neither permits `sorryAx`, custom axioms or `native_decide`/`trustCompiler`.
+The older small-field suite remains for exhaustive bounded regressions and word-lowering tests; it is not the main field example. Its native suite still compares 7,472 cases across 18 variants. The separate custom-type path adds two generated programs and ten exact source/target/native comparisons. Named-argument, duplicate-name, scoping, alias, shadowing, capture and invalid-shape controls accompany the generic structural authoring layer.
 
-**Tested TCB:** JSON encoding/checking, Rust printing, rustfmt/rustc, arkworks/GMP and native execution. Native division rejects zero; equivalence is claimed on the declared nonzero-divisor domains.
+**Kernel-checked:** typed finite syntax, operation-to-subprogram/model-related lowering, generic structure representation laws, the circuit/full-buffer results and the specifically scoped Caliper execution/resource theorems. Exact nonempty axiom audits keep the core/crypto policies at `propext` and `Quot.sound`; Caliper additionally permits standard `Classical.choice`. No custom axioms, `sorry`, native-decision proofs or blanket heartbeat increases are used.
 
-**Current limits:** pure semantics, explicit-input regions, fixed abstract sort indices with representation changes through model relations, and no general bignum-to-word pass or arbitrary dynamic type/procedure registry. Parent Clean's current WitnessIR has not been replaced by this package yet.
+**Tested boundary:** elaboration behavior, JSON codecs, Rust printing, rustfmt/rustc, Arkworks/GMP and native execution. The code emitter does not reconstruct code from evaluated outputs. Cryptographic-size arithmetic is implemented and tested; a verified foreign runtime, a general multi-limb Caliper backend, automatic lowering search, arbitrary procedure linking, and replacement of parent Clean's WitnessIR remain separate work.
 """]
 
 output = REPO / "doc/witgen-dsl-design.md"

@@ -13,6 +13,7 @@ from axiom_audit import check_axioms
 from build_native import build
 from emit_rust import EmitError, emit_module
 from run_caliper import run_all as run_caliper
+from run_crypto import run_all as run_crypto
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "artifacts"
@@ -104,6 +105,10 @@ def main():
         "Witgen.IntegrationTests",
         "Witgen.ExportTests",
         "Witgen.BatchTests",
+        "Witgen.StructTests",
+        "Witgen.AuthoringTests",
+        "Witgen.AuthoringControlTests",
+        "Witgen.CustomTests",
         "witgen",
     ]
     run(["lake", "build", *targets], "lean-build.log")
@@ -210,6 +215,33 @@ def main():
     counts = Counter(x["program"] for x in cases)
     large = [x for x in cases if x["program"] == "modmul_nat_raw"]
     assert large and int(large[0]["inputs"][0]).bit_length() == 4096
+    custom_export = ART / "custom"
+    custom_export.mkdir(exist_ok=True)
+    run(["lake", "exe", "witgen", "custom-export", str(custom_export)], "custom-export.log")
+    run(["lake", "exe", "witgen", "custom-fixtures", str(custom_export / "fixtures.json")], "custom-fixtures.log")
+    build(custom_export, generated_subdir="generated_custom", binary="witgen-custom")
+    run(["cargo", "build", "--locked", "--manifest-path", "backend/Cargo.toml", "--bin", "witgen-custom"], "custom-build.log")
+    custom_cases = json.loads((custom_export / "fixtures.json").read_text())
+    expected_custom = Counter((name, str(x)) for name in ("custom_split", "custom_low")
+                              for x in (0, 1, 65535, 65536, 2**128+19))
+    if Counter((c["program"], *c["inputs"]) for c in custom_cases) != expected_custom:
+        raise ValueError("custom-feature fixture coverage mismatch")
+    custom_output = run([str(ROOT / "backend/target/debug/witgen-custom")], "custom-native.jsonl",
+                        "\n".join(json.dumps({"program": c["program"], "inputs": c["inputs"]})
+                                  for c in custom_cases) + "\n")
+    custom_rows = [json.loads(line) for line in custom_output.splitlines()]
+    if len(custom_rows) != len(custom_cases):
+        raise ValueError("custom-feature result coverage mismatch")
+    for case, result in zip(custom_cases, custom_rows):
+        x = int(case["inputs"][0])
+        expected = ({"low": str(x % 65536), "high": str(x // 65536)}
+                    if case["program"] == "custom_split" else str(x % 65536))
+        if (case["expected"] != {"value": expected} or result.get("value") != expected
+                or result.get("program") != case["program"] or "error" in result):
+            raise ValueError("custom-type lowering/native representation mismatch")
+    crypto = run_crypto()
+    if crypto.get("status") != "PASS":
+        raise ValueError("cryptographic main-example verification failed")
     caliper = run_caliper()
     if caliper.get("status") != "PASS":
         raise AssertionError("Caliper verification did not pass")
@@ -230,6 +262,10 @@ def main():
         "wrong_slot_cells": bad_cells,
         "missing_cell_layout_rejected": True,
         "gmp_large_integer_case": True,
+        "custom_types": {"status": "PASS", "cases": len(custom_cases),
+                         "programs": ["custom_split", "custom_low"]},
+        "crypto": {"status": crypto["status"], "native_cases": crypto["native_cases"],
+                   "verification_receipt": "artifacts/crypto/verification.json"},
         "caliper": {
             "status": caliper["status"],
             "verification_receipt": "artifacts/caliper/verification.json",

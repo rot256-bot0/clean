@@ -1,4 +1,6 @@
-# Demo library API (compiled)
+# Bounded Regression Library API
+
+The main cryptographic-size examples are in [CryptoAPI.md](CryptoAPI.md). This optional small-field library remains for exhaustive regression and bounded-word tests.
 
 Namespace `Witgen.Demo`; imports `Witgen.Demo` and `Witgen.Pipeline`.
 The Core stays generic. This optional library supplies:
@@ -16,27 +18,26 @@ structure ModMul (α : Type) where
 -- Scalar representations: Arithmetic.Field17, Nat, UInt64.
 ```
 
-Finite feature signatures `FieldOp`, `NatOp`, `WordOp`, `DataOp`, `Control`.
+Finite feature signatures `FieldOp`, `NatOp`, `WordOp`, generic `StructOp schemaDesc`, separate `ListOp`, and `Control`.
 Scalar operations: `const (n : Nat)`, `add`, `mul`, `eq`; Nat/Word also `div`, `mod`.
-`DataOp`: `quad`, `square`, `output`, `modmul`, `product`, `quotient`,
-`remainder`, `empty (element : Ty)`, `push (element : Ty)`.
+`StructOp schemaDesc` supplies generic `make` and typed `get` for the caller-owned Quad/ModMul schemas. `ListOp` supplies `empty` and `push`; neither requires a new core constructor per record. See [StructAuthoringAPI.md](StructAuthoringAPI.md).
 `Control`: `branch (captures : List Ty) (result : Ty)`,
 `map (captures : List Ty) (input output : Ty)`,
 `fold (captures : List Ty) (element accumulator : Ty)`.
 
 ```lean
-abbrev FieldSig := SigSum FieldOp (SigSum DataOp Control)
-abbrev NatSig := SigSum NatOp (SigSum DataOp Control)
-abbrev WordSig := SigSum WordOp (SigSum DataOp Control)
+abbrev FieldSig := SigSum FieldOp (SigSum AggregateSig Control)
+abbrev NatSig := SigSum NatOp (SigSum AggregateSig Control)
+abbrev WordSig := SigSum WordOp (SigSum AggregateSig Control)
 fieldModel : Model FieldSig (Val Arithmetic.Field17)
 natModel : Model NatSig (Val Nat)
 wordModel : Model WordSig (Val UInt64)
 ```
 
-`FieldOp.info`, `NatOp.info`, `WordOp.info`, `DataOp.info`, `Control.info`,
+`FieldOp.info`, `NatOp.info`, `WordOp.info`, generic `structInfo`, `ListOp.info`, `aggregateInfo`, `Control.info`,
 and `fieldInfo`, `natInfo`, `wordInfo` return `OpInfo`:
 `tag : String`, `literal : Option Nat`, `field : Option Nat`.
-The parent emits JSON; `literal` belongs in static `value`, `field` in static `field`.
+The parent emits JSON; `literal` belongs in static `value`, `field` in static `index`.
 Tags match NativeSchema.md. `Ty.quad` emits record `Quad` with ordered fields
 `[square: scalar, output: scalar]`; `Ty.modmul` emits `ModMul` with
 `[product: scalar, quotient: scalar, remainder: scalar]`.
@@ -59,7 +60,7 @@ fold is left-to-right. Native traversal visits *all* region ASTs, not evaluated 
 
 ## Programs and transformations
 
-`quadratic` is feature-polymorphic using `Has FieldOp F` and `Has DataOp F`:
+`quadratic` is feature-polymorphic using `Has FieldOp F` and `Has (StructOp schemaDesc) F`:
 inputs `[scalar,scalar] = [x,c]`; output `quad`; computes `square=x*x`,
 `output=square+c`. `quadraticField : Program FieldSig [scalar,scalar] quad`.
 `quadraticNat` is actual `Program.lower fieldToNat quadraticField`.
@@ -83,7 +84,7 @@ Correspondence requires `FitsU64 a`, `FitsU64 b`, `FitsU64 n`,
 ## Generic map elimination and conditional examples
 
 ```lean
-abbrev Library (F : Signature Ty) := SigSum F (SigSum DataOp Control)
+abbrev Library (F : Signature Ty) := SigSum F (SigSum AggregateSig Control)
 libraryModel (M : Model F (Val α)) : Model (Library F) (Val α)
 mapToFold (F : Signature Ty) : Template (Library F) (Library F)
 

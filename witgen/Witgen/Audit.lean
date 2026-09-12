@@ -1,6 +1,14 @@
 import Witgen.Integration
 import Witgen.Batch
+import Witgen.Custom
 
+#print axioms Witgen.StructRepr.get_pack
+#print axioms Witgen.structModel_respects
+#print axioms Witgen.Step.eval_bind
+#print axioms Witgen.Custom.lowerSplit_law
+#print axioms Witgen.Custom.lowerSplit_correct
+#print axioms Witgen.Custom.splitProgram_satisfies
+#print axioms Witgen.Custom.lowered_satisfies
 #print axioms Witgen.Program.eval_subst
 #print axioms Witgen.Program.eval_bind
 #print axioms Witgen.Program.eval_lower_related

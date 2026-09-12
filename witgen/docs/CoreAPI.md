@@ -108,7 +108,7 @@ Intermediate representation conditions are **retained**, not erased. The models 
 
 Import `Witgen.CoreTests`; namespace `Witgen.CoreTests.Optional`. This library fixture is deliberately outside the kernel.
 
-`Ty`, `Val`, `MapRecord`, `DataOp`, and `Control` define numbers, lists, records, Boolean selection, and a left fold as independent extensions. `mapped` implements a doubling map via fold, returning a **first-class record** containing transformed values and an ordered visitation trace. `map_correct xs` proves both fields for every list, including empty lists.
+`Ty`, `Val`, `MapRecord`, `FixtureOp`, and `Control` define numbers, lists, records, Boolean selection, and a left fold as independent extensions. `mapped` implements a doubling map via fold, returning a **first-class record** containing transformed values and an ordered visitation trace. `map_correct xs` proves both fields for every list, including empty lists.
 
 `branch_true yes no` and `branch_false yes no` are definitional equalities to exactly the selected body's interpretation. The model calls only that body. Concrete tests return:
 

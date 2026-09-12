@@ -102,7 +102,7 @@ class CaliperIntegrationTests(unittest.TestCase):
         self.assertEqual(declarations, list(run_caliper.AUDIT_DECLARATIONS))
         for name in [
             "Witgen.Backends.Caliper.compileWord_correct",
-            "Witgen.Backends.Caliper.compileData_correct",
+            "Witgen.Backends.Caliper.compileAggregate_correct",
             "Witgen.Backends.Caliper.fixedGated_exec",
             "Witgen.Backends.CaliperWitness.writeRegs_exec",
             "Witgen.Backends.CaliperWitness.writeRegs_triple",

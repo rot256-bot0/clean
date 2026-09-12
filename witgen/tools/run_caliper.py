@@ -30,7 +30,11 @@ AUDIT_DECLARATIONS = (
     "Witgen.Backends.Caliper.decode_div",
     "Witgen.Backends.Caliper.decode_mod",
     "Witgen.Backends.Caliper.compileWord_correct",
-    "Witgen.Backends.Caliper.compileData_correct",
+    "Witgen.Backends.Caliper.read_env",
+    "Witgen.Backends.Caliper.locSchema_respects",
+    "Witgen.Backends.Caliper.compileStruct_correct",
+    "Witgen.Backends.Caliper.compileList_correct",
+    "Witgen.Backends.Caliper.compileAggregate_correct",
     "Witgen.Backends.Caliper.quadratic_compiles",
     "Witgen.Backends.Caliper.modMul_compiles",
     "Witgen.Backends.Caliper.quadratic_code",
@@ -106,6 +110,8 @@ AUDIT_DECLARATIONS = (
     "Witgen.Backends.CaliperExamples.modMul_intermediate_memory",
     "Witgen.Backends.CaliperRuntimeGuide.quadratic_runtime",
     "Witgen.Backends.CaliperRuntimeGuide.quadratic_exact_cost",
+    "Witgen.Backends.CaliperRuntimeGuide.modMul_runtime",
+    "Witgen.Backends.CaliperRuntimeGuide.modMul_exact_cost",
 )
 
 

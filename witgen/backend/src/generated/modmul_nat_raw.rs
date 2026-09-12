@@ -7,7 +7,11 @@ pub struct ModMul {
     pub remainder: rug::Integer,
 }
 
-pub fn generate(a: rug::Integer, b: rug::Integer, modulus: rug::Integer) -> Result<ModMul, String> {
+pub fn generate(
+    a: rug::Integer,
+    b: rug::Integer,
+    modulus: rug::Integer,
+) -> witgen_native::Result<ModMul> {
     let _wg0: rug::Integer = witgen_native::nat_mul(&a, &b);
     let _wg1: rug::Integer = witgen_native::nat_div(&_wg0, &modulus)?;
     let _wg2: rug::Integer = witgen_native::nat_mod(&_wg0, &modulus)?;

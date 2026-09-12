@@ -10,7 +10,7 @@ pub fn generate(
     enabled: bool,
     xs: Vec<witgen_native::F17>,
     offset: witgen_native::F17,
-) -> Result<Vec<Quad>, String> {
+) -> witgen_native::Result<Vec<Quad>> {
     let _wg7: Vec<Quad> = if enabled {
         let _wg5: Vec<Quad> = {
             let mut _wg1: Vec<Quad> = Vec::with_capacity(xs.len());

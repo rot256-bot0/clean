@@ -1,5 +1,10 @@
 import Witgen.Pipeline
 
+namespace Witgen.Demo
+example : (structInfo (StructOp.make (desc := schemaDesc) Schema.quad)).tag = "record.make" := rfl
+example : (ListOp.empty .scalar).info.tag = "list.empty" := rfl
+end Witgen.Demo
+
 open Witgen Witgen.Demo Witgen.Arithmetic
 
 -- Tracer 1: actual first-class record from the source AST.
@@ -91,7 +96,7 @@ example : conditionalBatchFoldWord.eval wordModel
 example : (nativeOps fieldInfo conditionalBatchField).map OpInfo.tag =
     ["control.branch", "control.map", "field.mul", "field.add", "record.make", "list.empty"] := by decide
 example : (nativeOps natInfo quadraticNat).filterMap OpInfo.literal = [17, 17] := by decide
-example : (DataOp.quotient.info).field = some 1 := by decide
+example : (structInfo (StructOp.get (desc := schemaDesc) .modmul (.there .here))).field = some 1 := by decide
 
 -- Runtime checks exercise the actual AST transformations (not foreign code).
 #eval show IO Unit from do

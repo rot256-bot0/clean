@@ -49,16 +49,38 @@ theorem graph_env_eq (f : α → β) (xs : HList (Val α) Γ) (ys : HList (Val �
       have hx : Val.map f x = y := h.1
       simp only [HList.map, hx, ih ys h.2]
 
-theorem data_respects (f : α → β) :
-    (dataModel α).Respects (dataModel β) (Handler.id DataOp) (Graph f) := by
+theorem schema_respects (f : α → β) :
+    (structModel (schemaRepr α)).Respects (structModel (schemaRepr β))
+      (Handler.id _) (Graph f) := by
+  apply structModel_respects
+  · intro k xs ys hr
+    rw [← graph_env_eq f xs ys hr]
+    cases k with
+    | quad => cases xs with | cons a xs => cases xs with | cons b xs => cases xs; rfl
+    | modmul => cases xs with | cons a xs => cases xs with | cons b xs => cases xs with | cons c xs => cases xs; rfl
+  · intro k x y hr
+    have h : Val.map f x = y := hr
+    subst y
+    cases k with
+    | quad => exact ⟨rfl, rfl, trivial⟩
+    | modmul => exact ⟨rfl, rfl, rfl, trivial⟩
+
+theorem list_respects (f : α → β) :
+    (listModel α).Respects (listModel β) (Handler.id ListOp) (Graph f) := by
   intro args shapes t op xs ys fs gs hr _
   rw [← graph_env_eq f xs ys hr]
   clear hr ys
   cases op <;> cases xs
   all_goals try (rename_i a xs; cases xs)
   all_goals try (rename_i b xs; cases xs)
-  all_goals try (rename_i c xs; cases xs)
-  all_goals simp [Graph, Handler.id, dataModel, HList.map, Val.map, List.map_append]
+  all_goals simp [Graph, Handler.id, listModel, HList.map, Val.map, List.map_append]
+
+theorem aggregate_respects (f : α → β) :
+    (aggregateModel α).Respects (aggregateModel β) (Handler.id AggregateSig) (Graph f) := by
+  intro args shapes t op xs ys fs gs hr hb
+  cases op with
+  | inl op => exact schema_respects f op xs ys fs gs hr hb
+  | inr op => exact list_respects f op xs ys fs gs hr hb
 
 theorem control_respects (f : α → β) :
     (controlModel α).Respects (controlModel β) (Handler.id Control) (Graph f) := by
@@ -123,11 +145,11 @@ theorem control_respects (f : α → β) :
               exact ih _
 
 theorem shared_respects (f : α → β) :
-    ((dataModel α).sum (controlModel α)).Respects
-      ((dataModel β).sum (controlModel β)) (Handler.id _) (Graph f) := by
+    ((aggregateModel α).sum (controlModel α)).Respects
+      ((aggregateModel β).sum (controlModel β)) (Handler.id _) (Graph f) := by
   intro args shapes t op xs ys fs gs hr hb
   cases op with
-  | inl op => exact data_respects f op xs ys fs gs hr hb
+  | inl op => exact aggregate_respects f op xs ys fs gs hr hb
   | inr op => exact control_respects f op xs ys fs gs hr hb
 
 /-- Field arithmetic expands to primitive integer arithmetic and an explicit reduction. -/
@@ -406,22 +428,22 @@ theorem modMulWord_small_satisfies {a b n : Nat}
 
 /-! Generic optional map elimination. The base feature and its model are arbitrary;
 input/output/capture sorts may themselves be records or nested lists. -/
-abbrev Library (F : Signature Ty) := SigSum F (SigSum DataOp Control)
+abbrev Library (F : Signature Ty) := SigSum F (SigSum AggregateSig Control)
 
 def libraryModel (M : Model F (Val α)) : Model (Library F) (Val α) :=
-  M.sum ((dataModel α).sum (controlModel α))
+  M.sum ((aggregateModel α).sum (controlModel α))
 
 def mapBodyToFold {F : Signature Ty} {captures : List Ty} {input output : Ty}
     (body : Program (Library F) (input :: captures) output) :
     Program (Library F) (input :: .list output :: captures) (.list output) :=
   (body.subst (RefSubst.lift (fun r => .succ r))).bind <|
-    .let_ (.inr (.inl (.push output)))
+    .let_ (.inr (.inl (.inr (.push output))))
       (.cons (.succ (.succ .zero)) (.cons .zero .nil)) .nil (.ret .zero)
 
 def mapBlock {F : Signature Ty} {captures : List Ty} {input output : Ty}
     (body : Program (Library F) (input :: captures) output) :
     Program (Library F) (.list input :: captures) (.list output) :=
-  .let_ (.inr (.inl (.empty output))) .nil .nil <|
+  .let_ (.inr (.inl (.inr (.empty output)))) .nil .nil <|
   .let_ (.inr (.inr (.fold captures input (.list output))))
     (.cons (.succ .zero) (.cons .zero
       ((refs captures).map (fun r => .succ (.succ r)))))

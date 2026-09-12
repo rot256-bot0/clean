@@ -40,7 +40,7 @@ alias each other; generated destinations never alias live input bindings. Typed
 `Var.get` selects arguments/captures. Registers increase monotonically. Records
 and lists are generation-time layouts, not opaque machine instructions.
 
-All `WordOp`s lower to `imm`/`bin`: const/add/mul/div/mod/eq. `DataOp`s manipulate
+All `WordOp`s lower to `imm`/`bin`: const/add/mul/div/mod/eq. `StructOp` construction/projection and separate `ListOp`s manipulate
 locations without emitted instructions. Map/fold unroll compile-time-known lists,
 including captures and accumulator locations. Branch compiles both actual regions,
 emits `ifNZ`, and copies each selected result into a fresh common layout. Nested
@@ -65,7 +65,7 @@ Implemented and building (Lean 4.32.2):
 - `compileWord_correct`: every word primitive, every typed operand location,
   every initial state, destination, tape and cost table; actual one-instruction
   `Caliper.run` agrees with `wordScalarModel` (including overflow and zero divisor).
-- `compileData_correct`: all record/list layout operations commute with `Loc.read`.
+- `compileStruct_correct`, `compileList_correct`, `compileAggregate_correct`: generic structural operations and separate list-layout operations commute with `Loc.read`; `locSchema_respects` supplies the layout representation law.
 - `quadraticCompiled`, `modMulCompiled`: checked extraction of actual `compile`
   results at input registers `[0,1]`/`[0,1,2]`, fresh endpoints `2`/`3`.
 - `quadratic_compiles`, `modMul_compiles`: exact checked-success equations.

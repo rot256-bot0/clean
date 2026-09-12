@@ -11,6 +11,18 @@ class EmitError(ValueError):
     pass
 
 
+BN254_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617
+
+
+def cell_backend(field):
+    """Explicit native cell backends; field identifiers are never normalized."""
+    if type(field) is int and field in {17, 257}:
+        return f"f{field}", f"witgen_native::F{field}"
+    if field == "bn254":
+        return "bn254", "witgen_native::Bn254Scalar"
+    raise EmitError("unsupported witness cell field")
+
+
 KEYWORDS = {
     "as",
     "break",
@@ -82,10 +94,18 @@ class RustEmitter:
     def __init__(self, module):
         if type(module.get("version")) is not int or module.get("version") != 1:
             raise EmitError("unsupported IR version")
-        if module.get("domain") not in {"field17", "nat", "word"}:
+        if module.get("domain") not in {"field17", "bn254", "nat", "word"}:
             raise EmitError("unsupported scalar domain")
+        layout = module.get("wire_layout")
+        bn254_cells = isinstance(layout, dict) and layout.get("field") == "bn254"
+        if module.get("domain") == "bn254" or module.get("input_semantics") == "bn254" or bn254_cells:
+            if module.get("field_modulus") != str(BN254_MODULUS):
+                raise EmitError("BN254 requires its exact decimal scalar modulus")
+            if module["domain"] == "word":
+                raise EmitError("BN254 field values do not fit in one u64")
         self.module = module
         self.domain = module["domain"]
+        self.is_field = self.domain in {"field17", "bn254"}
         self.records = {}
         self.used = set()
         self.counter = 0
@@ -94,6 +114,7 @@ class RustEmitter:
         if ty == "scalar":
             return {
                 "field17": "witgen_native::F17",
+                "bn254": "witgen_native::Bn254Scalar",
                 "nat": "rug::Integer",
                 "word": "u64",
             }[self.domain]
@@ -163,6 +184,8 @@ class RustEmitter:
         n = int(value)
         if self.domain == "nat":
             return f'witgen_native::nat_from_str("{n}")?'
+        if self.domain == "bn254":
+            return f'witgen_native::bn254_from_str("{n % BN254_MODULUS}")?'
         limit = 17 if self.domain == "field17" else 2**64
         # Static const follows Field17.ofNat / UInt64.ofNat, not input decoding.
         n %= limit
@@ -202,9 +225,9 @@ class RustEmitter:
         )
         if not isinstance(static, dict) or set(static) - allowed_static:
             raise EmitError("unexpected static operation parameters")
-        prefix = {"field17": "field", "nat": "nat", "word": "word"}[self.domain]
+        prefix = {"field17": "field", "bn254": "field", "nat": "nat", "word": "word"}[self.domain]
         arithmetic = {prefix + ".add", prefix + ".mul"}
-        if self.domain != "field17":
+        if not self.is_field:
             arithmetic |= {prefix + ".div", prefix + ".mod"}
         if op == "control.branch":
             if not refs or refs[0][1] != "bool" or len(regions) != 2:
@@ -305,7 +328,7 @@ class RustEmitter:
             if [ty for _, ty in refs] != ["scalar", "scalar"] or result != "scalar":
                 raise EmitError("arithmetic operation signature mismatch")
             suffix = op.split(".")[1]
-            method = ("f17" if self.domain == "field17" else prefix) + "_" + suffix
+            method = {"field17": "f17", "bn254": "bn254", "nat": "nat", "word": "word"}[self.domain] + "_" + suffix
             a, b = refs[0][0], refs[1][0]
             if self.domain == "nat":
                 a, b = "&" + a, "&" + b
@@ -371,10 +394,13 @@ class RustEmitter:
         if layout is None:
             return ""
         cell_field = layout.get("field")
-        if type(cell_field) is not int or cell_field not in {17, 257}:
-            raise EmitError("unsupported witness cell field")
+        cell_prefix, cell_type = cell_backend(cell_field)
         if self.domain == "field17" and cell_field != 17:
             raise EmitError("field17 generator needs field17 cells")
+        if self.domain == "bn254" and cell_field != "bn254":
+            raise EmitError("BN254 generator needs BN254 cells")
+        if cell_field == "bn254" and self.domain == "word":
+            raise EmitError("BN254 cells need a full-width representation, not one u64")
         count, outputs = layout.get("cells"), layout.get("outputs")
         if type(count) is not int or count < 1 or not isinstance(outputs, list):
             raise EmitError("invalid witness buffer/output declaration")
@@ -448,10 +474,11 @@ class RustEmitter:
         lines = []
 
         def raw(slot):
-            return f"witgen_native::f{cell_field}_to_u64(cells[{slot}])"
+            conversion = "to_nat" if cell_field == "bn254" else "to_u64"
+            return f"witgen_native::{cell_prefix}_{conversion}(cells[{slot}])"
 
         def scalar(slot):
-            if self.domain == "field17":
+            if self.is_field:
                 return f"cells[{slot}]"
             return (
                 f"rug::Integer::from({raw(slot)})"
@@ -464,7 +491,7 @@ class RustEmitter:
             if ty == "bool":
                 lines.append(f"let _bit{i} = {raw(positions[0])};")
                 lines.append(
-                    f'if _bit{i} > 1 {{ return Err("non-Boolean input cell".into()); }}'
+                    f'if _bit{i} > 1 {{ return Err(witgen_native::Error::NonBooleanCell {{ slot: {positions[0]} }}); }}'
                 )
                 args.append(f"_bit{i} == 1")
             elif ty == "scalar":
@@ -476,12 +503,12 @@ class RustEmitter:
         if policy == "modmul_small":
             lines += [f"let _raw{i} = {raw(slot)};" for i, slot in enumerate(inputs)]
             lines.append(
-                'if _raw2 == 0 || _raw2 > 16 || _raw0 >= _raw2 || _raw1 >= _raw2 { return Err("modmul circuit input assumptions failed".into()); }'
+                'if _raw2 == 0 || _raw2 > 16 || _raw0 >= _raw2 || _raw1 >= _raw2 { return Err(witgen_native::Error::CircuitAssumptions { circuit: "modmul" }); }'
             )
         lines.append(f"let result = {self.module['name']}({', '.join(args)})?;")
         if isinstance(self.module["output"], dict) and "list" in self.module["output"]:
             lines.append(
-                f'if result.len() != {layout["output_length"]} {{ return Err("witness result length mismatch".into()); }}'
+                f'if result.len() != {layout["output_length"]} {{ return Err(witgen_native::Error::WitnessLength {{ expected: {layout["output_length"]}, actual: result.len() }}); }}'
             )
         for i, path in enumerate(paths):
             value = "result"
@@ -489,11 +516,11 @@ class RustEmitter:
                 value += f"[{part}]" if type(part) is int else "." + identifier(part)
             converted = (
                 value
-                if self.domain == "field17"
+                if self.is_field
                 else (
-                    f"witgen_native::f{cell_field}_from_nat(&{value})?"
+                    f"witgen_native::{cell_prefix}_from_nat(&{value})?"
                     if self.domain == "nat"
-                    else f"witgen_native::f{cell_field}_from_u64({value})?"
+                    else f"witgen_native::{cell_prefix}_from_u64({value})?"
                 )
             )
             lines.append(f"let _cell{i} = {converted};")
@@ -503,7 +530,7 @@ class RustEmitter:
         )
         lines.append("Ok(())")
         return (
-            f"\npub fn populate(cells: &mut [witgen_native::F{cell_field}; {count}]) -> Result<(), String> {{\n"
+            f"\npub fn populate(cells: &mut [{cell_type}; {count}]) -> witgen_native::Result<()> {{\n"
             + self.indent("\n".join(lines))
             + "\n}\n"
         )
@@ -536,7 +563,7 @@ class RustEmitter:
         return (
             "// Generated from typed witness IR. Do not hand-edit.\n\n"
             + "\n\n".join(declarations)
-            + f"\n\npub fn {name}({params}) -> Result<{output_type}, String> {{\n{body}\n}}\n"
+            + f"\n\npub fn {name}({params}) -> witgen_native::Result<{output_type}> {{\n{body}\n}}\n"
             + self.emit_writer()
         )
 

@@ -6,7 +6,7 @@ pub struct Quad {
     pub output: u64,
 }
 
-pub fn generate(x: u64, y: u64) -> Result<Quad, String> {
+pub fn generate(x: u64, y: u64) -> witgen_native::Result<Quad> {
     let _wg0: u64 = witgen_native::word_mul(x, x);
     let _wg1: u64 = 17_u64;
     let _wg2: u64 = witgen_native::word_mod(_wg0, _wg1)?;
@@ -20,7 +20,7 @@ pub fn generate(x: u64, y: u64) -> Result<Quad, String> {
     Ok((_wg6).clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::F17; 4]) -> Result<(), String> {
+pub fn populate(cells: &mut [witgen_native::F17; 4]) -> witgen_native::Result<()> {
     let result = generate(
         witgen_native::f17_to_u64(cells[0]),
         witgen_native::f17_to_u64(cells[1]),

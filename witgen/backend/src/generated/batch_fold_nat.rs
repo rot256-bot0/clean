@@ -10,7 +10,7 @@ pub fn generate(
     enabled: bool,
     xs: Vec<rug::Integer>,
     c: rug::Integer,
-) -> Result<Vec<Quad>, String> {
+) -> witgen_native::Result<Vec<Quad>> {
     let _wg0: Vec<Quad> = Vec::new();
     let _wg15: Vec<Quad> = {
         let mut _wg2: Vec<Quad> = (_wg0).clone();
@@ -49,10 +49,10 @@ pub fn generate(
     Ok((_wg15).clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::F17; 11]) -> Result<(), String> {
+pub fn populate(cells: &mut [witgen_native::F17; 11]) -> witgen_native::Result<()> {
     let _bit0 = witgen_native::f17_to_u64(cells[0]);
     if _bit0 > 1 {
-        return Err("non-Boolean input cell".into());
+        return Err(witgen_native::Error::NonBooleanCell { slot: 0 });
     }
     let result = generate(
         _bit0 == 1,
@@ -64,7 +64,10 @@ pub fn populate(cells: &mut [witgen_native::F17; 11]) -> Result<(), String> {
         rug::Integer::from(witgen_native::f17_to_u64(cells[4])),
     )?;
     if result.len() != 3 {
-        return Err("witness result length mismatch".into());
+        return Err(witgen_native::Error::WitnessLength {
+            expected: 3,
+            actual: result.len(),
+        });
     }
     let _cell0 = witgen_native::f17_from_nat(&result[0].square)?;
     let _cell1 = witgen_native::f17_from_nat(&result[0].output)?;

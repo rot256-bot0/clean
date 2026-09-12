@@ -1,15 +1,23 @@
 mod generated;
 use std::io::{self, BufRead};
 
-fn run(request: &serde_json::Value) -> Result<serde_json::Value, String> {
-    let name = request
+fn run(request: &serde_json::Value) -> witgen_native::Result<serde_json::Value> {
+    let program = request
         .get("program")
-        .and_then(|v| v.as_str())
-        .ok_or("missing program")?;
-    let inputs = request
+        .ok_or(witgen_native::Error::MissingField("program"))?;
+    let name = program
+        .as_str()
+        .ok_or(witgen_native::Error::InvalidInputType {
+            expected: "program string",
+        })?;
+    let input = request
         .get("inputs")
-        .and_then(|v| v.as_array())
-        .ok_or("missing inputs")?;
+        .ok_or(witgen_native::Error::MissingField("inputs"))?;
+    let inputs = input
+        .as_array()
+        .ok_or(witgen_native::Error::InvalidInputType {
+            expected: "inputs array",
+        })?;
     generated::dispatch(name, inputs)
 }
 
@@ -18,13 +26,16 @@ fn main() {
         let response = match line {
             Ok(text) => match serde_json::from_str::<serde_json::Value>(&text) {
                 Ok(request) => run(&request),
-                Err(error) => Err(error.to_string()),
+                Err(error) => Err(witgen_native::Error::Json(error)),
             },
-            Err(error) => Err(error.to_string()),
+            Err(error) => Err(witgen_native::Error::Io(error)),
         };
         match response {
             Ok(value) => println!("{}", value),
-            Err(error) => println!("{}", serde_json::json!({"error": error})),
+            Err(error) => println!(
+                "{}",
+                serde_json::json!({"error": error.to_string(), "error_code": error.code()})
+            ),
         }
     }
 }

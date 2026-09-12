@@ -1,5 +1,11 @@
 # Caliper Review Scope
 
+**Historical checkpoint:** this records the recovered backend review preceding
+commit `3f31325a`, before migration to generic structural features. The current
+Caliper audit has 88 entries, including the new structural correspondence and
+ModMul runtime-guide endpoints. Run the current verification commands for the
+current source hashes; the historical count below is not the present inventory.
+
 The recovered compiler, writer and circuit/resource example sources were independently
 reviewed before integration. No blocking semantic defect or proof hole was found in
 that scope. Direct Lean checks, independent alias/control/arithmetic/buffer controls,

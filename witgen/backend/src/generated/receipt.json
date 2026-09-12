@@ -2,91 +2,91 @@
   {
     "program": "quadratic_field",
     "ir_sha256": "4d4bfca77d0160beb30a78809e0f8060e766a5a884d970d51c6510d19006f036",
-    "rust_sha256": "34e0f44a2753ef0fd9b52227c8f52ad22dda8b1bd82198ff009d3464f588ff1b"
+    "rust_sha256": "e5f2f63b1982acb8d9514dad1bd68d8f0969989d8e241bd2647ef6d200399bc5"
   },
   {
     "program": "quadratic_nat",
     "ir_sha256": "6ee8bf78a21722519af08a537d46bdec670d1fa104071b9cb0dad59b43cb2deb",
-    "rust_sha256": "14c702fc1f52f10c3d62805e9c6ced671e4b5e96ffb121231bd11b2231f535fd"
+    "rust_sha256": "e846209959908adeaa937d4beb143e865a141ab53971f682a9785746f110fcea"
   },
   {
     "program": "quadratic_word",
     "ir_sha256": "a515478d7573a0e751c52eae8097fdf6ba9ee30d97981571734ba6ab7d3795a8",
-    "rust_sha256": "5da6cb57171d22062691e6235b7a464bbbedbe8faf3c1a01e895b89ebb0b5776"
+    "rust_sha256": "ff3c7cd218cfa0274f8bfd465d00340c0238de786fd9ef19e60345c979001125"
   },
   {
     "program": "modmul_nat",
     "ir_sha256": "adcb5585bdc326d4f18d841238af710ff9fdd3ae2eba6f593bf748657bffda00",
-    "rust_sha256": "fe57fb88af20ff56c8c40f2a50bc28f31642bf027c4d1612b1874d10acc2857e"
+    "rust_sha256": "542de0a314031ac68ba6c42c32c7f949a59663fb7e2e471ecce7bdd27a215595"
   },
   {
     "program": "modmul_word",
     "ir_sha256": "309243a409a505574d9d778989e94ab4c9a5a7c63b89596e0254eaeddbe5e7c6",
-    "rust_sha256": "390854cd331cd21e986703717677c36a4230d88b4b66a66dfcbba2f5e9351180"
+    "rust_sha256": "8e48d0cca96de8db29fefdc5ba67262b7f2d9ec3d3a1f34d7ecda99989fb8264"
   },
   {
     "program": "modmul_nat_raw",
     "ir_sha256": "6b7603ef1bdcf0b9b42dc7c682ed420df3973f914b0db8921ac47fc29e000699",
-    "rust_sha256": "69f0c4f3ec79d0adebf610098990046f17784d043271e25345c1f50f6907a33a"
+    "rust_sha256": "ab69513278c9ff792994c3535501860c874baecc96a5b19ed17adeaceba8665e"
   },
   {
     "program": "conditional_field",
     "ir_sha256": "10175d1b7cf27d76127345c8cc3504cf0527b214b743e1a0a6a2e6ecb20161d5",
-    "rust_sha256": "ede6a2fcacfd6f02ffec9be726a6b405774336df2925e001c0e2e739a459cebb"
+    "rust_sha256": "dabb4dc8b1ceb4a6233b0377c6363a8cc393a20801bf043f1452944f3dd113bf"
   },
   {
     "program": "conditional_nat",
     "ir_sha256": "0ba4390696fd6da23fbf15ec34711b26d3e57b58d881bcad75a1adc09c50591f",
-    "rust_sha256": "3fcd3db801734bc1a4c003d67ebbd5b04e71e1f4a602d92a789237e2842aaae2"
+    "rust_sha256": "e638fe51178ff9ba8490832c95aad6f96d15614cb9d345c6256957910042dd06"
   },
   {
     "program": "conditional_word",
     "ir_sha256": "49400720e9cba019f60948654c187d91f1a793ca56f2756f04439b02ff69a8f7",
-    "rust_sha256": "9056f78a25db1417174e1c5a6745a67508f978b7b2156462d4b9e6dc001d35bf"
+    "rust_sha256": "c753c7e7c30d2510bac92dbb34f9ea8cce28e2108623fd82cad19ddfa4692d0d"
   },
   {
     "program": "conditional_fold_field",
     "ir_sha256": "1a5c3182703266381355e5c6da366009137bb5fab613cba042e4cfa2a2a7cc91",
-    "rust_sha256": "1e495aacd29447c7d26a32f98f77c883e3715ccb2539c8e25f73255bf9193461"
+    "rust_sha256": "96cca4c484d8bce8caf1ed7fc5ceb0fd5ff734195372f8406373791d19608b10"
   },
   {
     "program": "conditional_fold_nat",
     "ir_sha256": "c0992b38f2816441d6d6a4af8c776c237ca90afd72eb8251cc4a22695e25c02d",
-    "rust_sha256": "dc459f8113b48f94f4e3f1a4a0890a6f40e70c076e3eeeee9c21a64ad4fdc5ea"
+    "rust_sha256": "5807ffe6636fe122e6cb5eeb9e54fdb9c17297c79e2303bbbadc90a32f560a7c"
   },
   {
     "program": "conditional_fold_word",
     "ir_sha256": "83fdff098f3a45292f26a5cea11fff02190915af5101a89937573d5c77629b87",
-    "rust_sha256": "0f9abdcdd78862458833e3441378313ca4e656f5b6da68c19b845e3c64c576dc"
+    "rust_sha256": "bc1403805bafbef3218a5e27ec70a1b161a49a5e88ccec7b3f3fdfd65b71fd25"
   },
   {
     "program": "batch_field",
     "ir_sha256": "4f79c21f51f8354d11ae43292f79c0b6042f9d98c0ae55e5a853294ce0ddac65",
-    "rust_sha256": "5d594a45979e7dc7e9a07ea6bb271408839ca9d53daa478e5a3e2d37480b314b"
+    "rust_sha256": "eecf964d012c82a87a173b94071e482b566628103f71adb2a8a72eff264790f4"
   },
   {
     "program": "batch_nat",
     "ir_sha256": "cddac5d8701f6db262acce7692b42f1810f8f42c38d4cabc9a402bd7c39e5f5c",
-    "rust_sha256": "e43ca8b9dc49827c86c4eb3e653c457d40b70f766f8ba4d65762b39ec576318e"
+    "rust_sha256": "293bd316b749add934348d687c60050166c4f590cd43dc5e26c93304eefff066"
   },
   {
     "program": "batch_word",
     "ir_sha256": "6b13e07ca2f7fb3ec237d3aa22b8cbf6f1da89f04fb8dcb63f5862d3a703c366",
-    "rust_sha256": "4ee3c3942039f32902a796aaa3d110fd5db2a5aa2635f76513c9ce556171482e"
+    "rust_sha256": "0fb8b732d298fce8a15bb5a6b39ece83cfee9420e4b7639893b966cca211440c"
   },
   {
     "program": "batch_fold_field",
     "ir_sha256": "0fbbf14c50135fcf1eeeb2132e6de3a41d934781c3c64e282eaf63c2a9c0d7bb",
-    "rust_sha256": "4553ecc4d4b694b5cc16930101f91d69b2c4ce6e0b65121a2a084bd37dc4fa6b"
+    "rust_sha256": "b12a2e40bead96e65fd7198cbd82788a86fafdcfed3373ad90835b70d49594ae"
   },
   {
     "program": "batch_fold_nat",
     "ir_sha256": "5dad0f87066894706239fcc77467fe1ea664e41e660f619799b53f3ce0170b91",
-    "rust_sha256": "9de1fd0fb824a17f7b2d6c7e06870e39152da36a7d19527ed5fca5a45eb9f712"
+    "rust_sha256": "b3cf176253d98e36be89a5bc5e2eed03af0ea1c4e5911a78aa38b2cb18a03914"
   },
   {
     "program": "batch_fold_word",
     "ir_sha256": "3986e0917fc72727622b748f48eb99750a947146c9d050ca21700f21c920b79e",
-    "rust_sha256": "ff1a7db7a2136374601cf1b07a4f4453b9abcaca951bbd384d3c16950906f1ef"
+    "rust_sha256": "7960d59f344efe2ba0702de6fba2341c9f91ae0fdd5fdd412c4c688b9728cbba"
   }
 ]

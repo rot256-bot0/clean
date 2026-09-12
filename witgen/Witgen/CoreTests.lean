@@ -168,22 +168,22 @@ abbrev Val : Ty → Type
   | .numbers => List Nat
   | .record => MapRecord
 
-inductive DataOp : Signature Ty where
-  | numbers (xs : List Nat) : DataOp [] [] .numbers
-  | empty : DataOp [] [] .record
-  | double : DataOp [.number] [] .number
-  | push : DataOp [.record, .number, .number] [] .record
+inductive FixtureOp : Signature Ty where
+  | numbers (xs : List Nat) : FixtureOp [] [] .numbers
+  | empty : FixtureOp [] [] .record
+  | double : FixtureOp [.number] [] .number
+  | push : FixtureOp [.record, .number, .number] [] .record
 
 inductive Control : Signature Ty where
   | branch (t : Ty) : Control [.flag] [⟨[], t⟩, ⟨[], t⟩] t
   | fold : Control [.numbers, .record] [⟨[.number, .record], .record⟩] .record
 
-abbrev Library := SigSum DataOp Control
+abbrev Library := SigSum FixtureOp Control
 
 def push (r : MapRecord) (x y : Nat) : MapRecord :=
   ⟨r.values ++ [y], r.visits ++ [x]⟩
 
-def dataModel : Model DataOp Val where
+def fixtureModel : Model FixtureOp Val where
   eval := fun op args _ => match op, args with
     | .numbers xs, .nil => xs
     | .empty, .nil => ⟨[], []⟩
@@ -197,7 +197,7 @@ def controlModel : Model Control Val where
     | .fold, .cons xs (.cons init .nil), .cons step .nil =>
       xs.foldl (fun acc x => step (.cons x (.cons acc .nil))) init
 
-def model : Model Library Val := Model.sum dataModel controlModel
+def model : Model Library Val := Model.sum fixtureModel controlModel
 
 /-- Map is derived via a left fold carrying a first-class result record.
 Both transformed values and an ordered input visitation trace are returned. -/

@@ -1,4 +1,4 @@
-import Witgen.Core
+import Witgen.Authoring
 import Witgen.Arithmetic
 
 /-! Optional typed demonstration vocabulary; none of these sorts or features
@@ -9,17 +9,6 @@ open Arithmetic
 inductive Ty where
   | scalar | bool | quad | modmul | list (element : Ty)
   deriving Repr, DecidableEq
-
-/-- Native record identity and ordered named fields are library-owned metadata. -/
-def Ty.recordName : Ty → Option String
-  | .quad => some "Quad"
-  | .modmul => some "ModMul"
-  | _ => none
-
-def Ty.recordFields : Ty → List (String × Ty)
-  | .quad => [("square", .scalar), ("output", .scalar)]
-  | .modmul => [("product", .scalar), ("quotient", .scalar), ("remainder", .scalar)]
-  | _ => []
 
 structure Quad (α : Type) where
   square : α
@@ -68,16 +57,30 @@ inductive WordOp : Signature Ty where
   | mod : WordOp [.scalar, .scalar] [] .scalar
   | eq : WordOp [.scalar, .scalar] [] .bool
 
-inductive DataOp : Signature Ty where
-  | quad : DataOp [.scalar, .scalar] [] .quad
-  | square : DataOp [.quad] [] .scalar
-  | output : DataOp [.quad] [] .scalar
-  | modmul : DataOp [.scalar, .scalar, .scalar] [] .modmul
-  | product : DataOp [.modmul] [] .scalar
-  | quotient : DataOp [.modmul] [] .scalar
-  | remainder : DataOp [.modmul] [] .scalar
-  | empty (element : Ty) : DataOp [] [] (.list element)
-  | push (element : Ty) : DataOp [.list element, element] [] (.list element)
+inductive Schema where
+  | quad | modmul
+  deriving Repr, DecidableEq
+
+@[reducible] def schemaDesc : Schema → StructDesc Ty
+  | .quad => ⟨"Quad", .quad, [("square", .scalar), ("output", .scalar)], by decide⟩
+  | .modmul => ⟨"ModMul", .modmul,
+      [("product", .scalar), ("quotient", .scalar), ("remainder", .scalar)], by decide⟩
+
+/-- Optional sort-to-schema lookup belongs to this caller, not StructOp/Core. -/
+def Ty.schema? : Ty → Option Schema
+  | .quad => some .quad
+  | .modmul => some .modmul
+  | _ => none
+
+def Ty.recordName (t : Ty) : Option String := t.schema?.map (fun k => (schemaDesc k).name)
+def Ty.recordFields (t : Ty) : List (String × Ty) :=
+  (t.schema?.map (fun k => (schemaDesc k).fields)).getD []
+
+inductive ListOp : Signature Ty where
+  | empty (element : Ty) : ListOp [] [] (.list element)
+  | push (element : Ty) : ListOp [.list element, element] [] (.list element)
+
+abbrev AggregateSig := SigSum (StructOp schemaDesc) ListOp
 
 inductive Control : Signature Ty where
   | branch (captures : List Ty) (result : Ty) :
@@ -88,15 +91,19 @@ inductive Control : Signature Ty where
       Control (.list element :: accumulator :: captures)
         [⟨element :: accumulator :: captures, accumulator⟩] accumulator
 
-abbrev FieldSig := SigSum FieldOp (SigSum DataOp Control)
-abbrev NatSig := SigSum NatOp (SigSum DataOp Control)
-abbrev WordSig := SigSum WordOp (SigSum DataOp Control)
+abbrev FieldSig := SigSum FieldOp (SigSum AggregateSig Control)
+abbrev NatSig := SigSum NatOp (SigSum AggregateSig Control)
+abbrev WordSig := SigSum WordOp (SigSum AggregateSig Control)
 
-instance {F : Signature Ty} : Has DataOp (SigSum F (SigSum DataOp Control)) where
-  inject := fun op => .inr (.inl op)
-  injective := fun h => Sum.inl.inj (Sum.inr.inj h)
+instance {F : Signature Ty} : Has (StructOp schemaDesc) (SigSum F (SigSum AggregateSig Control)) where
+  inject := fun op => .inr (.inl (.inl op))
+  injective := fun h => Sum.inl.inj (Sum.inl.inj (Sum.inr.inj h))
 
-instance {F : Signature Ty} : Has Control (SigSum F (SigSum DataOp Control)) where
+instance {F : Signature Ty} : Has ListOp (SigSum F (SigSum AggregateSig Control)) where
+  inject := fun op => .inr (.inl (.inr op))
+  injective := fun h => Sum.inr.inj (Sum.inl.inj (Sum.inr.inj h))
+
+instance {F : Signature Ty} : Has Control (SigSum F (SigSum AggregateSig Control)) where
   inject := fun op => .inr (.inr op)
   injective := fun h => Sum.inr.inj (Sum.inr.inj h)
 
@@ -125,17 +132,25 @@ def wordScalarModel : Model WordOp (Val UInt64) where
     | .mod, .cons a (.cons b .nil) => a % b
     | .eq, .cons a (.cons b .nil) => decide (a = b)
 
-def dataModel (α : Type) : Model DataOp (Val α) where
+def schemaRepr (α : Type) : (k : Schema) → StructRepr (Val α) (schemaDesc k)
+  | .quad => {
+      pack := fun | .cons a (.cons b .nil) => ⟨a, b⟩
+      unpack := fun w => .cons w.square (.cons w.output .nil)
+      unpack_pack := by intro xs; cases xs with | cons a xs => cases xs with | cons b xs => cases xs; rfl
+      pack_unpack := by intro x; cases x; rfl }
+  | .modmul => {
+      pack := fun | .cons a (.cons b (.cons c .nil)) => ⟨a, b, c⟩
+      unpack := fun w => .cons w.product (.cons w.quotient (.cons w.remainder .nil))
+      unpack_pack := by intro xs; cases xs with | cons a xs => cases xs with | cons b xs => cases xs with | cons c xs => cases xs; rfl
+      pack_unpack := by intro x; cases x; rfl }
+
+def listModel (α : Type) : Model ListOp (Val α) where
   eval := fun op args _ => match op, args with
-    | .quad, .cons a (.cons b .nil) => ⟨a, b⟩
-    | .square, .cons w .nil => w.square
-    | .output, .cons w .nil => w.output
-    | .modmul, .cons p (.cons q (.cons r .nil)) => ⟨p, q, r⟩
-    | .product, .cons w .nil => w.product
-    | .quotient, .cons w .nil => w.quotient
-    | .remainder, .cons w .nil => w.remainder
     | .empty _, .nil => []
     | .push _, .cons xs (.cons x .nil) => xs ++ [x]
+
+def aggregateModel (α : Type) : Model AggregateSig (Val α) :=
+  (structModel (schemaRepr α)).sum (listModel α)
 
 def controlModel (α : Type) : Model Control (Val α) where
   eval := fun op args bodies => match op, args, bodies with
@@ -147,19 +162,34 @@ def controlModel (α : Type) : Model Control (Val α) where
         xs.foldl (fun acc x => body (.cons x (.cons acc captures))) initial
 
 def fieldModel : Model FieldSig (Val Field17) :=
-  fieldScalarModel.sum ((dataModel Field17).sum (controlModel Field17))
+  fieldScalarModel.sum ((aggregateModel Field17).sum (controlModel Field17))
 def natModel : Model NatSig (Val Nat) :=
-  natScalarModel.sum ((dataModel Nat).sum (controlModel Nat))
+  natScalarModel.sum ((aggregateModel Nat).sum (controlModel Nat))
 def wordModel : Model WordSig (Val UInt64) :=
-  wordScalarModel.sum ((dataModel UInt64).sum (controlModel UInt64))
+  wordScalarModel.sum ((aggregateModel UInt64).sum (controlModel UInt64))
 
-/-- Feature-polymorphic program. Return the entire record, not a selected scalar. -/
-def quadratic {F : Signature Ty} [Has FieldOp F] [Has DataOp F] :
+/-- Smart author-facing arithmetic calls hide injection and empty region lists. -/
+def fieldConst {F : Signature Ty} [Has FieldOp F] (n : Nat) : Step F Γ .scalar :=
+  call (FieldOp.const n) h![] .nil
+def fieldMul {F : Signature Ty} [Has FieldOp F] (x y : Var Γ .scalar) : Step F Γ .scalar :=
+  call FieldOp.mul h![x, y] .nil
+def fieldAdd {F : Signature Ty} [Has FieldOp F] (x y : Var Γ .scalar) : Step F Γ .scalar :=
+  call FieldOp.add h![x, y] .nil
+def natMul {F : Signature Ty} [Has NatOp F] (x y : Var Γ .scalar) : Step F Γ .scalar :=
+  call NatOp.mul h![x, y] .nil
+def natDiv {F : Signature Ty} [Has NatOp F] (x y : Var Γ .scalar) : Step F Γ .scalar :=
+  call NatOp.div h![x, y] .nil
+def natMod {F : Signature Ty} [Has NatOp F] (x y : Var Γ .scalar) : Step F Γ .scalar :=
+  call NatOp.mod h![x, y] .nil
+
+/-- Named authoring, feature-polymorphic and returning the entire structure. -/
+def quadratic {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] :
     Program F [.scalar, .scalar] .quad :=
-  .let_ (Has.inject FieldOp.mul) (.cons .zero (.cons .zero .nil)) .nil <|
-  .let_ (Has.inject FieldOp.add) (.cons .zero (.cons (.succ (.succ .zero)) .nil)) .nil <|
-  .let_ (Has.inject DataOp.quad) (.cons (.succ .zero) (.cons .zero .nil)) .nil <|
-  .ret .zero
+  witgen [x, c] do
+    let square ← fieldMul x x
+    let output ← fieldAdd square c
+    let result ← makeNamedStruct schemaDesc .quad fields![square := square, output := output]
+    return result
 
 def quadraticField : Program FieldSig [.scalar, .scalar] .quad := quadratic
 
@@ -197,13 +227,19 @@ def WordOp.info : WordOp args shapes t → OpInfo
   | .mod => ⟨"word.mod", none, none⟩
   | .eq => ⟨"word.eq", none, none⟩
 
-def DataOp.info : DataOp args shapes t → OpInfo
-  | .quad | .modmul => ⟨"record.make", none, none⟩
-  | .square | .product => ⟨"record.get", none, some 0⟩
-  | .output | .quotient => ⟨"record.get", none, some 1⟩
-  | .remainder => ⟨"record.get", none, some 2⟩
+def structInfo {S Schema : Type} {desc : Schema → StructDesc S}
+    {args : List S} {shapes : List (RegionShape S)} {t : S} :
+    StructOp desc args shapes t → OpInfo
+  | .make _ => ⟨"record.make", none, none⟩
+  | .get _ field => ⟨"record.get", none, some field.ref.index⟩
+
+def ListOp.info : ListOp args shapes t → OpInfo
   | .empty _ => ⟨"list.empty", none, none⟩
   | .push _ => ⟨"list.push", none, none⟩
+
+def aggregateInfo : AggregateSig args shapes t → OpInfo
+  | .inl op => structInfo op
+  | .inr op => op.info
 
 def Control.info : Control args shapes t → OpInfo
   | .branch _ _ => ⟨"control.branch", none, none⟩
@@ -212,30 +248,29 @@ def Control.info : Control args shapes t → OpInfo
 
 def fieldInfo : FieldSig args shapes t → OpInfo
   | .inl op => op.info
-  | .inr (.inl op) => op.info
+  | .inr (.inl op) => aggregateInfo op
   | .inr (.inr op) => op.info
 
 def natInfo : NatSig args shapes t → OpInfo
   | .inl op => op.info
-  | .inr (.inl op) => op.info
+  | .inr (.inl op) => aggregateInfo op
   | .inr (.inr op) => op.info
 
 def wordInfo : WordSig args shapes t → OpInfo
   | .inl op => op.info
-  | .inr (.inl op) => op.info
+  | .inr (.inl op) => aggregateInfo op
   | .inr (.inr op) => op.info
 
-/-- RSA-inspired modular multiplication slice, not signature verification. -/
-def modMul {F : Signature Ty} [Has NatOp F] [Has DataOp F] :
+/-- RSA-inspired bounded regression slice, not signature verification. -/
+def modMul {F : Signature Ty} [Has NatOp F] [Has (StructOp schemaDesc) F] :
     Program F [.scalar, .scalar, .scalar] .modmul :=
-  .let_ (Has.inject NatOp.mul) (.cons .zero (.cons (.succ .zero) .nil)) .nil <|
-  .let_ (Has.inject NatOp.div)
-    (.cons .zero (.cons (.succ (.succ (.succ .zero))) .nil)) .nil <|
-  .let_ (Has.inject NatOp.mod)
-    (.cons (.succ .zero) (.cons (.succ (.succ (.succ (.succ .zero)))) .nil)) .nil <|
-  .let_ (Has.inject DataOp.modmul)
-    (.cons (.succ (.succ .zero)) (.cons (.succ .zero) (.cons .zero .nil))) .nil <|
-  .ret .zero
+  witgen [a, b, n] do
+    let product ← natMul a b
+    let quotient ← natDiv product n
+    let remainder ← natMod product n
+    let result ← makeNamedStruct schemaDesc .modmul
+      fields![product := product, quotient := quotient, remainder := remainder]
+    return result
 
 def modMulNat : Program NatSig [.scalar, .scalar, .scalar] .modmul := modMul
 
@@ -251,23 +286,26 @@ theorem modMulNat_satisfies (a b n : Nat) (hn : 0 < n) :
       (modMulNat.eval natModel (.cons a (.cons b (.cons n .nil)))).toArithmetic :=
   genMulMod_correct a b n hn
 
-/-- Captured c is an explicit map argument and an explicit body input. -/
-def batchQuadratic {F : Signature Ty} [Has FieldOp F] [Has DataOp F] [Has Control F] :
+/-- Captured c is an explicit map argument and an explicit closed body input. -/
+def batchQuadratic {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F] [Has Control F] :
     Program F [.list .scalar, .scalar] (.list .quad) :=
-  .let_ (Has.inject (Control.map [.scalar] .scalar .quad))
-    (.cons .zero (.cons (.succ .zero) .nil)) (.cons quadratic .nil) (.ret .zero)
+  witgen [xs, c] do
+    let result ← call (Control.map [.scalar] .scalar .quad) h![xs, c] regions![quadratic]
+    return result
 
 def batchQuadraticField : Program FieldSig [.list .scalar, .scalar] (.list .quad) :=
   batchQuadratic
 
-/-- The false region returns an actual empty record list. Both regions are syntax. -/
-def conditionalBatch {F : Signature Ty} [Has FieldOp F] [Has DataOp F] [Has Control F] :
+/-- Both arms are finite closed syntax; false returns an actual empty list. -/
+def conditionalBatch {F : Signature Ty} [Has FieldOp F] [Has (StructOp schemaDesc) F]
+    [Has ListOp F] [Has Control F] :
     Program F [.bool, .list .scalar, .scalar] (.list .quad) :=
-  .let_ (Has.inject (Control.branch [.list .scalar, .scalar] (.list .quad)))
-    (.cons .zero (.cons (.succ .zero) (.cons (.succ (.succ .zero)) .nil)))
-    (.cons batchQuadratic
-      (.cons (.let_ (Has.inject (DataOp.empty .quad)) .nil .nil (.ret .zero)) .nil))
-    (.ret .zero)
+  witgen [b, xs, c] do
+    let result ← call (Control.branch [.list .scalar, .scalar] (.list .quad)) h![b, xs, c]
+      regions![batchQuadratic, (witgen [_xs, _c] do
+        let empty ← call (ListOp.empty .quad) h![] .nil
+        return empty)]
+    return result
 
 def conditionalBatchField : Program FieldSig [.bool, .list .scalar, .scalar] (.list .quad) :=
   conditionalBatch

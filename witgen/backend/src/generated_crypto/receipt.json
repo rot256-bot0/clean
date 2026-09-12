@@ -1,0 +1,22 @@
+[
+  {
+    "program": "quad_bn254",
+    "ir_sha256": "05d1a25aebcfebcb22b9dfda09a403f54416605caad5172ac46f1abc5caf2255",
+    "rust_sha256": "066044b55ddbbe06eec47d2a35cb2e87d162d1d399072bed64eab77e33ed1cf8"
+  },
+  {
+    "program": "quad_nat",
+    "ir_sha256": "909b62282c4c1e9bb9851ae69f28fc0aca6983caf1351a314dd5bd62737f7957",
+    "rust_sha256": "7463207c79d875c1686d049de8f9881b64d7ec977343bd48230de388ecf56405"
+  },
+  {
+    "program": "envelope_bn254",
+    "ir_sha256": "fcb9902aeeec5761639063682d16944c7111bbcf10e15b0c0ef7924527d93e25",
+    "rust_sha256": "e04978289244dec0da1ee67eaa773bf7a0b2b2cf5e0a7999f3e44736bf8c77ad"
+  },
+  {
+    "program": "envelope_nat",
+    "ir_sha256": "de6e05441d748df9735939613bc6ad269e7bc5af8e0de95b347655be1fb293c2",
+    "rust_sha256": "792236ad9ab683c714143d235b07a555423290ff9c2a164b5e313b42915888e2"
+  }
+]

@@ -7,7 +7,7 @@ pub struct ModMul {
     pub remainder: u64,
 }
 
-pub fn generate(a: u64, b: u64, modulus: u64) -> Result<ModMul, String> {
+pub fn generate(a: u64, b: u64, modulus: u64) -> witgen_native::Result<ModMul> {
     let _wg0: u64 = witgen_native::word_mul(a, b);
     let _wg1: u64 = witgen_native::word_div(_wg0, modulus)?;
     let _wg2: u64 = witgen_native::word_mod(_wg0, modulus)?;
@@ -19,12 +19,12 @@ pub fn generate(a: u64, b: u64, modulus: u64) -> Result<ModMul, String> {
     Ok((_wg3).clone())
 }
 
-pub fn populate(cells: &mut [witgen_native::F257; 6]) -> Result<(), String> {
+pub fn populate(cells: &mut [witgen_native::F257; 6]) -> witgen_native::Result<()> {
     let _raw0 = witgen_native::f257_to_u64(cells[0]);
     let _raw1 = witgen_native::f257_to_u64(cells[1]);
     let _raw2 = witgen_native::f257_to_u64(cells[2]);
     if _raw2 == 0 || _raw2 > 16 || _raw0 >= _raw2 || _raw1 >= _raw2 {
-        return Err("modmul circuit input assumptions failed".into());
+        return Err(witgen_native::Error::CircuitAssumptions { circuit: "modmul" });
     }
     let result = generate(
         witgen_native::f257_to_u64(cells[0]),

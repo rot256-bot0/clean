@@ -4,17 +4,18 @@
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 from pathlib import Path
 
-from emit_rust import EmitError, emit_module, identifier
+from emit_rust import EmitError, emit_module, identifier, cell_backend
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def rust_type(ty, domain, module):
     if ty == "scalar":
-        return {"field17": "witgen_native::F17", "nat": "rug::Integer", "word": "u64"}[
+        return {"field17": "witgen_native::F17", "bn254": "witgen_native::Bn254Scalar", "nat": "rug::Integer", "word": "u64"}[
             domain
         ]
     if ty == "bool":
@@ -29,21 +30,21 @@ def parse_expr(value, ty, domain, semantic, module, depth=0):
         natural = f"parse_scalar({value}, {json.dumps(semantic)})?"
         if domain == "nat":
             return natural
-        method = "f17_from_nat" if domain == "field17" else "word_from_nat"
+        method = {"field17": "f17_from_nat", "bn254": "bn254_from_nat", "word": "word_from_nat"}[domain]
         return f"witgen_native::{method}(&{natural})?"
     if ty == "bool":
         return (
-            f'({value}).as_bool().ok_or_else(|| "expected Boolean input".to_string())?'
+            f'({value}).as_bool().ok_or(witgen_native::Error::InvalidInputType {{ expected: "Boolean" }})?'
         )
     if isinstance(ty, dict) and "list" in ty:
         variable = f"item_{depth}"
         item = parse_expr(variable, ty["list"], domain, semantic, module, depth + 1)
         item_type = rust_type(ty["list"], domain, module)
-        return f'({value}).as_array().ok_or_else(|| "expected array input".to_string())?.iter().map(|{variable}| -> Result<{item_type}, String> {{ Ok({item}) }}).collect::<Result<Vec<_>, String>>()?'
+        return f'({value}).as_array().ok_or(witgen_native::Error::InvalidInputType {{ expected: "array" }})?.iter().map(|{variable}| -> witgen_native::Result<{item_type}> {{ Ok({item}) }}).collect::<witgen_native::Result<Vec<_>>>()?'
     fields = []
     for field in ty["fields"]:
         key = identifier(field["name"])
-        child = f'({value}).get({json.dumps(key)}).ok_or_else(|| "missing record input field".to_string())?'
+        child = f'({value}).get({json.dumps(key)}).ok_or(witgen_native::Error::MissingField({json.dumps(key)}))?'
         fields.append(
             key
             + ": "
@@ -54,6 +55,8 @@ def parse_expr(value, ty, domain, semantic, module, depth=0):
 
 def value_json(reference, ty, domain, depth=0):
     if ty == "scalar":
+        if domain == "bn254":
+            return f"serde_json::Value::String(witgen_native::bn254_to_decimal(*({reference})))"
         value = (
             f"witgen_native::f17_to_u64(*({reference})).to_string()"
             if domain == "field17"
@@ -77,19 +80,20 @@ def value_json(reference, ty, domain, depth=0):
 def dispatch_arm(key, module):
     domain = module["domain"]
     semantic = module.get(
-        "input_semantics", "field17" if domain == "field17" else "nat"
+        "input_semantics", domain if domain in {"field17", "bn254"} else "nat"
     )
-    if semantic not in {"field17", "nat"}:
+    if semantic not in {"field17", "bn254", "nat"}:
         raise EmitError("unsupported logical input contract")
     count = len(module["inputs"])
     lines = [
-        f'if inputs.len() != {count} {{ return Err("input arity mismatch".into()); }}'
+        f'if inputs.len() != {count} {{ return Err(witgen_native::Error::InputArity {{ expected: {count}, actual: inputs.len() }}); }}'
     ]
     layout = module.get("wire_layout")
     if layout is not None:
         prime = layout["field"]
+        cell_prefix, cell_type = cell_backend(prime)
         size = layout["cells"]
-        lines.append(f"let mut cells = [witgen_native::F{prime}::from(0u64); {size}];")
+        lines.append(f"let mut cells = [{cell_type}::from(0u64); {size}];")
         bindings = layout.get("input_bindings")
         if bindings is None:
             bindings = [{"slot": slot} for slot in layout["input_slots"]]
@@ -98,31 +102,32 @@ def dispatch_arm(key, module):
             if ty == "bool":
                 flag = f"_flag{index}"
                 lines.append(
-                    f'let {flag} = inputs[{index}].as_bool().ok_or_else(|| "expected Boolean input".to_string())?;'
+                    f'let {flag} = inputs[{index}].as_bool().ok_or(witgen_native::Error::InvalidInputType {{ expected: "Boolean" }})?;'
                 )
                 lines.append(
-                    f"cells[{binding['slot']}] = witgen_native::F{prime}::from(if {flag} {{1u64}} else {{0u64}});"
+                    f"cells[{binding['slot']}] = {cell_type}::from(if {flag} {{1u64}} else {{0u64}});"
                 )
             elif ty == "scalar":
                 lines.append(
-                    f"cells[{binding['slot']}] = witgen_native::f{prime}_from_nat(&parse_scalar(&inputs[{index}], {json.dumps(semantic)})?)?;"
+                    f"cells[{binding['slot']}] = witgen_native::{cell_prefix}_from_nat(&parse_scalar(&inputs[{index}], {json.dumps(semantic)})?)?;"
                 )
             else:
                 array = f"_array{index}"
                 slots = binding["slots"]
                 lines.append(
-                    f'let {array} = inputs[{index}].as_array().ok_or_else(|| "expected array input".to_string())?;'
+                    f'let {array} = inputs[{index}].as_array().ok_or(witgen_native::Error::InvalidInputType {{ expected: "array" }})?;'
                 )
                 lines.append(
-                    f'if {array}.len() != {len(slots)} {{ return Err("input array length differs from circuit layout".into()); }}'
+                    f'if {array}.len() != {len(slots)} {{ return Err(witgen_native::Error::InputLength {{ expected: {len(slots)}, actual: {array}.len() }}); }}'
                 )
                 for item, slot in enumerate(slots):
                     lines.append(
-                        f"cells[{slot}] = witgen_native::f{prime}_from_nat(&parse_scalar(&{array}[{item}], {json.dumps(semantic)})?)?;"
+                        f"cells[{slot}] = witgen_native::{cell_prefix}_from_nat(&parse_scalar(&{array}[{item}], {json.dumps(semantic)})?)?;"
                     )
         lines.append(f"{key}::populate(&mut cells)?;")
+        output_converter = f"{cell_prefix}_to_decimal" if prime == "bn254" else f"{cell_prefix}_to_u64"
         lines.append(
-            f'Ok(serde_json::json!({{"program": {json.dumps(key)}, "cells": cells.into_iter().map(witgen_native::f{prime}_to_u64).collect::<Vec<_>>()}}))'
+            f'Ok(serde_json::json!({{"program": {json.dumps(key)}, "cells": cells.into_iter().map(witgen_native::{output_converter}).collect::<Vec<_>>()}}))'
         )
     else:
         args = [
@@ -139,12 +144,15 @@ def dispatch_arm(key, module):
     return json.dumps(key) + " => {\n" + "\n".join("    " + x for x in lines) + "\n}"
 
 
-def build(directory):
+def build(directory, *, generated_subdir="generated", binary=None):
+    identifier(generated_subdir)
+    if binary is not None and not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*", binary):
+        raise EmitError("invalid native binary name")
     manifest = json.loads((directory / "manifest.json").read_text())
     names = manifest["programs"]
     if not isinstance(names, list) or len(names) != len(set(names)):
         raise EmitError("invalid program manifest")
-    output = ROOT / "backend/src/generated"
+    output = ROOT / "backend/src" / generated_subdir
     output.mkdir(parents=True, exist_ok=True)
     arms = []
     receipts = []
@@ -164,25 +172,28 @@ def build(directory):
         )
     declarations = "\n".join("pub mod " + name + ";" for name in names)
     helpers = r"""
-fn parse_scalar(value: &serde_json::Value, semantic: &str) -> Result<rug::Integer, String> {
+fn parse_scalar(value: &serde_json::Value, semantic: &str) -> witgen_native::Result<rug::Integer> {
     let text = if let Some(s) = value.as_str() {
         s.to_string()
     } else if let Some(n) = value.as_u64() {
         n.to_string()
     } else {
-        return Err("expected a nonnegative decimal integer".into());
+        return Err(witgen_native::Error::InvalidInputType { expected: "nonnegative decimal integer" });
     };
     let n = witgen_native::nat_from_str(&text)?;
     if semantic == "field17" && n >= 17 {
-        return Err("source field17 input is not canonical".into());
+        return Err(witgen_native::Error::NonCanonicalField { field: "field17" });
+    }
+    if semantic == "bn254" && n >= witgen_native::bn254_modulus() {
+        return Err(witgen_native::Error::NonCanonicalField { field: "bn254" });
     }
     Ok(n)
 }
 """
     dispatch = (
-        "\npub fn dispatch(program: &str, inputs: &[serde_json::Value]) -> Result<serde_json::Value, String> {\n match program {\n"
+        "\npub fn dispatch(program: &str, inputs: &[serde_json::Value]) -> witgen_native::Result<serde_json::Value> {\n match program {\n"
         + ",\n".join(arms)
-        + ',\n _ => Err("unknown exported program".into()),\n }\n}\n'
+        + ',\n _ => Err(witgen_native::Error::UnknownProgram(program.to_owned())),\n }\n}\n'
     )
     (output / "mod.rs").write_text(
         "// Generated typed-program dispatch.\n" + declarations + helpers + dispatch
@@ -190,9 +201,11 @@ fn parse_scalar(value: &serde_json::Value, semantic: &str) -> Result<rug::Intege
     main = r"""mod generated;
 use std::io::{self, BufRead};
 
-fn run(request: &serde_json::Value) -> Result<serde_json::Value, String> {
-    let name = request.get("program").and_then(|v| v.as_str()).ok_or("missing program")?;
-    let inputs = request.get("inputs").and_then(|v| v.as_array()).ok_or("missing inputs")?;
+fn run(request: &serde_json::Value) -> witgen_native::Result<serde_json::Value> {
+    let program = request.get("program").ok_or(witgen_native::Error::MissingField("program"))?;
+    let name = program.as_str().ok_or(witgen_native::Error::InvalidInputType { expected: "program string" })?;
+    let input = request.get("inputs").ok_or(witgen_native::Error::MissingField("inputs"))?;
+    let inputs = input.as_array().ok_or(witgen_native::Error::InvalidInputType { expected: "inputs array" })?;
     generated::dispatch(name, inputs)
 }
 
@@ -201,20 +214,28 @@ fn main() {
         let response = match line {
             Ok(text) => match serde_json::from_str::<serde_json::Value>(&text) {
                 Ok(request) => run(&request),
-                Err(error) => Err(error.to_string()),
+                Err(error) => Err(witgen_native::Error::Json(error)),
             },
-            Err(error) => Err(error.to_string()),
+            Err(error) => Err(witgen_native::Error::Io(error)),
         };
         match response {
             Ok(value) => println!("{}", value),
-            Err(error) => println!("{}", serde_json::json!({"error": error})),
+            Err(error) => println!("{}", serde_json::json!({"error": error.to_string(), "error_code": error.code()})),
         }
     }
 }
 """
-    (ROOT / "backend/src/main.rs").write_text(main)
+    if binary is None:
+        target = ROOT / "backend/src/main.rs"
+        if generated_subdir != "generated":
+            main = main.replace("mod generated;", f'#[path = "{generated_subdir}/mod.rs"]\nmod generated;', 1)
+    else:
+        target = ROOT / "backend/src/bin" / (binary + ".rs")
+        main = main.replace("mod generated;", f'#[path = "../{generated_subdir}/mod.rs"]\nmod generated;', 1)
+    target.parent.mkdir(exist_ok=True)
+    target.write_text(main)
     subprocess.run(
-        ["rustfmt", "--edition", "2021", str(ROOT / "backend/src/main.rs")],
+        ["rustfmt", "--edition", "2021", str(target)],
         cwd=ROOT,
         check=True,
     )
