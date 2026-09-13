@@ -158,7 +158,7 @@ def contains_nat(ty):
 
 def native_field_helper(f, op):
     if f == 0:
-        return f"typed::bn254_{op}" if op in ("square", "neg", "inv") else f"witgen_native::bn254_{op}"
+        return f"typed::bn254_{op}" if op in ("square", "neg", "inv", "sqrt", "sub") else f"witgen_native::bn254_{op}"
     return f"typed::secp_{'base' if f == 1 else 'scalar'}_{op}"
 
 
@@ -252,12 +252,13 @@ class Emitter:
             expected, output = ["nat"], "nat"
             expression = (f"{expressions[0]} % {rust_integer(static['modulus'])}" if modulus != "0"
                           else expressions[0]) if len(args) == 1 else ""
-        elif self.mode == "nat" and op in ("nat.field.neg", "nat.field.inv"):
+        elif self.mode == "nat" and op in ("nat.field.neg", "nat.field.inv", "nat.field.sqrt", "nat.field.sub"):
             keys(static, "field modulus", path + ".static")
             fty = field_metadata(static, path + ".static")
-            expected, output = [fty], fty
+            arity = 2 if op == "nat.field.sub" else 1
+            expected, output = [fty] * arity, ("option", fty) if op == "nat.field.sqrt" else fty
             helper = "nat_field_" + op.rsplit(".", 1)[1]
-            expression = f"typed::{helper}::<{fty[1]}>({expressions[0]})?" if len(args) == 1 else ""
+            expression = f"typed::{helper}::<{fty[1]}>({', '.join(expressions)})?"
         elif self.mode == "nat" and op in ("nat.field.const", "nat.field.pack", "nat.field.unpack"):
             if op == "nat.field.const":
                 keys(static, "field modulus value", path + ".static")
@@ -285,12 +286,13 @@ class Emitter:
         op, static = node["op"], node["static"]
         if array(node["regions"], path + ".regions"):
             fail("regions", path, "native primitive takes no regions")
-        if op in ("field.const", "field.add", "field.mul", "field.square", "field.neg", "field.inv"):
+        if op in ("field.const", "field.add", "field.sub", "field.mul", "field.square", "field.neg", "field.inv", "field.sqrt"):
             keys(static, "field modulus value" if op == "field.const" else "field modulus", path + ".static")
             field = field_metadata(static, path + ".static")
-            arity = {"field.const": 0, "field.add": 2, "field.mul": 2,
-                     "field.square": 1, "field.neg": 1, "field.inv": 1}[op]
-            signature(args, result, [field] * arity, field, path)
+            arity = {"field.const": 0, "field.add": 2, "field.sub": 2, "field.mul": 2,
+                     "field.square": 1, "field.neg": 1, "field.inv": 1, "field.sqrt": 1}[op]
+            output = ("option", field) if op == "field.sqrt" else field
+            signature(args, result, [field] * arity, output, path)
             f = field[1]
             if op == "field.const":
                 decimal(static["value"], path + ".static.value")

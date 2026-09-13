@@ -1,4 +1,4 @@
-# Clean WitGen DSL
+# Polymorphic WitGen DSL
 
 [Source branch](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl) · [Run instructions](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/README.md)
 
@@ -19,19 +19,21 @@ Features declare typed operations. Models specify their semantics; implementatio
 
 ## 1. Fields Are Selected by Types
 
-`field.Add`, `field.Mul`, `field.Square`, `field.Neg`, and `field.Inv` infer the field identity from their operands. Constants specify the field explicitly.
+`field.Add`, `field.Sub`, `field.Mul`, `field.Square`, `field.Neg`, `field.Inv`, and `field.Sqrt` infer the field identity from their operands. Constants specify the field explicitly.
 
 
-[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L6-L12)
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L6-L14)
 
 ```lean
 inductive FieldOp (f : FieldId) : Signature Ty where
   | const (n : Nat) : FieldOp f [] [] (.field f)
   | add : FieldOp f [.field f, .field f] [] (.field f)
+  | sub : FieldOp f [.field f, .field f] [] (.field f)
   | mul : FieldOp f [.field f, .field f] [] (.field f)
   | square : FieldOp f [.field f] [] (.field f)
   | neg : FieldOp f [.field f] [] (.field f)
   | inv : FieldOp f [.field f] [] (.field f)
+  | sqrt : FieldOp f [.field f] [] (.option (.field f))
 ```
 
 
@@ -41,17 +43,19 @@ inductive FieldOp (f : FieldId) : Signature Ty where
 `FieldOp` declares signatures; `fieldModel` defines their meaning:
 
 
-[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L14-L21)
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L16-L25)
 
 ```lean
 def fieldModel (f : FieldId) : Model (FieldOp f) FieldVal where
   eval := fun op args _ => match op, args with
     | .const n, .nil => Residue.ofNat (modulus_pos f) n
     | .add, .cons a (.cons b .nil) => Residue.add a b
+    | .sub, .cons a (.cons b .nil) => Residue.sub a b
     | .mul, .cons a (.cons b .nil) => Residue.mul a b
     | .square, .cons a .nil => Residue.square a
     | .neg, .cons a .nil => Residue.neg a
     | .inv, .cons a .nil => Residue.inv a
+    | .sqrt, .cons a .nil => Residue.sqrt a
 ```
 
 
@@ -75,11 +79,25 @@ def square {p : Nat} (a : Fin p) : Fin p := ofNat (Nat.zero_lt_of_lt a.isLt) (a.
 def inverseNat (p a : Nat) : Nat := ((a : ZMod p)⁻¹).val
 ```
 
-[Witgen/Typed/FieldInverses.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/FieldInverses.lean#L19-L24)
+[Witgen/Typed/FieldInverses.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/FieldInverses.lean#L19-L38)
 
 ```lean
 def neg {p : Nat} (a : Fin p) : Fin p :=
   ofNat (Nat.zero_lt_of_lt a.isLt) (p - a.val)
+
+def sub {p : Nat} (a b : Fin p) : Fin p := add a (neg b)
+
+theorem sub_eq_add_neg {p : Nat} (a b : Fin p) : sub a b = add a (neg b) := rfl
+
+@[simp] theorem sub_val {p : Nat} (a b : Fin p) :
+    (sub a b).val = (a.val + p - b.val) % p := by
+  simp only [sub, add, neg, ofNat]
+  rw [Nat.add_mod_mod, Nat.add_sub_assoc (Nat.le_of_lt b.isLt)]
+
+theorem sub_self {p : Nat} (a : Fin p) :
+    sub a a = ofNat (Nat.zero_lt_of_lt a.isLt) 0 := by
+  apply Fin.ext
+  simp [sub_val, ofNat]
 
 def inv {p : Nat} (a : Fin p) : Fin p :=
   letI : NeZero p := ⟨Nat.ne_of_gt (Nat.zero_lt_of_lt a.isLt)⟩
@@ -88,14 +106,61 @@ def inv {p : Nat} (a : Fin p) : Fin p :=
 
 
 
+Subtraction is modular and requires two operands from the same field:
+
+
+[MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L31-L35)
+
+```lean
+def subProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
+    Program F [.field f, .field f] (.field f) :=
+  witgen [a,b] do
+    let difference ← field.Sub a b
+    return difference
+```
+
+
+
 Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementations preserve the model under their representation relation.
+
+### Optional Square Roots
+
+`field.Sqrt x` returns `Option` of the same field: `some 0` at zero, `none` for nonsquares, and the smaller canonical representative of the two roots otherwise. The root choice is the same in the Lean model, Arkworks, and the Nat/GMP implementation. Squaring a returned root recovers the input.
+
+
+[MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L37-L41)
+
+```lean
+def sqrtProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
+    Program F [.field f] (.option (.field f)) :=
+  witgen [x] do
+    let root ← field.Sqrt x
+    return root
+```
+
+[MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L50-L57)
+
+```lean
+def sqrtMatchProgram {F : Signature Ty} (f : FieldId)
+    [Has (FieldOp f) F] [Has ValueOp F] : Program F [.field f] (.field f) :=
+  witgen [x] do
+    let root ← field.Sqrt x
+    let result ← match root with
+      | none => field.Const f 0
+      | some r => field.Square r
+    return result
+```
+
+
+
+Only matching the result requires `ValueOp`; calling `Sqrt` needs just the field capability. Here the `none` branch explicitly chooses zero; the square-root operation itself does not disguise a nonsquare as zero.
 
 ### Authoring Helpers
 
 The helpers construct typed calls:
 
 
-[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L87-L103)
+[Witgen/Typed/Field.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Typed/Field.lean#L98-L120)
 
 ```lean
 def Const (f : FieldId) [Has (FieldOp f) F] (n : Nat) :
@@ -103,6 +168,9 @@ def Const (f : FieldId) [Has (FieldOp f) F] (n : Nat) :
 
 def Add [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.add (f := f)) h![a, b] .nil
+
+def Sub [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
+  call (FieldOp.sub (f := f)) h![a, b] .nil
 
 def Mul [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.mul (f := f)) h![a, b] .nil
@@ -115,6 +183,9 @@ def Neg [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.field f) :=
 
 def Inv [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.inv (f := f)) h![a] .nil
+
+def Sqrt [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.option (.field f)) :=
+  call (FieldOp.sqrt (f := f)) h![a] .nil
 ```
 
 

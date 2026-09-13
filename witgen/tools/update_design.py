@@ -21,7 +21,7 @@ def sample(relative,start=None,end=None,language='lean'):
     return f'[{relative}]({URL}witgen/{relative}#L{lo}-L{hi})\n\n```{language}\n{text}\n```\n'
 
 
-parts=['''# Clean WitGen DSL
+parts=['''# Polymorphic WitGen DSL
 
 [Source branch](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl) · [Run instructions](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/README.md)
 
@@ -42,7 +42,7 @@ Features declare typed operations. Models specify their semantics; implementatio
 
 ## 1. Fields Are Selected by Types
 
-`field.Add`, `field.Mul`, `field.Square`, `field.Neg`, and `field.Inv` infer the field identity from their operands. Constants specify the field explicitly.
+`field.Add`, `field.Sub`, `field.Mul`, `field.Square`, `field.Neg`, `field.Inv`, and `field.Sqrt` infer the field identity from their operands. Constants specify the field explicitly.
 
 ''',sample('Witgen/Typed/Field.lean','inductive FieldOp','def fieldModel'),'''
 
@@ -58,7 +58,20 @@ A field value is `Fin (modulus f)`. The arithmetic definitions use canonical res
  sample('Witgen/Typed/FieldInverses.lean','def inverseNat','namespace Residue'),
  sample('Witgen/Typed/FieldInverses.lean','def neg','@[simp] theorem inv_val'),'''
 
+Subtraction is modular and requires two operands from the same field:
+
+''',sample('MainExtended.lean','def subProgram','def sqrtProgram'),'''
+
 Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementations preserve the model under their representation relation.
+
+### Optional Square Roots
+
+`field.Sqrt x` returns `Option` of the same field: `some 0` at zero, `none` for nonsquares, and the smaller canonical representative of the two roots otherwise. The root choice is the same in the Lean model, Arkworks, and the Nat/GMP implementation. Squaring a returned root recovers the input.
+
+''',sample('MainExtended.lean','def sqrtProgram','def sqrtSquareProgram'),
+ sample('MainExtended.lean','def sqrtMatchProgram','private def sqrtInputs'),'''
+
+Only matching the result requires `ValueOp`; calling `Sqrt` needs just the field capability. Here the `none` branch explicitly chooses zero; the square-root operation itself does not disguise a nonsquare as zero.
 
 ### Authoring Helpers
 

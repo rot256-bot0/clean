@@ -26,10 +26,12 @@ def fieldCodec {f : FieldId} : OpCodec (FieldOp f) := fun op =>
   let (tag, literal) : String × List (String × Json) := match op with
     | .const n => ("field.const", [("value", .str (toString n))])
     | .add => ("field.add", [])
+    | .sub => ("field.sub", [])
     | .mul => ("field.mul", [])
     | .square => ("field.square", [])
     | .neg => ("field.neg", [])
     | .inv => ("field.inv", [])
+    | .sqrt => ("field.sqrt", [])
   Json.mkObj [("op", .str tag), ("static", Json.mkObj
     ([("field", toJson f.val), ("modulus", .str (toString (modulus f)))] ++ literal))]
 

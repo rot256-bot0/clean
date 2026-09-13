@@ -94,6 +94,199 @@ fn raw_nat_neg_inv_cover_all_prime_fields_without_changing_inputs() {
     ));
 }
 
+/// Independent integer oracle: square chosen signed roots, never call a sqrt helper.
+fn check_sqrt_vectors(id: u8, sqrt: impl Fn(Integer) -> Option<Integer>) {
+    let p = field_modulus(id).unwrap();
+    for root in [
+        Integer::from(0),
+        Integer::from(1),
+        Integer::from(2),
+        Integer::from(17),
+        (Integer::from(1) << 200) + 17,
+        p.clone() / 2,
+        p.clone() - 2,
+        p.clone() - 1,
+    ] {
+        let square = root.clone().square() % &p;
+        let expected = root.clone().min((p.clone() - &root) % &p);
+        let actual = sqrt(square.clone()).expect("chosen square has a root");
+        assert_eq!(actual, expected, "field {id}, chosen root {root}");
+        assert_eq!(actual.clone().square() % &p, square);
+        assert!(actual <= p.clone() - &actual);
+    }
+    let exponent: Integer = (p.clone() - 1) / 2;
+    let mut nonresidue = Integer::from(2);
+    while nonresidue.clone().pow_mod(&exponent, &p).unwrap() == 1 {
+        nonresidue += 1;
+    }
+    assert_eq!(nonresidue.clone().pow_mod(&exponent, &p).unwrap(), p - 1);
+    assert_eq!(sqrt(nonresidue), None);
+}
+
+#[test]
+fn native_sqrt_all_prime_fields_uses_smallest_integer_root() {
+    check_sqrt_vectors(0, |a| {
+        bn254_sqrt(witgen_native::bn254_from_nat(&a).unwrap()).map(witgen_native::bn254_to_nat)
+    });
+    check_sqrt_vectors(1, |a| {
+        secp_base_sqrt(secp_base_from_nat(&a).unwrap()).map(secp_base_to_nat)
+    });
+    check_sqrt_vectors(2, |a| {
+        secp_scalar_sqrt(secp_scalar_from_nat(&a).unwrap()).map(secp_scalar_to_nat)
+    });
+}
+
+#[test]
+fn native_sqrt_corrects_both_arkworks_sign_choices() {
+    fn check<F: ark_ff::PrimeField>(
+        id: u8,
+        parse: fn(&Integer) -> witgen_native::Result<F>,
+        to_nat: fn(F) -> Integer,
+        sqrt: fn(F) -> Option<F>,
+    ) {
+        let p = field_modulus(id).unwrap();
+        let mut signs = [false; 2];
+        for i in 1..=64 {
+            let root: Integer = (Integer::from(i) << 180) + i;
+            let square = root.clone().square() % &p;
+            let input = parse(&square).unwrap();
+            let ark_root = to_nat(input.sqrt().unwrap());
+            signs[usize::from(ark_root > p.clone() - &ark_root)] = true;
+            // Expected result is from a chosen integer root, not Arkworks sqrt.
+            assert_eq!(
+                to_nat(sqrt(input).unwrap()),
+                root.clone().min(p.clone() - root)
+            );
+        }
+        assert_eq!(
+            signs,
+            [true, true],
+            "field {id}: must exercise both Arkworks root signs"
+        );
+    }
+    check(
+        0,
+        witgen_native::bn254_from_nat,
+        witgen_native::bn254_to_nat,
+        bn254_sqrt,
+    );
+    check(1, secp_base_from_nat, secp_base_to_nat, secp_base_sqrt);
+    check(
+        2,
+        secp_scalar_from_nat,
+        secp_scalar_to_nat,
+        secp_scalar_sqrt,
+    );
+}
+
+#[test]
+fn nat_sqrt_reduces_raw_values_without_changing_pack_or_input_codec() {
+    fn check<const ID: u8>() {
+        let p = field_modulus(ID).unwrap();
+        check_sqrt_vectors(ID, |a| {
+            // Include very wide multiples; the explicit sqrt must reduce, not pack.
+            let raw = NatField::<ID>(a + (p.clone() << 600));
+            let original = raw.clone();
+            let root: Option<NatField<ID>> = nat_field_sqrt(raw.clone()).unwrap();
+            assert_eq!(raw, original);
+            root.map(|r| r.0)
+        });
+        for a in [p.clone(), p.clone() * 2] {
+            assert_eq!(nat_field_sqrt(NatField::<ID>(a)).unwrap().unwrap().0, 0);
+        }
+        assert!(matches!(
+            nat_field_sqrt(NatField::<ID>(Integer::from(-1))),
+            Err(Error::NegativeNatural)
+        ));
+        assert!(matches!(
+            parse_nat_field::<ID>(&serde_json::json!(p.to_string())),
+            Err(Error::NonCanonicalField { .. })
+        ));
+    }
+    check::<0>();
+    check::<1>();
+    check::<2>();
+    assert!(matches!(
+        nat_field_sqrt(NatField::<99>(Integer::from(0))),
+        Err(Error::UnknownField(99))
+    ));
+}
+
+fn check_sub_vectors(id: u8, sub: impl Fn(Integer, Integer) -> Integer) {
+    let p = field_modulus(id).unwrap();
+    let values = [
+        Integer::from(0),
+        Integer::from(1),
+        Integer::from(2),
+        p.clone() - 1,
+        (Integer::from(1) << 200) + 17,
+    ];
+    for a in &values {
+        for b in &values {
+            let difference = sub(a.clone(), b.clone());
+            assert!(difference >= 0 && difference < p);
+            // Independent characterizing equation, not the implementation formula.
+            assert_eq!((difference + b) % &p, *a);
+        }
+    }
+}
+
+#[test]
+fn native_sub_all_prime_fields_is_canonical_modular_difference() {
+    check_sub_vectors(0, |a, b| {
+        witgen_native::bn254_to_nat(bn254_sub(
+            witgen_native::bn254_from_nat(&a).unwrap(),
+            witgen_native::bn254_from_nat(&b).unwrap(),
+        ))
+    });
+    check_sub_vectors(1, |a, b| {
+        secp_base_to_nat(secp_base_sub(
+            secp_base_from_nat(&a).unwrap(),
+            secp_base_from_nat(&b).unwrap(),
+        ))
+    });
+    check_sub_vectors(2, |a, b| {
+        secp_scalar_to_nat(secp_scalar_sub(
+            secp_scalar_from_nat(&a).unwrap(),
+            secp_scalar_from_nat(&b).unwrap(),
+        ))
+    });
+}
+
+#[test]
+fn nat_sub_reduces_both_raw_operands_without_normalizing_inputs() {
+    fn check<const ID: u8>() {
+        let p = field_modulus(ID).unwrap();
+        check_sub_vectors(ID, |a, b| {
+            let raw_a = NatField::<ID>(a + (p.clone() << 600));
+            let raw_b = NatField::<ID>(b + p.clone() * 7);
+            let originals = (raw_a.clone(), raw_b.clone());
+            let difference = nat_field_sub(raw_a.clone(), raw_b.clone()).unwrap().0;
+            assert_eq!((raw_a, raw_b), originals);
+            difference
+        });
+        for (a, b) in [(-1, 0), (0, -1)] {
+            assert!(matches!(
+                nat_field_sub(
+                    NatField::<ID>(Integer::from(a)),
+                    NatField::<ID>(Integer::from(b))
+                ),
+                Err(Error::NegativeNatural)
+            ));
+        }
+    }
+    check::<0>();
+    check::<1>();
+    check::<2>();
+    assert!(matches!(
+        nat_field_sub(
+            NatField::<99>(Integer::from(0)),
+            NatField::<99>(Integer::from(0))
+        ),
+        Err(Error::UnknownField(99))
+    ));
+}
+
 #[test]
 fn point_eq_compares_math_not_sec1_or_projective_representations() {
     use ark_ff::Field;

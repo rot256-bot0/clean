@@ -1,4 +1,4 @@
-# Clean WitGen DSL
+# Polymorphic WitGen DSL
 
 Typed, feature-based witness programs on the authorized
 [`feat/clean-witgen-dsl`](https://github.com/rot256-bot0/clean/tree/feat/clean-witgen-dsl)
@@ -7,9 +7,11 @@ finite `Program`/`Regions` core are unchanged.
 
 ## Interfaces and Specifications
 
-- `FieldOp f`: Const, Add, Mul, Square, Neg, Inv. Operand types select the field;
+- `FieldOp f`: Const, Add, Sub, Mul, Square, Neg, Inv, Sqrt. Operand types select the field;
   backend selection is separate. `fieldModel` specifies canonical modular arithmetic.
   Inversion maps zero to zero and satisfies the proved nonzero inverse law.
+  Square root returns an Option: zero has root zero, nonsquares return none, and
+  squares return the smaller canonical representative of their two roots.
 - `CurveOp c`: Const, Add, Mul, Inv, Eq, MSM, Generator, Identity, ToAffine,
   FromAffine. `c` contains field identities and the Weierstrass equation.
   `Curve.model` interprets real Mathlib points; secp256k1 is the concrete native instance.
@@ -43,7 +45,7 @@ and returns identity for the empty list. Native execution uses Arkworks.
 stored bodies. Evaluation uses those bodies, not host-function payloads. Generic
 substitution, refinement, name-uniqueness and linkage laws are checked.
 
-The Nat implementation stores Add/Mul/Square bodies and retains calls. Neg/Inv
+The Nat implementation stores Add/Mul/Square bodies and retains calls. Sub/Neg/Inv/Sqrt
 have field-indexed Nat primitives with proved raw-Nat representation preservation;
 the emitter implements them with GMP.
 
@@ -53,10 +55,10 @@ One emitted library serves twelve callers. Multiplication contains one bounded
 overflow-aware addition, multiplication, squaring, canonicality and raw decoding
 are proved, with separate stored-body evaluation theorems.
 
-U64 supports Const/Add/Mul/Square. Its partial handler declines Neg/Inv rather than
+U64 supports Const/Add/Mul/Square. Its partial handler declines Sub/Neg/Inv/Sqrt rather than
 inventing a word implementation. `U64.compile` requires an acceptance proof;
 `PartialCertifiedLowering` proves preservation for accepted programs. Nested
-unsupported operations fail closed. Nat lowering remains total for all six field
+unsupported operations fail closed. Nat lowering remains total for all eight field
 operations. No whole-field Nat/GMP/native-field arithmetic is hidden in U64 bodies.
 
 ## Reproduce
@@ -82,8 +84,9 @@ python3 -B Witgen/U64/check.py
 
 - Methods: 449 exact cases, including 25 curve equalities, MSMs, point constants,
   affine conversions and 279 raw U64 field results.
-- Extended: 174 exact cases across 18 programs, checking native/GMP Neg/Inv and
-  both outcomes of named conditionals and option matches.
+- Extended: 720 exact cases across 39 programs, checking native/GMP Sub/Neg/Inv/Sqrt,
+  canonical roots of squares, and both outcomes of named conditionals and option
+  matches. Square roots are independently checked with a Cipolla oracle.
 - U64 source: 601 pairs across 14 moduli, with 1,803 algorithm and 1,803 stored-body
   checks. The cold command rebuilds the entire local import closure without project
   oleans, using the pinned dependency caches; it records their manifests.

@@ -28,12 +28,57 @@ private def pairs (f : FieldId) : List (Nat × Nat) :=
   [(0,0),(0,1),(1,0),(1,1),(modulus f-1,modulus f-1),(modulus f-1,1),
     (2^128+17,2^200+3)] |>.map (fun (a,b) => (a % modulus f,b % modulus f))
 
+def subProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
+    Program F [.field f, .field f] (.field f) :=
+  witgen [a,b] do
+    let difference ← field.Sub a b
+    return difference
+
+def sqrtProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
+    Program F [.field f] (.option (.field f)) :=
+  witgen [x] do
+    let root ← field.Sqrt x
+    return root
+
+def sqrtSquareProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
+    Program F [.field f] (.option (.field f)) :=
+  witgen [x] do
+    let squared ← field.Square x
+    let root ← field.Sqrt squared
+    return root
+
+def sqrtMatchProgram {F : Signature Ty} (f : FieldId)
+    [Has (FieldOp f) F] [Has ValueOp F] : Program F [.field f] (.field f) :=
+  witgen [x] do
+    let root ← field.Sqrt x
+    let result ← match root with
+      | none => field.Const f 0
+      | some r => field.Square r
+    return result
+
+private def sqrtInputs (f : FieldId) : List Nat :=
+  ((List.range 16 ++ [modulus f-1,modulus f-2,2^128+17,2^200+17,
+    (modulus f-1)/2,(2^200+17)^2]).map (· % modulus f)).eraseDups
+
+private def sqrtRecord (name : String) (n : Nat) (root : Option (FieldValue f)) : Json :=
+  let expected := match root with | none => Json.null | some r => decimal r.val
+  Json.mkObj [("program", .str name), ("inputs", .arr #[decimal n]), ("expected", expected)]
+
 def exportAll (dir : System.FilePath) : IO Json := do
   IO.FS.createDirAll dir
   let mut entries : Array Json := #[]
   let mut rows : Array Json := #[]
   for f in [bn254Fr,secpBase,secpScalar] do
     let stem := "field_" ++ toString f.val
+    -- Check every exact sqrt input (including Square→Sqrt) before model evaluation.
+    -- A failed accelerator is not a nonsquare; reject this export instead of
+    -- accidentally starting the complete but potentially expensive fallback.
+    for n in sqrtInputs f do
+      for value in [n,n*n] do
+        let a := (value : ZMod (modulus f))
+        if a == 0 || a^(modulus f/2) == 1 then
+          unless (FieldSqrt.candidate f a)^2 == a do
+            throw (IO.userError s!"sqrt export requires fallback: field={f.val}, input={value}")
     let neg := Branching.negative (F := FieldOp f) f
     let inv := Branching.inverse (F := FieldOp f) f
     for (suffix,program) in [("neg",neg),("inv",inv)] do
@@ -49,6 +94,43 @@ def exportAll (dir : System.FilePath) : IO Json := do
         let expected := (program.eval (fieldModel f) h![a]).val
         rows := rows.push (record sourceName #[decimal n] expected)
         rows := rows.push (record natName #[decimal n] expected)
+    let subtraction := subProgram (F := FieldOp f) f
+    let subNativeName := stem ++ "_sub_native"
+    let subNatName := stem ++ "_sub_nat"
+    entries := entries.push (← save dir subNativeName "native"
+      (← nativeModule fieldCodec subNativeName ["a","b"] subtraction))
+    entries := entries.push (← save dir subNatName "nat" (← checked
+      (moduleJson typeJson NatMethods.codec (NatMethods.library f) subNatName ["a","b"]
+        (subtraction.mapHandler (NatMethods.handler f)))))
+    for a in unaryInputs f do
+      for b in unaryInputs f do
+        let fa := Residue.ofNat (modulus_pos f) a
+        let fb := Residue.ofNat (modulus_pos f) b
+        let expected := (subtraction.eval (fieldModel f) h![fa,fb]).val
+        rows := rows.push (record subNativeName #[decimal a,decimal b] expected)
+        rows := rows.push (record subNatName #[decimal a,decimal b] expected)
+    for (suffix,program) in [("sqrt",sqrtProgram (F := FieldOp f) f),
+        ("sqrt_square",sqrtSquareProgram (F := FieldOp f) f)] do
+      let sourceName := stem ++ "_" ++ suffix ++ "_native"
+      let natName := stem ++ "_" ++ suffix ++ "_nat"
+      entries := entries.push (← save dir sourceName "native"
+        (← nativeModule fieldCodec sourceName ["x"] program))
+      entries := entries.push (← save dir natName "nat" (← checked
+        (moduleJson typeJson NatMethods.codec (NatMethods.library f) natName ["x"]
+          (program.mapHandler (NatMethods.handler f)))))
+      for n in sqrtInputs f do
+        let a := Residue.ofNat (modulus_pos f) n
+        let expected := program.eval (fieldModel f) h![a]
+        rows := rows.push (sqrtRecord sourceName n expected)
+        rows := rows.push (sqrtRecord natName n expected)
+    let sqrtMatchName := stem ++ "_sqrt_match"
+    let sqrtMatch := sqrtMatchProgram (F := Branching.Feature f) f
+    entries := entries.push (← save dir sqrtMatchName "native"
+      (← nativeModule (Branching.codec f) sqrtMatchName ["x"] sqrtMatch))
+    for n in sqrtInputs f do
+      let a := Residue.ofNat (modulus_pos f) n
+      rows := rows.push (record sqrtMatchName #[decimal n]
+        (sqrtMatch.eval (Branching.model f) h![a]).val)
     let ifName := stem ++ "_conditional"
     let choose := Branching.conditional (F := Branching.Feature f) f
     entries := entries.push (← save dir ifName "native"

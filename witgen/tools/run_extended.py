@@ -25,7 +25,28 @@ AUDIT={
 'Witgen.Program.eval_mapHandler?_related','Witgen.PartialCertifiedLowering.ofHandler',
 'Witgen.U64.compile_accepted','Witgen.U64.lower_respects','Witgen.U64.certified','Witgen.U64.caller_correct',
 'Witgen.BranchOp.eval_true','Witgen.BranchOp.eval_false','Witgen.Branching.conditional_true',
-'Witgen.Branching.conditional_false','Witgen.Branching.match_none','Witgen.Branching.match_some'}
+'Witgen.Branching.conditional_false','Witgen.Branching.match_none','Witgen.Branching.match_some',
+'Witgen.Typed.FieldSqrt.sqrt_sound',
+'Witgen.Typed.FieldSqrt.sqrt_none_iff',
+'Witgen.Typed.FieldSqrt.canonical_unique',
+'Witgen.Typed.FieldSqrt.sqrt_eq_some_iff',
+'Witgen.Typed.FieldSqrt.sqrt_square',
+'Witgen.Typed.FieldSqrt.sqrt_zero',
+'Witgen.Typed.FieldSqrt.sqrt_of_candidate',
+'Witgen.Typed.FieldSqrt.sqrt_none_of_euler',
+'Witgen.Typed.Residue.sqrt_eq_some_iff',
+'Witgen.Typed.Residue.sqrt_sound',
+'Witgen.Typed.Residue.sqrt_none_iff',
+'Witgen.Typed.Residue.sqrt_canonical_unique',
+'Witgen.Typed.Residue.sqrt_zero',
+'Witgen.Typed.Residue.sqrt_square',
+'Witgen.Typed.Residue.sqrt_nat_rel',
+'Witgen.Typed.sqrtNat_mod',
+'Witgen.Typed.Residue.sub_eq_add_neg',
+'Witgen.Typed.Residue.sub_val',
+'Witgen.Typed.Residue.sub_self',
+'Witgen.Typed.FieldSubTests.lowering_correct',
+'Witgen.Typed.squareFallback_respects'}
 
 def canonical(value): return json.dumps(value,sort_keys=True,separators=(',',':'))
 def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -75,9 +96,36 @@ def sources():
     for path in (ROOT/'backend/src').glob('*.rs'):seen.add(str(path.relative_to(ROOT)))
     return {name:digest(ROOT/name) for name in sorted(seen)}
 
+def canonical_sqrt(x, p):
+    """Independent Cipolla oracle for the configured odd prime fields."""
+    x %= p
+    if x == 0:
+        return 0
+    if pow(x, (p - 1) // 2, p) != 1:
+        return None
+    a = 0
+    while pow((a * a - x) % p, (p - 1) // 2, p) != p - 1:
+        a += 1
+    w = (a * a - x) % p
+    def multiply(u, v):
+        return ((u[0] * v[0] + w * u[1] * v[1]) % p,
+                (u[0] * v[1] + u[1] * v[0]) % p)
+    acc, base, exponent = (1, 0), (a, 1), (p + 1) // 2
+    while exponent:
+        if exponent & 1:
+            acc = multiply(acc, base)
+        base = multiply(base, base)
+        exponent >>= 1
+    r, imaginary = acc
+    if imaginary != 0 or r * r % p != x:
+        raise AssertionError('Cipolla oracle did not produce a root')
+    return min(r, (-r) % p)
+
+
 def independent_cases():
     rows=[]
-    def add(name,inputs,value):rows.append({'program':name,'inputs':inputs,'expected':str(value)})
+    def add(name,inputs,value):
+        rows.append({'program':name,'inputs':inputs,'expected':None if value is None else str(value)})
     for f,p in enumerate(FIELD_MODULI):
         p=int(p);stem=f'field_{f}'
         vals=list(dict.fromkeys(x%p for x in [0,1,2,p-1,p-2,2**200+17]))
@@ -85,6 +133,20 @@ def independent_cases():
             for x in vals:
                 value=(-x)%p if op=='neg' else (0 if x==0 else pow(x,-1,p))
                 for mode in ['native','nat']:add(f'{stem}_{op}_{mode}',[str(x)],value)
+        for a in vals:
+            for b in vals:
+                for mode in ['native','nat']:
+                    add(f'{stem}_sub_{mode}',[str(a),str(b)],(a-b)%p)
+        sqrt_values=list(dict.fromkeys(x%p for x in
+            [*range(16),p-1,p-2,2**128+17,2**200+17,(p-1)//2,(2**200+17)**2]))
+        for x in sqrt_values:
+            root=canonical_sqrt(x,p)
+            square_root=canonical_sqrt(x*x%p,p)
+            if square_root!=min(x,(-x)%p):raise AssertionError('oracle canonical-square law')
+            for mode in ['native','nat']:
+                add(f'{stem}_sqrt_{mode}',[str(x)],root)
+                add(f'{stem}_sqrt_square_{mode}',[str(x)],square_root)
+            add(stem+'_sqrt_match',[str(x)],0 if root is None else x)
         pairs=[(0,0),(0,1),(1,0),(1,1),(p-1,p-1),(p-1,1),(2**128+17,2**200+3)]
         for flag in [False,True]:
             for a,b in pairs:
@@ -107,6 +169,21 @@ def audit(log):
     for axes in out.values():
         if not set(axes)<={'propext','Classical.choice','Quot.sound'}:raise AssertionError(axes)
     return out
+
+def validate_output(row, value):
+    """Check raw ABI values before equality; never repair or normalize them."""
+    f = int(row['program'].split('_')[1])
+    p = int(FIELD_MODULI[f])
+    optional = row['program'].endswith(('_sqrt_native', '_sqrt_nat',
+                                         '_sqrt_square_native', '_sqrt_square_nat'))
+    if value is None:
+        if not optional:
+            raise AssertionError({'unexpected_none': row})
+    elif not isinstance(value, str) or not re.fullmatch(r'0|[1-9][0-9]*', value) or not int(value) < p:
+        raise AssertionError({'noncanonical_native': value, 'case': row})
+    if value != row['expected']:
+        raise AssertionError({'expected': row, 'native': value})
+
 
 def main():
     ART.mkdir(parents=True,exist_ok=True)
@@ -143,20 +220,41 @@ def main():
     if len(results)!=len(rows):raise AssertionError('native result count mismatch')
     outcomes=[]
     for row,line in zip(rows,results):
-        value=json.loads(line);f=int(row['program'].split('_')[1]);p=int(FIELD_MODULI[f])
-        if not isinstance(value,str) or not re.fullmatch(r'0|[1-9][0-9]*',value) or not int(value)<p:
-            raise AssertionError({'noncanonical_native':value,'case':row})
-        if value!=row['expected']:raise AssertionError({'expected':row,'native':value})
+        value=json.loads(line)
+        validate_output(row,value)
         outcomes.append({**row,'actual':value})
     save(ART/'cases.json',outcomes)
     flags={row['inputs'][0] for row in rows if row['program'].endswith('_conditional')}
     option_cases={row['inputs'][0] is None for row in rows if row['program'].endswith('_match')}
     modes={row['program'].rsplit('_',1)[1] for row in rows if '_inv_' in row['program']}
     if flags!={False,True} or option_cases!={False,True} or modes!={'native','nat'}:raise AssertionError('missing semantic coverage')
+    for f,p in enumerate(FIELD_MODULI):
+        p=int(p)
+        for mode in ['native','nat']:
+            differences=[row for row in outcomes if row['program']==f'field_{f}_sub_{mode}']
+            if {int(row['inputs'][0])<int(row['inputs'][1]) for row in differences}!={False,True}:
+                raise AssertionError('missing modular subtraction wrap coverage')
+            if not any(row['inputs'][0]==row['inputs'][1] and row['actual']=='0' for row in differences):
+                raise AssertionError('missing subtraction self-zero coverage')
+            direct=[row for row in outcomes if row['program']==f'field_{f}_sqrt_{mode}']
+            if {row['actual'] is None for row in direct}!={False,True}:
+                raise AssertionError('missing square/nonsquare coverage')
+            if not any(row['inputs']==['0'] and row['actual']=='0' for row in direct):
+                raise AssertionError('missing square-root zero coverage')
+            squares=[row for row in outcomes if row['program']==f'field_{f}_sqrt_square_{mode}']
+            if not squares or not all(row['actual']==str(min(int(row['inputs'][0]),(-int(row['inputs'][0]))%p)) for row in squares):
+                raise AssertionError('sqrt-square canonical sign mismatch')
+            if {int(row['inputs'][0])>p//2 for row in squares}!={False,True}:
+                raise AssertionError('missing both input signs')
+        matches=[row for row in outcomes if row['program']==f'field_{f}_sqrt_match']
+        if {canonical_sqrt(int(row['inputs'][0]),p) is None for row in matches}!={False,True}:
+            raise AssertionError('missing sqrt Option-match branch')
     if sources()!=before:raise AssertionError('consumed sources changed during execution')
     generated=[*gen.glob('*.rs'),binpath,* (ART/'bundle').glob('*.json'),ART/'requests.jsonl',ART/'cases.json',ART/'native.log']
     report={'status':'PASS','cases':len(rows),'independent_cases':len(expected),'programs':len(names),
             'native_and_nat_inverse':True,'both_if_branches':True,'both_option_branches':True,
+            'native_and_nat_sub':True,'native_and_nat_sqrt':True,'sqrt_some_and_none_all_fields':True,
+            'sqrt_match_both_branches':True,'sqrt_square_canonical':True,
             'u64_rejection_proved':True,'audit':audited,'sources':before,
             'artifacts':artifact_manifest(generated,consumed),
             'executable':str(executable),'executable_sha256':exehash,'cargo_artifact':artifacts[0],

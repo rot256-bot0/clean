@@ -12,13 +12,14 @@
     "Witgen/U64/Bodies.lean": "83c1c085e2cc24ec0d2f13bcb22969fe9c2ce3e81d9922e8903ea5f6cd90023c",
     "Witgen/Primality.lean": "79c87e43c7ba1d002e0c1f26786a15931929ce54aef9b10a4127d3cfa043706a",
     "Witgen/PrimeCertificates.lean": "ddb87f2f3eed25d3a29971831bbac4b0a5cb7e069a36bf4c41d44a53f5be4258",
-    "Witgen/Typed/FieldInverses.lean": "73d4e52b4437c1c9989239603ad60ddda3f25c80981e52dcb3b7efd2054a3ca4",
-    "Witgen/Typed/Field.lean": "4c7bba3bf924c522e2a98e853bf2d24656366d352c4e013b9e6e2f49a7047f4d",
+    "Witgen/Typed/FieldInverses.lean": "e0eba4582570b98a6ca18d21cdbeec9921f4a3b4fb16301e011e975a4c70cf06",
+    "Witgen/Typed/FieldSqrt.lean": "13571da230fd41ce93c2389ec1fb758ae0a7e9b4f9e95eb15d9e2eee8516e0c0",
+    "Witgen/Typed/Field.lean": "54b60ab0177ac1a2d0447d272ee5aa590b7bf26eeb79ffb9ce5ba030e7369847",
     "Witgen/U64/FieldTarget.lean": "c14020040ccc60cda92c0a599630bbb6aa8eba8339e269c416d0a391ad4d4882",
     "Witgen/PartialLowering.lean": "bbf1deef3a8e7dd442355525d4dc86c81e63928b9733570537213e9e0abdde68",
-    "Witgen/U64/Lowering.lean": "c8a5c09300ed2de3be8b07fe14480f9e59251446b61303140ddd2637f3d17b47",
+    "Witgen/U64/Lowering.lean": "00d6a793c251d486aa2baa389689ee5ec2264a842f50e956efff25363d3bdadb",
     "Witgen/U64/Audit.lean": "89159335850890ad61fb63640e052856f682baf61388b0d6bb832ca8945a21a8",
-    "Witgen/Typed/Export.lean": "e01bf29f9e31c0d1d6b938bb6746f5f2ad1455932145742ac01513cec58b8ab7",
+    "Witgen/Typed/Export.lean": "a75f272ae036c8c2e19c197c5eedad043c7844fec47518b18086bc28259b12bf",
     "Witgen/U64/Export.lean": "da0385439d30067e0114b4304bde5e4846eb43732bb9e9e73631265e7a49f581",
     "Witgen/U64/Tests.lean": "f1161261f5b2952b8e948b1f88cdba58a17213611dbbc71558f5d3a8d9d6a013",
     "MainU64.lean": "330242b60f062807843d8ee3cebc2480f246b19dceeac98d2d8281255f6dd628"
@@ -29,7 +30,7 @@
     "lake-manifest.json": "7bb6c32ad63b3f41fec29bf43d3afa0146172444b1ef267f7aedc2fd4f715302"
   },
   "project_oleans_reused": false,
-  "direct_lean_modules": 22,
+  "direct_lean_modules": 23,
   "axiom_endpoints": 25,
   "axioms": [
     "Quot.sound",

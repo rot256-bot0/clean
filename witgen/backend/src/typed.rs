@@ -110,6 +110,74 @@ pub fn nat_field_inv<const ID: u8>(a: NatField<ID>) -> Result<NatField<ID>> {
             .map_err(|_| Error::DivisionByZero)?,
     ))
 }
+/// Canonical modular subtraction of raw naturals; neither pack nor inputs normalize.
+pub fn nat_field_sub<const ID: u8>(a: NatField<ID>, b: NatField<ID>) -> Result<NatField<ID>> {
+    let p = field_modulus(ID)?;
+    if a.0 < 0 || b.0 < 0 {
+        return Err(Error::NegativeNatural);
+    }
+    // Add p before subtracting the reduced RHS, avoiding negative remainders.
+    Ok(NatField(((a.0 % &p) + &p - (b.0 % &p)) % p))
+}
+
+/// Modular square root over a registered odd prime, using GMP Tonelli–Shanks.
+/// Reduce raw internal naturals here; pack and the external canonical codec stay raw/strict.
+pub fn nat_field_sqrt<const ID: u8>(a: NatField<ID>) -> Result<Option<NatField<ID>>> {
+    let p = field_modulus(ID)?;
+    if a.0 < 0 {
+        return Err(Error::NegativeNatural);
+    }
+    let a = a.0 % &p;
+    if a == 0 {
+        return Ok(Some(NatField(Integer::from(0))));
+    }
+    // All registered moduli are positive odd primes, and all exponents below
+    // are nonnegative, so GMP modular exponentiation cannot fail.
+    let pow = |base: &Integer, exponent: &Integer| {
+        base.clone()
+            .pow_mod(exponent, &p)
+            .expect("positive registered modulus and nonnegative exponent")
+    };
+    let legendre: Integer = (p.clone() - 1) / 2;
+    if pow(&a, &legendre) != 1 {
+        return Ok(None);
+    }
+    let mut q: Integer = p.clone() - 1;
+    let mut m = 0u32;
+    while q.is_even() {
+        q >>= 1;
+        m += 1;
+    }
+    let mut z = Integer::from(2);
+    while pow(&z, &legendre) == 1 {
+        z += 1;
+    }
+    let mut c = pow(&z, &q);
+    let mut root = pow(&a, &((q.clone() + 1) / 2));
+    let mut t = pow(&a, &q);
+    // root² = a*t; c has order 2^m and t has order strictly below 2^m.
+    // Each correction reduces m, so the loop terminates at t = 1.
+    while t != 1 {
+        let mut i = 0u32;
+        let mut power = t.clone();
+        while power != 1 {
+            power.square_mut();
+            power %= &p;
+            i += 1;
+        }
+        let mut b = c;
+        for _ in 0..(m - i - 1) {
+            b.square_mut();
+            b %= &p;
+        }
+        root = (root * &b) % &p;
+        c = b.square() % &p;
+        t = (t * &c) % &p;
+        m = i;
+    }
+    let opposite = p - &root;
+    Ok(Some(NatField(root.min(opposite))))
+}
 pub fn parse_word_field<const ID: u8>(value: &Value) -> Result<WordField<ID>> {
     let value = canonical(parse_nat(value)?, ID)?;
     let digits = value.to_digits::<u64>(Order::Lsf);
@@ -199,6 +267,37 @@ pub fn bn254_neg(a: crate::Bn254Scalar) -> crate::Bn254Scalar {
 }
 pub fn bn254_inv(a: crate::Bn254Scalar) -> crate::Bn254Scalar {
     a.inverse().unwrap_or(crate::Bn254Scalar::ZERO)
+}
+
+pub fn bn254_sub(a: crate::Bn254Scalar, b: crate::Bn254Scalar) -> crate::Bn254Scalar {
+    a - b
+}
+pub fn secp_base_sub(a: SecpBase, b: SecpBase) -> SecpBase {
+    a - b
+}
+pub fn secp_scalar_sub(a: SecpScalar, b: SecpScalar) -> SecpScalar {
+    a - b
+}
+
+/// Arkworks chooses a root; the DSL chooses the smaller natural representative.
+fn canonical_sqrt<F: PrimeField>(a: F) -> Option<F> {
+    a.sqrt().map(|root| {
+        let opposite = -root;
+        if root.into_bigint() <= opposite.into_bigint() {
+            root
+        } else {
+            opposite
+        }
+    })
+}
+pub fn bn254_sqrt(a: crate::Bn254Scalar) -> Option<crate::Bn254Scalar> {
+    canonical_sqrt(a)
+}
+pub fn secp_base_sqrt(a: SecpBase) -> Option<SecpBase> {
+    canonical_sqrt(a)
+}
+pub fn secp_scalar_sqrt(a: SecpScalar) -> Option<SecpScalar> {
+    canonical_sqrt(a)
 }
 
 pub fn point_generator() -> SecpPoint {

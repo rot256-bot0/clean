@@ -64,6 +64,8 @@ def lower : PartialHandler AnyFieldOp (WithCalls U64Op allSigs) :=
     | .square => some (.inr (.call (fieldSquareRef f)))
     | .neg => none
     | .inv => none
+    | .sqrt => none
+    | .sub => none
 
 theorem lower_respects : lower.Respects anyFieldModel (allLibrary.model primitive) Rep := by
   intro args shapes t op target accepted xs ys fs gs hr _
@@ -106,6 +108,8 @@ theorem lower_respects : lower.Respects anyFieldModel (allLibrary.model primitiv
           exact fieldSquare_spec f a aw hr.1
     | neg => simp [lower] at accepted
     | inv => simp [lower] at accepted
+    | sqrt => simp [lower] at accepted
+    | sub => simp [lower] at accepted
 
 /-- Discharged, reusable implementation certificate over actual registered bodies. -/
 def certified : PartialCertifiedLowering anyFieldModel (allLibrary.model primitive) Rep :=

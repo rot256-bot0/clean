@@ -1,4 +1,4 @@
-import Witgen.Typed.FieldInverses
+import Witgen.Typed.FieldSqrt
 import Witgen.Authoring
 
 namespace Witgen.Typed
@@ -6,19 +6,23 @@ namespace Witgen.Typed
 inductive FieldOp (f : FieldId) : Signature Ty where
   | const (n : Nat) : FieldOp f [] [] (.field f)
   | add : FieldOp f [.field f, .field f] [] (.field f)
+  | sub : FieldOp f [.field f, .field f] [] (.field f)
   | mul : FieldOp f [.field f, .field f] [] (.field f)
   | square : FieldOp f [.field f] [] (.field f)
   | neg : FieldOp f [.field f] [] (.field f)
   | inv : FieldOp f [.field f] [] (.field f)
+  | sqrt : FieldOp f [.field f] [] (.option (.field f))
 
 def fieldModel (f : FieldId) : Model (FieldOp f) FieldVal where
   eval := fun op args _ => match op, args with
     | .const n, .nil => Residue.ofNat (modulus_pos f) n
     | .add, .cons a (.cons b .nil) => Residue.add a b
+    | .sub, .cons a (.cons b .nil) => Residue.sub a b
     | .mul, .cons a (.cons b .nil) => Residue.mul a b
     | .square, .cons a .nil => Residue.square a
     | .neg, .cons a .nil => Residue.neg a
     | .inv, .cons a .nil => Residue.inv a
+    | .sqrt, .cons a .nil => Residue.sqrt a
 
 /-- Every field feature keeps its identity, even in a dynamically assembled signature. -/
 inductive AnyFieldOp : Signature Ty where
@@ -35,10 +39,12 @@ def anyFieldModel : Model AnyFieldOp FieldVal where
 def squareFallback (f : FieldId) : Template (FieldOp f) (FieldOp f)
   | _, _, _, .const n, .nil => .let_ (.const n) .nil .nil (.ret .zero)
   | _, _, _, .add, .nil => .let_ .add h![.zero, .succ .zero] .nil (.ret .zero)
+  | _, _, _, .sub, .nil => .let_ .sub h![.zero, .succ .zero] .nil (.ret .zero)
   | _, _, _, .mul, .nil => .let_ .mul h![.zero, .succ .zero] .nil (.ret .zero)
   | _, _, _, .square, .nil => .let_ .mul h![.zero, .zero] .nil (.ret .zero)
   | _, _, _, .neg, .nil => .let_ .neg h![.zero] .nil (.ret .zero)
   | _, _, _, .inv, .nil => .let_ .inv h![.zero] .nil (.ret .zero)
+  | _, _, _, .sqrt, .nil => .let_ .sqrt h![.zero] .nil (.ret .zero)
 
 private theorem eq_of_hrel {ts : List Ty} (xs ys : HList FieldVal ts)
     (h : HList.Rel (fun _ a b => a = b) xs ys) : xs = ys := by
@@ -66,12 +72,17 @@ theorem squareFallback_respects (f : FieldId) :
     cases xs with | cons a tail =>
       cases tail with | cons b tail =>
         cases tail; cases regions; rfl
+  | sub =>
+    cases xs with | cons a tail =>
+      cases tail with | cons b tail =>
+        cases tail; cases regions; rfl
   | square =>
     cases xs with | cons a tail =>
       cases tail; cases regions
       exact Residue.square_eq_mul a
   | neg => cases xs with | cons a tail => cases tail; cases regions; rfl
   | inv => cases xs with | cons a tail => cases tail; cases regions; rfl
+  | sqrt => cases xs with | cons a tail => cases tail; cases regions; rfl
 
 def certifiedSquareFallback (f : FieldId) :
     CertifiedLowering (fieldModel f) (fieldModel f) (fun _ a b => a = b) :=
@@ -90,6 +101,9 @@ def Const (f : FieldId) [Has (FieldOp f) F] (n : Nat) :
 def Add [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.add (f := f)) h![a, b] .nil
 
+def Sub [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
+  call (FieldOp.sub (f := f)) h![a, b] .nil
+
 def Mul [Has (FieldOp f) F] (a b : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.mul (f := f)) h![a, b] .nil
 
@@ -101,5 +115,8 @@ def Neg [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.field f) :=
 
 def Inv [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.field f) :=
   call (FieldOp.inv (f := f)) h![a] .nil
+
+def Sqrt [Has (FieldOp f) F] (a : Var Γ (.field f)) : Step F Γ (.option (.field f)) :=
+  call (FieldOp.sqrt (f := f)) h![a] .nil
 
 end Witgen.field

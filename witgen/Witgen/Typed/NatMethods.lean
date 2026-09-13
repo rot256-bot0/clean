@@ -14,6 +14,8 @@ inductive Op : Signature Ty where
   | mod (p : Nat) : Op [.nat] [] .nat
   | neg (f : FieldId) : Op [.field f] [] (.field f)
   | inv (f : FieldId) : Op [.field f] [] (.field f)
+  | sqrt (f : FieldId) : Op [.field f] [] (.option (.field f))
+  | sub (f : FieldId) : Op [.field f,.field f] [] (.field f)
 
 abbrev Val : Ty → Type
   | .field _ | .nat => Nat
@@ -35,6 +37,9 @@ def model : Model Op Val where
     | .mod p, .cons a .nil => a % p
     | .neg f, .cons a .nil => (modulus f - a % modulus f) % modulus f
     | .inv f, .cons a .nil => inverseNat (modulus f) a
+    | .sqrt f, .cons a .nil => sqrtNat f a
+    | .sub f, .cons a (.cons b .nil) =>
+        (a % modulus f + modulus f - b % modulus f) % modulus f
 
 def addSig (f : FieldId) : MethodSig Ty :=
   ⟨"field." ++ toString f.val ++ ".add.nat", [.field f, .field f], .field f⟩
@@ -88,6 +93,8 @@ def handler (f : FieldId) : Handler (FieldOp f) (WithCalls Op [squareSig f, mulS
   | _, _, _, .square => .inr (.call .zero)
   | _, _, _, .neg => .inl (.neg f)
   | _, _, _, .inv => .inl (.inv f)
+  | _, _, _, .sqrt => .inl (.sqrt f)
+  | _, _, _, .sub => .inl (.sub f)
 
 def Rel : ∀ t, FieldVal t → Val t → Prop
   | .field _, a, b => a.val = b
@@ -141,6 +148,24 @@ theorem handler_respects (f : FieldId) :
     obtain ⟨ha, _⟩ := hr
     change inverseNat (modulus f) a.val = inverseNat (modulus f) x
     exact congrArg (inverseNat (modulus f)) ha
+  | sqrt =>
+    cases xs; rename_i a xs; cases xs
+    cases ys; rename_i x ys; cases ys
+    obtain ⟨ha, _⟩ := hr
+    change a.val = x at ha
+    change Option.Rel (fun a b => a.val = b) (Residue.sqrt a) (sqrtNat f x)
+    rw [← ha]
+    exact Residue.sqrt_nat_rel a
+  | sub =>
+    cases xs; rename_i a xs; cases xs
+    rename_i b xs; cases xs
+    cases ys; rename_i x ys; cases ys
+    rename_i y ys; cases ys
+    obtain ⟨ha, hb, _⟩ := hr
+    change a.val = x at ha
+    change b.val = y at hb
+    change (Residue.sub a b).val = (x % modulus f + modulus f - y % modulus f) % modulus f
+    rw [Residue.sub_val, ← ha, ← hb, Nat.mod_eq_of_lt a.isLt, Nat.mod_eq_of_lt b.isLt]
 
 def lowering (f : FieldId) : CertifiedLowering (fieldModel f) ((library f).model model) Rel :=
   .ofHandler _ _ (handler f) Rel (handler_respects f)
@@ -157,6 +182,8 @@ def codec : OpCodec Op := fun op =>
     | .mod p => ("nat.mod", [("modulus", .str (toString p))])
     | .neg f => ("nat.field.neg", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
     | .inv f => ("nat.field.inv", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
+    | .sqrt f => ("nat.field.sqrt", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
+    | .sub f => ("nat.field.sub", [("field", toJson f.val), ("modulus", .str (toString (modulus f)))])
   Json.mkObj [("op", .str tag), ("static", Json.mkObj data)]
 
 end Witgen.Typed.NatMethods

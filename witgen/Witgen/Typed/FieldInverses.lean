@@ -19,6 +19,20 @@ namespace Residue
 def neg {p : Nat} (a : Fin p) : Fin p :=
   ofNat (Nat.zero_lt_of_lt a.isLt) (p - a.val)
 
+def sub {p : Nat} (a b : Fin p) : Fin p := add a (neg b)
+
+theorem sub_eq_add_neg {p : Nat} (a b : Fin p) : sub a b = add a (neg b) := rfl
+
+@[simp] theorem sub_val {p : Nat} (a b : Fin p) :
+    (sub a b).val = (a.val + p - b.val) % p := by
+  simp only [sub, add, neg, ofNat]
+  rw [Nat.add_mod_mod, Nat.add_sub_assoc (Nat.le_of_lt b.isLt)]
+
+theorem sub_self {p : Nat} (a : Fin p) :
+    sub a a = ofNat (Nat.zero_lt_of_lt a.isLt) 0 := by
+  apply Fin.ext
+  simp [sub_val, ofNat]
+
 def inv {p : Nat} (a : Fin p) : Fin p :=
   letI : NeZero p := ⟨Nat.ne_of_gt (Nat.zero_lt_of_lt a.isLt)⟩
   ⟨inverseNat p a.val, ZMod.val_lt _⟩

@@ -7,7 +7,7 @@ The finite Core and parent Clean integration remain unchanged.
 ## Implemented
 
 - Generic structures with functional Set and preservation laws.
-- Field-indexed Const/Add/Mul/Square/Neg/Inv with model semantics and named helpers.
+- Field-indexed Const/Add/Sub/Mul/Square/Neg/Inv/Sqrt with model semantics and named helpers.
 - Kernel-checked primality for BN254 scalar and secp256k1 base/scalar moduli.
 - Generic curve descriptors/equations and `CurveOp c`, real Mathlib point models,
   Mul/Eq/MSM, statically checked point constants and explicit affine optionality.
@@ -26,7 +26,7 @@ Required: full Python/Rust regressions, typed/extended/structure/core/crypto/Cal
 axiom inventories, cold local U64 closure, source/native/oracle comparisons,
 independent frozen-source review, and live publication/readback.
 
-Methods cover 449 cases; the extended runner covers 174. Existing full-witness,
+Methods cover 449 cases; the extended runner covers 720. Existing full-witness,
 custom-type and bounded regressions remain in the standard runner.
 
 ## Publication

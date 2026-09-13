@@ -14,6 +14,7 @@ class DesignTests(unittest.TestCase):
                                 text=True, capture_output=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         text = (ROOT.parent / "doc/witgen-dsl-design.md").read_text()
+        self.assertTrue(text.startswith("# Polymorphic WitGen DSL\n"))
         self.assertIn("## 7. Caliper Integration and Runtime Proofs", text)
         self.assertIn("field.Square", text)
         self.assertIn("field.Mul", text)
@@ -22,7 +23,8 @@ class DesignTests(unittest.TestCase):
         self.assertIn("def ofNat", text)
         self.assertIn("n % p", text)
         self.assertIn("Residue.square a", text)
-        for symbol in ["field.Neg", "field.Inv", "curve.Mul", "curve.Eq", "curve.MSM", "curve.Const",
+        for symbol in ["field.Sub", "def subProgram", "field.Sqrt", "def sqrtMatchProgram", "nonsquares", "smaller canonical",
+                       "field.Neg", "field.Inv", "curve.Mul", "curve.Eq", "curve.MSM", "curve.Const",
                        "inductive CurveOp", "inductive CurveLiteral", "Has (CurveOp c) F",
                        "match xy with", "inductive BranchOp", "if flag then", "Bool sort"]:
             self.assertIn(symbol, text)

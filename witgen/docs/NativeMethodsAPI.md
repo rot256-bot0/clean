@@ -109,6 +109,18 @@ followed by pair projections inside an Option branch. Identity remains `None`.
   moduli are prime. Internal `a ≥ p` is allowed by these arithmetic primitives;
   pack/unpack remain raw and external field input parsing remains strict.
   Source and lowered Neg/Inv are rejected in U64 mode, never silently replaced.
+- `field.sub` and Nat-only `nat.field.sub` take `[Field(id),Field(id)] → Field(id)`,
+  exact `{field:id,modulus:exactDecimalString}` metadata, and no regions. Native
+  execution uses Arkworks subtraction. Nat/GMP computes `(a % p + p - b % p) % p`
+  on raw nonnegative internal inputs. No operand is changed by packing, and U64
+  rejects these tags rather than silently substituting whole-field arithmetic.
+- `field.sqrt` and Nat-only `nat.field.sqrt` take `[Field(id)] → Option<Field(id)>`,
+  exactly `{field:id,modulus:exactDecimalString}`, and no regions. Zero gives
+  `Some(0)`; nonsquares give `None`; other squares give the smaller canonical
+  representative of the two roots. Native execution uses Arkworks, while the
+  Nat implementation uses modular Tonelli–Shanks arithmetic with GMP/rug.
+  Raw internal Nat inputs are reduced inside the operation, not by pack/unpack.
+  External input parsing remains canonical. Both tags are rejected in U64 mode.
 
 `u64.repeat` receives `[p,a,b,acc]`, one closed region
 `[natIndex,acc,p,a,b] → word4`, and a static count. Emission is one descending

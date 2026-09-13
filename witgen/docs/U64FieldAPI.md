@@ -44,7 +44,7 @@ bodies use an explicit word4 modulus and are shared across all field identities.
 ## Certified Lowering and Export
 
 `lower : PartialHandler AnyFieldOp (WithCalls U64Op allSigs)` maps Add/Mul/Square
-to retained method calls and constants to encoded literals. Neg/Inv are declined.
+to retained method calls and constants to encoded literals. Sub/Neg/Inv/Sqrt are declined.
 `compile p accepted` requires a success proof; there is no fallback program.
 `certified` and `caller_correct` prove preservation for accepted programs. `Rep` says raw decoding of
 a target field value equals the source canonical representative and recursively
