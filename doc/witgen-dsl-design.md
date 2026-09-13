@@ -478,6 +478,98 @@ The generic laws cover get-after-set, other-field preservation, restoration, las
 
 Custom types can be represented through custom features and lowered to structures. [Checked custom lowering](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean).
 
+### RSA-4096: Bignum/Field Hybrid
+
+The target is zk.golf's RSA-4096/SHA-256/65537 circuit, pinned to winning submission `aa9cb03a-4312-476d-8ed8-761f781f6a86` as retrieved on 2026-09-13.[4][6] The program produces all 160,527 auxiliary cells: the signature comparison, fifteen modular squarings, and the final fused square–multiply relation. The squares use 24-bit limbs; the final relation uses 16-bit limbs.[6]
+
+Bignums choose quotients and stored residues. Field arithmetic constructs the polynomial coefficients, window products, and signed carries. `Scalar` is `.field bn254Fr`; `Scalars` is its list sort. Conversion between a bignum and a field value is explicit.
+
+The circuit uses a byte-centered offset, not simply half the limb radix. The program remains capability-polymorphic:
+
+
+[Witgen/Examples/RSA4096/Arithmetic.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Arithmetic.lean#L8-L11)
+
+```lean
+def sigma : Nat := ((List.range 510).map (fun j => 2^(8*j+7))).sum + 2^4095
+
+variable {F : Signature Ty} [Has BigNumOp F] [Has ValueOp F] [Has VectorOp F]
+  [Has (FieldOp bn254Fr) F] [Has (FieldBridgeOp bn254Fr) F] [Has (BranchOp .bool) F]
+```
+
+[Witgen/Examples/RSA4096/Arithmetic.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Arithmetic.lean#L307-L328)
+
+```lean
+def squareQR (first : Bool) : Program F [.nat, .nat] (.pair .nat .nat) :=
+  witgen [n, input] do
+    let magnitude ← vector.Apply h![input] (squareMagnitude first)
+    let product ← bignum.Square magnitude
+    let qr ← bignum.DivMod product n
+    let q0 ← value.Fst qr
+    let r0 ← value.Snd qr
+    let shift ← bignum.Const sigma
+    let threshold ← bignum.Const (2^4096-sigma)
+    let unadjusted ← bignum.Lt r0 threshold
+    let shifted ← bignum.Add r0 shift
+    let selected ← control.If unadjusted h![q0, shifted, n]
+      (witgen [q0, shifted, _n] do
+        let out ← value.Pair q0 shifted
+        return out)
+      (witgen [q0, shifted, n] do
+        let one ← bignum.Const 1
+        let q ← bignum.Add q0 one
+        let r ← bignum.Sub shifted n
+        let out ← value.Pair q r
+        return out)
+    return selected
+```
+
+
+
+After field convolution, each group carry is a field expression. Its offset and range bits are generated separately:
+
+
+[Witgen/Examples/RSA4096/Arithmetic.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Arithmetic.lean#L253-L264)
+
+```lean
+def squareCarryValue : Program F [Scalars, Scalars, .nat, Scalar] Scalar :=
+  witgen [lhs, rhs, k, signed] do
+    let nine ← bignum.Const 9
+    let start ← bignum.Mul k nine
+    let left ← vector.Apply h![lhs, start] (segment 24 9)
+    let right ← vector.Apply h![rhs, start] (segment 24 9)
+    let delta ← field.Sub left right
+    let numerator ← field.Add signed delta
+    let power ← field.Const bn254Fr (2^216)
+    let inverse ← field.Inv power
+    let carry ← field.Mul numerator inverse
+    return carry
+```
+
+
+
+The arithmetic trace keeps every allocated intermediate cell. The last square's low-bit cells and implicit high-bit expressions are repacked for the fused final step:
+
+
+[Witgen/Examples/RSA4096/Arithmetic.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Arithmetic.lean#L616-L624)
+
+```lean
+def arithmeticWitness : Program F [.nat, .nat, .nat] Scalars :=
+  witgen [n, signature, digest] do
+    let squares ← vector.Apply h![n, signature] squaresWitness
+    let stored ← value.Fst squares
+    let squareCells ← value.Snd squares
+    let a16 ← vector.Apply h![squareCells] repackSquareBits
+    let finalCells ← vector.Apply h![n, signature, digest, stored, a16] finalWitness
+    let cells ← vector.Append squareCells finalCells
+    return cells
+```
+
+
+
+[Full witness entry point](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Program.lean) · [Executable example and scope](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/RSA4096Hybrid.md)
+
+This hybrid executes in Lean; the Rust/GMP and U64 backends below are separate. Primitive model laws are checked. RSA correspondence is tested, not a universal generator theorem.
+
 ## 4. Shared Methods
 
 A method has a typed signature and a finite `Program` body. A call stores a typed reference, not a copy of that body:
@@ -708,3 +800,8 @@ T_{\mathrm{full}} &= T_{\mathrm{producer}} + C.\mathrm{memAlloc}\\
 $$
 
 The charge includes buffer reservation and initialization. Parsing and code generation are outside this example's clock; buffer capacity excludes registers.
+
+## Sources
+
+[4] https://zk.golf/api/agent/v1/challenges/rsa-pkcs1v15-sha256-4096-65537/leaderboard
+[6] https://zk.golf/api/submissions/aa9cb03a-4312-476d-8ed8-761f781f6a86/download

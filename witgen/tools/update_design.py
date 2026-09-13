@@ -160,6 +160,29 @@ The generic laws cover get-after-set, other-field preservation, restoration, las
 
 Custom types can be represented through custom features and lowered to structures. [Checked custom lowering](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Custom.lean).
 
+### RSA-4096: Bignum/Field Hybrid
+
+The target is zk.golf's RSA-4096/SHA-256/65537 circuit, pinned to winning submission `aa9cb03a-4312-476d-8ed8-761f781f6a86` as retrieved on 2026-09-13.[4][6] The program produces all 160,527 auxiliary cells: the signature comparison, fifteen modular squarings, and the final fused square–multiply relation. The squares use 24-bit limbs; the final relation uses 16-bit limbs.[6]
+
+Bignums choose quotients and stored residues. Field arithmetic constructs the polynomial coefficients, window products, and signed carries. `Scalar` is `.field bn254Fr`; `Scalars` is its list sort. Conversion between a bignum and a field value is explicit.
+
+The circuit uses a byte-centered offset, not simply half the limb radix. The program remains capability-polymorphic:
+
+''',sample('Witgen/Examples/RSA4096/Arithmetic.lean','def sigma','/-- Fixed little-endian'),
+ sample('Witgen/Examples/RSA4096/Arithmetic.lean','def squareQR','/-- q limbs,'),'''
+
+After field convolution, each group carry is a field expression. Its offset and range bits are generated separately:
+
+''',sample('Witgen/Examples/RSA4096/Arithmetic.lean','def squareCarryValue','/-- Table-indexed'),'''
+
+The arithmetic trace keeps every allocated intermediate cell. The last square's low-bit cells and implicit high-bit expressions are repacked for the fused final step:
+
+''',sample('Witgen/Examples/RSA4096/Arithmetic.lean','def arithmeticWitness','/-- A small model boundary'),'''
+
+[Full witness entry point](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/Witgen/Examples/RSA4096/Program.lean) · [Executable example and scope](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/docs/RSA4096Hybrid.md)
+
+This hybrid executes in Lean; the Rust/GMP and U64 backends below are separate. Primitive model laws are checked. RSA correspondence is tested, not a universal generator theorem.
+
 ## 4. Shared Methods
 
 A method has a typed signature and a finite `Program` body. A call stores a typed reference, not a copy of that body:
@@ -226,6 +249,8 @@ $$
 
 The charge includes buffer reservation and initialization. Parsing and code generation are outside this example's clock; buffer capacity excludes registers.
 ''']
+
+parts.append((PACKAGE/'tools/rsa4096/sources.md').read_text())
 
 output=REPO/'doc/witgen-dsl-design.md'
 output.write_text('\n'.join(parts).rstrip()+'\n')

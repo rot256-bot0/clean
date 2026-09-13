@@ -1,0 +1,458 @@
+{
+  "challenge": "rsa-pkcs1v15-sha256-4096-65537",
+  "submission_id": "aa9cb03a-4312-476d-8ed8-761f781f6a86",
+  "source_url": "https://zk.golf/api/submissions/aa9cb03a-4312-476d-8ed8-761f781f6a86/download",
+  "api_url": "https://zk.golf/api/agent/v1/submissions/aa9cb03a-4312-476d-8ed8-761f781f6a86",
+  "score": 321769.0,
+  "allocations": 160527,
+  "constraints": 161242,
+  "archive_sha256": "0c04418f927c53034bfa58702548d9da3b1dcaa69ef6ee76b4a05a4b8a72e7d0",
+  "files": [
+    {
+      "name": "BalancedZ.lean",
+      "bytes": 29677,
+      "sha256": "d53d71a4f73397ef53c7cf57f15c304e7101a6a990307624d3671226f9b9602b"
+    },
+    {
+      "name": "ByteBlock.lean",
+      "bytes": 8053,
+      "sha256": "2956c53534df0288e0a94dc19b778dc64ac3008a32d97879a80a4ea1bf9e5b8b"
+    },
+    {
+      "name": "ByteBlockTheorems.lean",
+      "bytes": 3278,
+      "sha256": "1530ee6e804bf0ce8ade49e6e8b7c60c403b7c8cafc6e67c2b97806493e590bf"
+    },
+    {
+      "name": "Bytes.lean",
+      "bytes": 9855,
+      "sha256": "044ac9cd20f95a872ba93006d126b2416d14179f9af7ca03bfd21e6ac3296f2c"
+    },
+    {
+      "name": "Bytes16.lean",
+      "bytes": 7097,
+      "sha256": "8a6f48903d359321a30dcff8d281b3134736ed092c4d12f9180a57a330c36d6d"
+    },
+    {
+      "name": "Bytes24.lean",
+      "bytes": 11496,
+      "sha256": "a48f475951061bce7eb6043038c133faa3d55b1544bea4c23693f2a849a2e771"
+    },
+    {
+      "name": "Bytes24Circuits.lean",
+      "bytes": 8450,
+      "sha256": "01218e2ca8a97afa73cb8a91658756bda65a784694c006bbb70bfb4239d53abc"
+    },
+    {
+      "name": "Bytes32.lean",
+      "bytes": 10702,
+      "sha256": "38e6248490f827639a8544c1163d5abacd7091c93b4c2b273c32445d890756fc"
+    },
+    {
+      "name": "Bytes32Circuits.lean",
+      "bytes": 8062,
+      "sha256": "74c4f5ac34bba2dee8412acaaa08131792eade636da78cdaf0b14244172bd278"
+    },
+    {
+      "name": "BytesLemmas.lean",
+      "bytes": 38499,
+      "sha256": "1424437eb7b3406987891e371adb490e675a30d39ac5da2eb2d29734eb74c069"
+    },
+    {
+      "name": "BytesSplitLemmas.lean",
+      "bytes": 49565,
+      "sha256": "d07c2735164e50f2c4e49dd6da3053e9bac1d6f34507b3ab0080ff5c0f7e8538"
+    },
+    {
+      "name": "BytesToBigInt.lean",
+      "bytes": 6691,
+      "sha256": "0f6fb2685ac31aec86c27e6ad580c3af98d08847f8712404c344aec91ed3294b"
+    },
+    {
+      "name": "CarryFloor.lean",
+      "bytes": 19759,
+      "sha256": "85f01b0bd2303e096b972ad1163c6375d39a1bbd9ebd22fa3744e30d865f634e"
+    },
+    {
+      "name": "CarryFloorFacts.lean",
+      "bytes": 2149,
+      "sha256": "ce06ef52ad9218af3e8aa9e1c972bf0ac90781fb33a6ef7273059e3b9ab13b81"
+    },
+    {
+      "name": "ComputableWitness.lean",
+      "bytes": 96951,
+      "sha256": "c112d16adc67846592f3e873c5d2520f37d8cd598dc84b15e587ad4e5e369c12"
+    },
+    {
+      "name": "ComputableWitnessOpt.lean",
+      "bytes": 11788,
+      "sha256": "85f24bb16d4cec3c0629cce5ed869c8e34881f587eb5572c690eae35b46d0eb2"
+    },
+    {
+      "name": "Cost.lean",
+      "bytes": 93142,
+      "sha256": "1aff09de12f76d3de9a2608c31c1ae7ce00e06d02b178fd81f6dc0282fd4ca8a"
+    },
+    {
+      "name": "CostBal.lean",
+      "bytes": 66348,
+      "sha256": "c9c46adadb235fa54e466e239d64f9a24327502604be24f60451c8eb5bb47e76"
+    },
+    {
+      "name": "CostFloor.lean",
+      "bytes": 9194,
+      "sha256": "c101fb10ce26213a28ecdcf456189bee45187fe31b359d32d21494aa472a28d5"
+    },
+    {
+      "name": "CostG.lean",
+      "bytes": 47020,
+      "sha256": "c844917a9a6cd66a16e276e74ddd54cf30c3c392c5db8328433d8933c7eca47d"
+    },
+    {
+      "name": "DirectFinal.lean",
+      "bytes": 6083,
+      "sha256": "5c10120aa7fef4c15b96dc2a031d530dc4db2288ec2feb9da8a98251dde54cb5"
+    },
+    {
+      "name": "EqMod.lean",
+      "bytes": 20816,
+      "sha256": "c0aa17556a8cd424d48f35e8166a05829f33582ad11dee5095e7f04186c7d7d0"
+    },
+    {
+      "name": "EqViaCarries.lean",
+      "bytes": 27769,
+      "sha256": "36c1ce916dc35a4329bc7f97ee81b7b0293956f5c6d2839fe99a62262e1b6b8d"
+    },
+    {
+      "name": "Equal.lean",
+      "bytes": 1587,
+      "sha256": "3e04f691b9621fdad93d580d1a5c77c05acbe661618850a5a6d3363fb4b3b4ff"
+    },
+    {
+      "name": "ExponentFloor.lean",
+      "bytes": 3595,
+      "sha256": "77f20b49f67c255e7d6462616e70b0db48ddfebc4fb5dfc73f05f611e3321553"
+    },
+    {
+      "name": "GroupedEq.lean",
+      "bytes": 41571,
+      "sha256": "6a2b8d765f5a1eb8bde05bfb3be5ed42a3bad6c35cb0456d0d2fc840aed24a0f"
+    },
+    {
+      "name": "GroupedEqD.lean",
+      "bytes": 87881,
+      "sha256": "0573830e4d2668f0beb388fbabe18aec2e97c877f53c94767c989d810de3e88c"
+    },
+    {
+      "name": "GroupedEqDCost.lean",
+      "bytes": 5505,
+      "sha256": "da4dac4b8426a7371deaf8bbec4ede53fb25713bd096358e8d504ec8ad138b61"
+    },
+    {
+      "name": "GroupedEqV.lean",
+      "bytes": 70046,
+      "sha256": "816430de60ef6988025fff7f2ae7c4dee1c57146d98a82fd1010939ebbaff68f"
+    },
+    {
+      "name": "GroupedEqX.lean",
+      "bytes": 51054,
+      "sha256": "11505cf4f07194e94a83c477629ce9293a514c68da562e0f117c76954c635501"
+    },
+    {
+      "name": "GroupedEqXV.lean",
+      "bytes": 111824,
+      "sha256": "a4baf2ee244277f107d43c32e76a653db5dd19f0bea5005c26be8febe22b632a"
+    },
+    {
+      "name": "GroupedEqXVCost.lean",
+      "bytes": 10067,
+      "sha256": "16c6776da3d48c59fb86b4d63bb4a46f2d8c2648aa603206bda80fabf4199107"
+    },
+    {
+      "name": "InterpMul.lean",
+      "bytes": 20524,
+      "sha256": "c14b2cf8c5b6eb783bfb1853a1ad646b6c20f2d95b66fa84275c1c1e576743d2"
+    },
+    {
+      "name": "InterpMulX.lean",
+      "bytes": 26762,
+      "sha256": "3531615377eaea32583503fc5a17f0c5bc5f19a382588f724ff897e23fb5ba63"
+    },
+    {
+      "name": "LessThan.lean",
+      "bytes": 26471,
+      "sha256": "1644d5f38c82517c5b02e75e12963478eaa6bc2fca263dfb354fc7039a70a903"
+    },
+    {
+      "name": "LessThanBytes.lean",
+      "bytes": 31114,
+      "sha256": "148633d9c897d2e696f6f77adeedd8fa8c8aa0dc4b7f3794f7bcb9fc57e38291"
+    },
+    {
+      "name": "LessThanBytes65.lean",
+      "bytes": 102672,
+      "sha256": "a6ba4b5c92e777fb5a556b172ba5ccdb34e6398c252083748665dd563c1c1044"
+    },
+    {
+      "name": "LessThanBytesG.lean",
+      "bytes": 50405,
+      "sha256": "d150fff0038006824fa8a4799f45572c60e41493a3f5c5525badc6f02a7add08"
+    },
+    {
+      "name": "LessThanBytesOpt.lean",
+      "bytes": 60496,
+      "sha256": "b24763ff836b0f6de4154dd6b21515fce7682d4b79373e969c76dacab373e2f1"
+    },
+    {
+      "name": "LessThanSel.lean",
+      "bytes": 24381,
+      "sha256": "9c6146643673080e4e9c1d2999abed1cec4a6839eef8778be698872d237304d0"
+    },
+    {
+      "name": "LessThanTight.lean",
+      "bytes": 28385,
+      "sha256": "70b14830c45ed2ed38be2b91e1475ee011b9316f75c0592bd414b86b1652c7ad"
+    },
+    {
+      "name": "Main.lean",
+      "bytes": 41249,
+      "sha256": "19e67d1d756020424dc2b61ed9ecbcd4285ced0c24b5187741e924f26d7dc03f"
+    },
+    {
+      "name": "MainTheorems.lean",
+      "bytes": 10300,
+      "sha256": "c6eb0ab3e637affb7578173b6ec79fc3d9bd6173d99af169d00bdf6c61597772"
+    },
+    {
+      "name": "MixedRadix.lean",
+      "bytes": 9048,
+      "sha256": "fc41ae40318635c48b6a0299f979df133fa96b880448c64883b5219189450ec8"
+    },
+    {
+      "name": "ModExp.lean",
+      "bytes": 37321,
+      "sha256": "2073390cb278d935455c49adbedf97a211395daca2fefb2c63977bbd3b6320f3"
+    },
+    {
+      "name": "ModExpG.lean",
+      "bytes": 39878,
+      "sha256": "3699cb256fd24b37175f8f17041a661281827aa82cf5bf6092afffb68eaf47a0"
+    },
+    {
+      "name": "ModExpGTheorems.lean",
+      "bytes": 8228,
+      "sha256": "d52c3e47707da10c24ca6f70de7bd2673842444022160e2113df32faaa36259f"
+    },
+    {
+      "name": "ModExpSqGT.lean",
+      "bytes": 35536,
+      "sha256": "5f86a106d09ec273f79a7f9c36c4e626d78e03b696159417165f0db1a087f59c"
+    },
+    {
+      "name": "ModExpTheorems.lean",
+      "bytes": 7595,
+      "sha256": "5ad94c3c342e6611f73ced127e223a5aa8a239e9aa3caf3adb52d6fb0f622e7a"
+    },
+    {
+      "name": "MulMod.lean",
+      "bytes": 18211,
+      "sha256": "0b2f2ca9c74a1c3d6baf3e86b924059a04c165d853b079092cca25ba78e56287"
+    },
+    {
+      "name": "MulModCanon.lean",
+      "bytes": 11555,
+      "sha256": "a209c335f553d4f427d03944b42eabddebfcb46a4ffdedd040af146d99f76495"
+    },
+    {
+      "name": "MulModLazy.lean",
+      "bytes": 12834,
+      "sha256": "1c11ff8b4ba8aca612699a200b18d6a6ffaf254480fd40543a61c636e1e5afce"
+    },
+    {
+      "name": "MulModLazyG.lean",
+      "bytes": 13004,
+      "sha256": "28a90be367d3a0054565b70e87f9d3dccd7e6da4e6bb5d1ea1b0c918dda48c8c"
+    },
+    {
+      "name": "MulModTheorems.lean",
+      "bytes": 79729,
+      "sha256": "7c502efcc529d2626481a7ffe2c782b4d402d11e41362e777435af481fbae7f9"
+    },
+    {
+      "name": "MulModTo.lean",
+      "bytes": 39995,
+      "sha256": "6e661f666f0650d2c5bbd82d3e29c6291732aa0602e92351ec15862ca77ceab4"
+    },
+    {
+      "name": "MulModToG.lean",
+      "bytes": 10294,
+      "sha256": "b6e314366a53230f3925de4427698f5b768141dbdfe48ed0ba53a2cafdeab162"
+    },
+    {
+      "name": "Normalize.lean",
+      "bytes": 2038,
+      "sha256": "8fec661436b501462e70b7d7096f724f8a489539ddbbc9ededfa5d5de373f693"
+    },
+    {
+      "name": "NormalizeTight.lean",
+      "bytes": 8815,
+      "sha256": "fc455b9811130f9664ebd774b5821aa888927fd2f999d508bd38119348eeaa23"
+    },
+    {
+      "name": "Optimality.lean",
+      "bytes": 6254,
+      "sha256": "739003d864a98a6c2e82a6c97f33ba23c6e87598c71f8f82b2549a3f454c52fc"
+    },
+    {
+      "name": "PadDigest.lean",
+      "bytes": 8547,
+      "sha256": "6e0d481c0ee65b1f19ca55381df6965d9416c0c3eb98747d7f19f695f4be9fa2"
+    },
+    {
+      "name": "Params16Final.lean",
+      "bytes": 22004,
+      "sha256": "6f3c8bfd31cad2865f0539c84150dc1853084697b880f9c9b262c704ab9ffe2a"
+    },
+    {
+      "name": "Params24.lean",
+      "bytes": 18645,
+      "sha256": "a67ce338191a04506bb8d5673a3cc56e00c0358506cd72967b07530d1fdd911b"
+    },
+    {
+      "name": "Params24Cost.lean",
+      "bytes": 3804,
+      "sha256": "9f6fe0404287e7db72291bd0f0b38e723a48282cc87e8191d9aa1b3133b5d745"
+    },
+    {
+      "name": "Params24Final.lean",
+      "bytes": 6289,
+      "sha256": "f4de204e2d5f85574fe4a21593e2907fd01d8339b313f2e51312aef4b64eab77"
+    },
+    {
+      "name": "Params32.lean",
+      "bytes": 2064,
+      "sha256": "64b18acbfa4db108fbb37d8751b74ac460790c4a30b11f7dda66821936968704"
+    },
+    {
+      "name": "RangeCheck.lean",
+      "bytes": 11441,
+      "sha256": "cd351abe6c8be69dfd8afbfa96406f7d3774b55da6522564f9566dd46b629a22"
+    },
+    {
+      "name": "Repack24To16.lean",
+      "bytes": 5563,
+      "sha256": "b3099b7aa9e22b887b05a4fae0f8d020373cb730e6f8986a111110309c2dd69d"
+    },
+    {
+      "name": "Score.lean",
+      "bytes": 268,
+      "sha256": "592dd0ac0db47da39f062760193cf2c679457dd1fc725a494a7c2bfd465a2e04"
+    },
+    {
+      "name": "ScratchFinal.lean",
+      "bytes": 3771,
+      "sha256": "450345c7704ac6b3f3aa1c6d9face65266c7f7e8fd5c55acd22af07c8483d9cf"
+    },
+    {
+      "name": "ScratchTables.lean",
+      "bytes": 2589,
+      "sha256": "03f4c91cc5ba511601aeb311db8416fef03a581626d8689317cad492cd90c66a"
+    },
+    {
+      "name": "SqMulModBalTo.lean",
+      "bytes": 63977,
+      "sha256": "84668faeed1cde98f9644c01fd7e7abbd370c1579bf1ab325fd88bb2f436d5d7"
+    },
+    {
+      "name": "SqMulModTo.lean",
+      "bytes": 84910,
+      "sha256": "347ace2d55aa1a71a60723587d869d85707e430a569f3943f297c6ed396bf06a"
+    },
+    {
+      "name": "SquareModBalGT.lean",
+      "bytes": 95463,
+      "sha256": "1af16ec3915ec7ac66fdb2909a96f624b40067813d451594ef9e6d1b5b2e372c"
+    },
+    {
+      "name": "SquareModLazy.lean",
+      "bytes": 26101,
+      "sha256": "7c4a1ec544def678dfb2f6e43fe31b27fc321a19722c68c42d1b983c60de70e1"
+    },
+    {
+      "name": "SquareModLazyG.lean",
+      "bytes": 26741,
+      "sha256": "898f7986582c3d05c2d6b235d81ca94ee65264b8006c7899f937ceb95e10f9ce"
+    },
+    {
+      "name": "SquareModLazyGT.lean",
+      "bytes": 40092,
+      "sha256": "2edbb5227e5080922f02e15eeee5da211ad588053f0749dc5f496b73e92f1ffa"
+    },
+    {
+      "name": "TailSquare5.lean",
+      "bytes": 26441,
+      "sha256": "8187a39479f3df8343ec4a2a4b16e90ad125aa88a883d0d5108d4f50057f42d0"
+    },
+    {
+      "name": "TailSquare5Cost.lean",
+      "bytes": 4332,
+      "sha256": "c8199713f56648b3e33ae721b376ae61831e90d59e200defd6ff23958d5e8ac9"
+    },
+    {
+      "name": "TestChk.lean",
+      "bytes": 703,
+      "sha256": "3cda7a206011935c0fbf0b2f0be8ea3def75c5b2b3856ac46401212c6c0f6a4e"
+    },
+    {
+      "name": "TestGetOfn.lean",
+      "bytes": 269,
+      "sha256": "c9cb4e5072242e30976f0e8e5cb833c742414afbe830164460fb837d3da74c10"
+    },
+    {
+      "name": "Theorems.lean",
+      "bytes": 45408,
+      "sha256": "a573be72c9cd4838e1aaa0e14aa1305370b087b5de60aef20abb23b2ab47f829"
+    },
+    {
+      "name": "Vandermonde.lean",
+      "bytes": 6093,
+      "sha256": "3ae2ee3caeaf2ebe80901cedba072cd2d61655276a17f10803a5f1cd5f190807"
+    },
+    {
+      "name": "WindowCaps.lean",
+      "bytes": 34893,
+      "sha256": "e9f30fa2c11d89055b1521e96ab53b21f3e826b29f1c05bd355e8dc114b3e2b2"
+    },
+    {
+      "name": "WindowSquare.lean",
+      "bytes": 16104,
+      "sha256": "80c5642e5689c750c7bbf2c13b7f863614f1460c28652536e0f0189bcb45dc9a"
+    },
+    {
+      "name": "WindowSquareCost.lean",
+      "bytes": 7103,
+      "sha256": "9c283b1fecd5f840c0b2ff44e956648531773f4411153adb70adfd31326c950b"
+    },
+    {
+      "name": "WindowSquareEval.lean",
+      "bytes": 3763,
+      "sha256": "16ca18a8c4bc822d9338fc8b45d0230fd396cb8e641cc8a94ea4e91c27f072dd"
+    },
+    {
+      "name": "WindowSquareFold.lean",
+      "bytes": 5048,
+      "sha256": "f731d925492ba45d7611e8c69e0f70e39095eb34a50409f18381c3a3dd102562"
+    },
+    {
+      "name": "WindowSquareIdentity.lean",
+      "bytes": 12163,
+      "sha256": "903d70cc05bdbef07a3d99bc830f4b1ab889286415bcb516ff749dd10c5a5160"
+    },
+    {
+      "name": "WindowSquareOps.lean",
+      "bytes": 15011,
+      "sha256": "4bcd4c2165df702702ae793c348d1898f7e089dc38607e27b6a4751ae4e16dc9"
+    }
+  ],
+  "fetched_at": "2026-09-13T09:55:22.255891+00:00"
+}

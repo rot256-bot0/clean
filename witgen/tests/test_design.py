@@ -28,6 +28,9 @@ class DesignTests(unittest.TestCase):
                        "inductive CurveOp", "inductive CurveLiteral", "Has (CurveOp c) F",
                        "match xy with", "inductive BranchOp", "if flag then", "Bool sort"]:
             self.assertIn(symbol, text)
+        for symbol in ["### RSA-4096: Bignum/Field Hybrid", "def squareQR", "bignum.DivMod",
+                       "def squareCarryValue", "def arithmeticWitness", "not a universal generator theorem"]:
+            self.assertIn(symbol, text)
         self.assertNotIn("def sqrtProgram", text)
         self.assertNotIn("def subProgram", text)
         self.assertNotIn("curve.Scale", text)

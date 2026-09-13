@@ -39,6 +39,22 @@ points and `None` at infinity; runtime invalid coordinates return `None`.
 `curve.Eq` compares mathematical points. MSM consumes one list of scalar/point pairs
 and returns identity for the empty list. Native execution uses Arkworks.
 
+## RSA-4096 Hybrid Example
+
+The [full RSA witness example](docs/RSA4096Hybrid.md) composes arbitrary-precision
+bignums, BN254-scalar field operations, explicit field/Nat conversion, and finite
+vector regions. It emits the complete auxiliary layout for the pinned winning
+zk.golf RSA circuit, including intermediate limbs, window products and carry bits.
+This example executes in Lean; the Rust/GMP and U64 paths below are separate.
+
+```sh
+python3 -B tools/run_rsa4096.py --output artifacts/rsa4096
+```
+
+The runner checks the actual finite AST on three public RSA-4096 fixtures against
+a source-derived relation and exact allocation schedule. Its receipt explicitly
+distinguishes source-reviewed correspondence from a universal circuit theorem.
+
 ## Shared Methods and Lowering
 
 `Methods.lean` provides finite typed signatures, earlier-only call references and
