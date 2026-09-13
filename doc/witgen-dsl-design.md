@@ -128,16 +128,6 @@ Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementatio
 `field.Sqrt x` returns `Option` of the same field: `some 0` at zero, `none` for nonsquares, and the smaller canonical representative of the two roots otherwise. The root choice is the same in the Lean model, Arkworks, and the Nat/GMP implementation. Squaring a returned root recovers the input.
 
 
-[MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L37-L41)
-
-```lean
-def sqrtProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
-    Program F [.field f] (.option (.field f)) :=
-  witgen [x] do
-    let root ← field.Sqrt x
-    return root
-```
-
 [MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L50-L57)
 
 ```lean

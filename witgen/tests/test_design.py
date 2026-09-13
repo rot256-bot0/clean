@@ -28,6 +28,7 @@ class DesignTests(unittest.TestCase):
                        "inductive CurveOp", "inductive CurveLiteral", "Has (CurveOp c) F",
                        "match xy with", "inductive BranchOp", "if flag then", "Bool sort"]:
             self.assertIn(symbol, text)
+        self.assertNotIn("def sqrtProgram", text)
         self.assertNotIn("curve.Scale", text)
         self.assertNotIn("curve.X", text)
         self.assertNotIn("value.Bind", text)

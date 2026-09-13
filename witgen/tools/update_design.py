@@ -68,8 +68,7 @@ Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementatio
 
 `field.Sqrt x` returns `Option` of the same field: `some 0` at zero, `none` for nonsquares, and the smaller canonical representative of the two roots otherwise. The root choice is the same in the Lean model, Arkworks, and the Nat/GMP implementation. Squaring a returned root recovers the input.
 
-''',sample('MainExtended.lean','def sqrtProgram','def sqrtSquareProgram'),
- sample('MainExtended.lean','def sqrtMatchProgram','private def sqrtInputs'),'''
+''',sample('MainExtended.lean','def sqrtMatchProgram','private def sqrtInputs'),'''
 
 Only matching the result requires `ValueOp`; calling `Sqrt` needs just the field capability. Here the `none` branch explicitly chooses zero; the square-root operation itself does not disguise a nonsquare as zero.
 
