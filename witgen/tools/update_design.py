@@ -58,9 +58,7 @@ A field value is `Fin (modulus f)`. The arithmetic definitions use canonical res
  sample('Witgen/Typed/FieldInverses.lean','def inverseNat','namespace Residue'),
  sample('Witgen/Typed/FieldInverses.lean','def neg','@[simp] theorem inv_val'),'''
 
-Subtraction is modular and requires two operands from the same field:
-
-''',sample('MainExtended.lean','def subProgram','def sqrtProgram'),'''
+Subtraction is modular and requires two operands from the same field.
 
 Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementations preserve the model under their representation relation.
 

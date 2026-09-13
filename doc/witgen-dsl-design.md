@@ -106,20 +106,7 @@ def inv {p : Nat} (a : Fin p) : Fin p :=
 
 
 
-Subtraction is modular and requires two operands from the same field:
-
-
-[MainExtended.lean](https://github.com/rot256-bot0/clean/blob/feat/clean-witgen-dsl/witgen/MainExtended.lean#L31-L35)
-
-```lean
-def subProgram {F : Signature Ty} (f : FieldId) [Has (FieldOp f) F] :
-    Program F [.field f, .field f] (.field f) :=
-  witgen [a,b] do
-    let difference ← field.Sub a b
-    return difference
-```
-
-
+Subtraction is modular and requires two operands from the same field.
 
 Inversion is total: `Inv 0 = 0`; for nonzero `x`, `x * Inv x = 1`. Implementations preserve the model under their representation relation.
 

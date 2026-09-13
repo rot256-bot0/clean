@@ -23,12 +23,13 @@ class DesignTests(unittest.TestCase):
         self.assertIn("def ofNat", text)
         self.assertIn("n % p", text)
         self.assertIn("Residue.square a", text)
-        for symbol in ["field.Sub", "def subProgram", "field.Sqrt", "def sqrtMatchProgram", "nonsquares", "smaller canonical",
+        for symbol in ["field.Sub", "field.Sqrt", "def sqrtMatchProgram", "nonsquares", "smaller canonical",
                        "field.Neg", "field.Inv", "curve.Mul", "curve.Eq", "curve.MSM", "curve.Const",
                        "inductive CurveOp", "inductive CurveLiteral", "Has (CurveOp c) F",
                        "match xy with", "inductive BranchOp", "if flag then", "Bool sort"]:
             self.assertIn(symbol, text)
         self.assertNotIn("def sqrtProgram", text)
+        self.assertNotIn("def subProgram", text)
         self.assertNotIn("curve.Scale", text)
         self.assertNotIn("curve.X", text)
         self.assertNotIn("value.Bind", text)
